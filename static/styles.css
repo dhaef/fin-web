@@ -1,0 +1,74 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  box-sizing: inherit;
+}
+
+body {
+  --text-color: #222;
+  --bkg-color: #fff;
+  --anchor-color: #0033cc;
+  --secondary-bkg-color: #d6d6d6;
+  color: var(--text-color);
+  background: var(--bkg-color);
+
+  box-sizing: border-box;
+}
+
+.wrapper {
+  max-width: 1200px;
+  margin: auto;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td,
+th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+ul {
+  list-style-position: inside;
+}
+
+.my-1 {
+  margin: 1rem 0;
+}
+
+.widget {
+  display: flex;
+  margin: 2rem 0;
+}
+
+.donut-widget {
+  width: 100%;
+  max-width: 600px;
+}
+
+#transactions-table-container {
+  max-height: 550px;
+  overflow-y: scroll;
+}
+
+#transactions-table-container thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #dddddd;
+}
+
+.category-donuts {
+  display: flex;
+  justify-content: space-around;
+}
