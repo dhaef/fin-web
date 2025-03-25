@@ -9,11 +9,7 @@ import (
 	"time"
 )
 
-func favicon(w http.ResponseWriter, r *http.Request) error {
-	return nil
-}
-
-func home(w http.ResponseWriter, r *http.Request) error {
+func transactions(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {
 		return renderTemplate(w, "", "layout", []string{"not-found.html", "layout.html"})
 	}
@@ -34,7 +30,7 @@ func home(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if endDate == "" {
-		transactions, err := model.QueryTransactions(dbConn, model.QueryTransactionsFilters{
+		transactions, err := model.QueryTransactions(transactionsDbConn, model.QueryTransactionsFilters{
 			OrderBy:        "date",
 			OrderDirection: "DESC",
 			Limit:          1,
@@ -57,7 +53,7 @@ func home(w http.ResponseWriter, r *http.Request) error {
 		endDate = endOfThisMonth.Format("2006-01-02")
 	}
 
-	transactions, err := model.QueryTransactions(dbConn, model.QueryTransactionsFilters{
+	transactions, err := model.QueryTransactions(transactionsDbConn, model.QueryTransactionsFilters{
 		OrderBy:             orderBy,
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
@@ -82,7 +78,7 @@ func home(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	expensesCategoryCounts, err := model.CategoryCounts(dbConn, model.QueryTransactionsFilters{
+	expensesCategoryCounts, err := model.CategoryCounts(transactionsDbConn, model.QueryTransactionsFilters{
 		OrderBy:             orderBy,
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
@@ -97,7 +93,7 @@ func home(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	incomeCategoryCounts, err := model.CategoryCounts(dbConn, model.QueryTransactionsFilters{
+	incomeCategoryCounts, err := model.CategoryCounts(transactionsDbConn, model.QueryTransactionsFilters{
 		OrderBy:             orderBy,
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
@@ -119,7 +115,7 @@ func home(w http.ResponseWriter, r *http.Request) error {
 
 	startOfMonthOneYearAgo, _ := getStartAndEndOfMonth(date.AddDate(0, -11, 0))
 
-	expenseCountsByMonth, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
+	expenseCountsByMonth, err := model.CountsByDate(transactionsDbConn, model.QueryTransactionsFilters{
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
 		Categories:          categories,
@@ -132,7 +128,7 @@ func home(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	incomeCountsByMonth, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
+	incomeCountsByMonth, err := model.CountsByDate(transactionsDbConn, model.QueryTransactionsFilters{
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
 		Categories:          []string{"work", "interest", "venmo", "miscellaneousIncome"},
@@ -180,68 +176,4 @@ func home(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	return nil
-}
-
-func annual(w http.ResponseWriter, r *http.Request) error {
-	incomeCountsByYear, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
-		Categories:          []string{"work", "interest", "venmo", "miscellaneousIncome"},
-		CategoriesToExclude: []string{"debit"},
-	}, "%Y")
-	if err != nil {
-		return APIError{
-			Status:  http.StatusInternalServerError,
-			Message: "error fetching income counts by year: " + err.Error(),
-		}
-	}
-
-	expenseCountsByYear, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
-		CategoriesToExclude: []string{"debit", "work", "interest", "venmo", "miscellaneousIncome"},
-	}, "%Y")
-	if err != nil {
-		return APIError{
-			Status:  http.StatusInternalServerError,
-			Message: "error fetching expense counts by year: " + err.Error(),
-		}
-	}
-
-	netCounts := getNetCounts(expenseCountsByYear, incomeCountsByYear)
-
-	err = renderTemplate(w, Base{
-		Data: map[string]any{
-			"incomeCountsByYear":  incomeCountsByYear,
-			"expenseCountsByYear": expenseCountsByYear,
-			"netCounts":           netCounts,
-		},
-	}, "layout", []string{"annual.html", "layout.html"})
-	if err != nil {
-		return APIError{
-			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
-		}
-	}
-
-	return nil
-}
-
-type NetCounts struct {
-	Net float64
-	Key string
-}
-
-func getNetCounts(expenses []model.GroupByCounts, income []model.GroupByCounts) []NetCounts {
-	expenseMap := map[string]float64{}
-	for _, item := range expenses {
-		expenseMap[item.Key] = item.Value
-	}
-
-	amountAndPercents := []NetCounts{}
-	for _, item := range income {
-		net := item.Value + expenseMap[item.Key]
-		amountAndPercents = append(amountAndPercents, NetCounts{
-			Net: net,
-			Key: item.Key,
-		})
-	}
-
-	return amountAndPercents
 }

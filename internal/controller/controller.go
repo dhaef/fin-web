@@ -9,14 +9,16 @@ import (
 	"time"
 )
 
-var dbConn *sql.DB
+var transactionsDbConn *sql.DB
+var netWorthDbConn *sql.DB
 
 type Controller struct {
 	Server http.Server
 }
 
-func NewController(conn *sql.DB) Controller {
-	dbConn = conn
+func NewController(transactionsConn *sql.DB, netWorthConn *sql.DB) Controller {
+	transactionsDbConn = transactionsConn
+	netWorthDbConn = netWorthConn
 	return Controller{
 		Server: http.Server{
 			Addr:    ":3000",
@@ -32,10 +34,15 @@ func buildRoutes() http.Handler {
 
 	r.HandleFunc("GET /favicon.ico", MakeHandler(favicon))
 	r.HandleFunc("GET /annual", MakeHandler(annual))
+	r.HandleFunc("GET /net-worth", MakeHandler(netWorth))
 	// this will match everything else so handle this in home handler
-	r.HandleFunc("GET /", MakeHandler(home))
+	r.HandleFunc("GET /", MakeHandler(transactions))
 
 	return r
+}
+
+func favicon(w http.ResponseWriter, r *http.Request) error {
+	return nil
 }
 
 type Base struct {

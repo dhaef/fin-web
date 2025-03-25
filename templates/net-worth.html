@@ -1,0 +1,38 @@
+{{ define "title" }}💰📈{{end}} {{ define "scripts" }}{{end}} {{define "body"}}
+<div id="transactions-table-container" class="my-1">
+  <table id="transactions-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Cash</th>
+        <th>Investment</th>
+        <th>Debit</th>
+        <th>Credit</th>
+        <th>Savings</th>
+        <th>Retirement</th>
+        <th>Loans</th>
+        <th>Net Worth</th>
+        <th>Change</th>
+        <th>Change (%)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range .Data.netWorthItems }}
+      <tr>
+        <td>{{ .Date }}</td>
+        <td class="currency">{{ .Cash }}</td>
+        <td class="currency">{{ .Investment }}</td>
+        <td class="currency">{{ .Debit }}</td>
+        <td class="currency">{{ .Credit }}</td>
+        <td class="currency">{{ .Savings }}</td>
+        <td class="currency">{{ .Retirement }}</td>
+        <td class="currency">{{ .Loans }}</td>
+        <td class="currency">{{ .NetWorth }}</td>
+        <td class="currency">{{ .Change }}</td>
+        <td>{{ .ChangePercent }}%</td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+{{end}}

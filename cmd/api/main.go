@@ -9,12 +9,17 @@ import (
 
 func main() {
 	dbPath := os.Getenv("dbPath")
-	db, err := db.NewDbConnection(dbPath)
+	transactionsDb, err := db.NewDbConnection(dbPath + "/transactions.db")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	api := controller.NewController(db)
+	netWorthDb, err := db.NewDbConnection(dbPath + "/net_worth.db")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	api := controller.NewController(transactionsDb, netWorthDb)
 
 	err = api.Server.ListenAndServe()
 	if err != nil {
