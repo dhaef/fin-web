@@ -1,0 +1,10 @@
+{{ define "form" }}
+<form>
+  <label for="date">Date:</label>
+  <input name="date" value="{{.Date}}" type="text" />
+  <label for="cash">Cash:</label>
+  <input name="cash" value="{{.Cash}}" type="number" />
+
+  <input type="submit" />
+</form>
+{{ end }}

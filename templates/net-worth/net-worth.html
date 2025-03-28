@@ -20,6 +20,7 @@
       {{ range .Data.netWorthItems }}
       <tr>
         <td>{{ .Date }}</td>
+        <!-- <td><a href="/net-worth/{{ .Id }}">{{ .Date }}</a></td> -->
         <td class="currency">{{ .Cash }}</td>
         <td class="currency">{{ .Investment }}</td>
         <td class="currency">{{ .Debit }}</td>

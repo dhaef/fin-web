@@ -5,6 +5,13 @@ import (
 	"strconv"
 )
 
+type QueryNetWorthItemsFilters struct {
+	OrderBy        string
+	OrderDirection string
+	Limit          int
+	Id             string
+}
+
 type NetWorthItem struct {
 	Id            string
 	Date          string
@@ -20,11 +27,34 @@ type NetWorthItem struct {
 	ChangePercent float32
 }
 
-func QueryNetWorthItems(conn *sql.DB, filters QueryTransactionsFilters) ([]NetWorthItem, error) {
+func buildNetWorthItemWhere(queryStr string, args []any, filters QueryNetWorthItemsFilters) (string, []any) {
+	filterStrings := []string{}
+
+	if filters.Id != "" {
+		filterStrings = append(filterStrings, "id = ?")
+		args = append(args, filters.Id)
+	}
+
+	if len(filterStrings) > 0 {
+		queryStr += " WHERE"
+
+		for idx, s := range filterStrings {
+			if idx != 0 {
+				queryStr += " AND " + s
+			} else {
+				queryStr += " " + s
+			}
+		}
+	}
+
+	return queryStr, args
+}
+
+func QueryNetWorthItems(conn *sql.DB, filters QueryNetWorthItemsFilters) ([]NetWorthItem, error) {
 	queryStr := "SELECT * FROM net_worth"
 	args := []any{}
 
-	// queryStr, args = buildWhere(queryStr, args, filters)
+	queryStr, args = buildNetWorthItemWhere(queryStr, args, filters)
 
 	if filters.OrderBy != "" {
 		queryStr += " ORDER BY " + filters.OrderBy + " " + filters.OrderDirection
