@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+var IncomeCategories = []string{"work", "interest", "venmo", "miscellaneousIncome", "taxes"}
+var ExcludedIncomeCategories = []string{"debit"}
+var ExpenseCategoriesToExclude = []string{"debit", "work", "interest", "venmo", "miscellaneousIncome", "taxes"}
+
 func transactions(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {
 		return renderTemplate(w, "", "layout", []string{"not-found.html", "layout.html"})
@@ -59,7 +63,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		StartDate:           startDate,
 		EndDate:             endDate,
 		Categories:          categories,
-		CategoriesToExclude: []string{"debit"},
+		CategoriesToExclude: ExcludedIncomeCategories,
 	})
 	if err != nil {
 		return APIError{
@@ -84,7 +88,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		StartDate:           startDate,
 		EndDate:             endDate,
 		Categories:          categories,
-		CategoriesToExclude: []string{"debit", "work", "interest", "venmo", "miscellaneousIncome"},
+		CategoriesToExclude: ExpenseCategoriesToExclude,
 	})
 	if err != nil {
 		return APIError{
@@ -98,8 +102,8 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
 		EndDate:             endDate,
-		Categories:          []string{"work", "interest", "venmo", "miscellaneousIncome"},
-		CategoriesToExclude: []string{"debit"},
+		Categories:          IncomeCategories,
+		CategoriesToExclude: ExcludedIncomeCategories,
 	})
 	if err != nil {
 		return APIError{
@@ -119,7 +123,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
 		Categories:          categories,
-		CategoriesToExclude: []string{"debit", "work", "interest", "venmo", "miscellaneousIncome"},
+		CategoriesToExclude: ExpenseCategoriesToExclude,
 	}, "%m-%Y")
 	if err != nil {
 		return APIError{
@@ -131,8 +135,8 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	incomeCountsByMonth, err := model.CountsByDate(transactionsDbConn, model.QueryTransactionsFilters{
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
-		Categories:          []string{"work", "interest", "venmo", "miscellaneousIncome"},
-		CategoriesToExclude: []string{"debit"},
+		Categories:          IncomeCategories,
+		CategoriesToExclude: ExcludedIncomeCategories,
 	}, "%m-%Y")
 	if err != nil {
 		return APIError{
