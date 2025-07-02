@@ -249,7 +249,11 @@ function buildBarChart(barId, countsId, color, labelOffset) {
       const elValue = children[i].textContent;
       const [name, value] = elValue.split(':');
       const numberValue = Number(value);
-      counts.push({ name, value: Math.abs(numberValue) });
+      counts.push({
+        name,
+        value: Math.abs(numberValue),
+        sign: numberValue > 0 ? 'neg' : undefined,
+      });
     }
 
     const { node } = barChart(counts, color, labelOffset);
