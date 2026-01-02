@@ -1,17 +1,18 @@
 package controller
 
 import (
-	"fin-web/internal/model"
 	"fmt"
 	"math"
 	"net/http"
 	"strings"
 	"time"
+
+	"fin-web/internal/model"
 )
 
-var IncomeCategories = []string{"work", "interest", "venmo", "miscellaneousIncome", "taxes"}
 var ExcludedIncomeCategories = []string{"debit"}
-var ExpenseCategoriesToExclude = []string{"debit", "work", "interest", "venmo", "miscellaneousIncome", "taxes"}
+
+var ExpenseCategoriesToExclude = []string{"debit"}
 
 func transactions(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {
@@ -89,6 +90,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		EndDate:             endDate,
 		Categories:          categories,
 		CategoriesToExclude: ExpenseCategoriesToExclude,
+		Type:                "expenses",
 	})
 	if err != nil {
 		return APIError{
@@ -102,7 +104,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
 		EndDate:             endDate,
-		Categories:          IncomeCategories,
+		Type:                "income",
 		CategoriesToExclude: ExcludedIncomeCategories,
 	})
 	if err != nil {
@@ -123,6 +125,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
 		Categories:          categories,
+		Type:                "expenses",
 		CategoriesToExclude: ExpenseCategoriesToExclude,
 	}, "%m-%Y")
 	if err != nil {
@@ -135,7 +138,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	incomeCountsByMonth, err := model.CountsByDate(transactionsDbConn, model.QueryTransactionsFilters{
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
-		Categories:          IncomeCategories,
+		Type:                "income",
 		CategoriesToExclude: ExcludedIncomeCategories,
 	}, "%m-%Y")
 	if err != nil {
@@ -172,6 +175,36 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 			"netCounts":              netCounts,
 		},
 	}, "layout", []string{"transactions/transactions.html", "layout.html"})
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+	}
+
+	return nil
+}
+
+func uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
+	emptyCustomCategory := true
+	transactions, err := model.QueryTransactions(
+		transactionsDbConn,
+		model.QueryTransactionsFilters{
+			EmptyCustomCategory: &emptyCustomCategory,
+		},
+	)
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error fetching transactions: " + err.Error(),
+		}
+	}
+
+	err = renderTemplate(w, Base{
+		Data: map[string]any{
+			"transactions": transactions,
+		},
+	}, "layout", []string{"transactions/uncategorized-transactions.html", "layout.html"})
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,

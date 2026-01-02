@@ -25,6 +25,8 @@ type QueryTransactionsFilters struct {
 	Categories          []string
 	CategoriesToExclude []string
 	Limit               int
+	Type                string
+	EmptyCustomCategory *bool
 }
 
 func Categories() []string {
@@ -84,10 +86,26 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 		filterStrings = append(filterStrings, cStr)
 	}
 
+	if filters.Type == "income" {
+		filterStrings = append(filterStrings, "amount < 0")
+	}
+
+	if filters.Type == "expenses" {
+		filterStrings = append(filterStrings, "amount >= 0")
+	}
+
 	if len(filters.CategoriesToExclude) > 0 && filters.CategoriesToExclude[0] != "" {
 		for _, val := range filters.CategoriesToExclude {
 			args = append(args, val)
 			filterStrings = append(filterStrings, "customCategory != ?")
+		}
+	}
+
+	if filters.EmptyCustomCategory != nil {
+		if !*filters.EmptyCustomCategory {
+			filterStrings = append(filterStrings, "customCategory IS NOT NULL")
+		} else {
+			filterStrings = append(filterStrings, "customCategory IS NULL")
 		}
 	}
 

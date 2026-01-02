@@ -1,12 +1,11 @@
 {{ define "layout" }}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ template "title" . }}</title>
     <link rel="stylesheet" href="/static/styles.css" />
-    <!-- <script src="https://unpkg.com/htmx.org@1.9.12"></script> -->
     {{ template "scripts" }}
   </head>
   <body>
@@ -15,6 +14,7 @@
       <a href="/">Home</a>
       <a href="/annual">Annual</a>
       <a href="/net-worth">Net Worth</a>
+      <a href="/uncategorized">Uncategorized</a>
     </div>
 
     <div class="wrapper">{{ template "body" . }}</div>

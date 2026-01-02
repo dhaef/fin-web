@@ -7,7 +7,7 @@ import (
 
 func annual(w http.ResponseWriter, r *http.Request) error {
 	incomeCountsByYear, err := model.CountsByDate(transactionsDbConn, model.QueryTransactionsFilters{
-		Categories:          IncomeCategories,
+		Type:                "income",
 		CategoriesToExclude: ExcludedIncomeCategories,
 	}, "%Y")
 	if err != nil {
@@ -19,6 +19,7 @@ func annual(w http.ResponseWriter, r *http.Request) error {
 
 	expenseCountsByYear, err := model.CountsByDate(transactionsDbConn, model.QueryTransactionsFilters{
 		CategoriesToExclude: ExpenseCategoriesToExclude,
+		Type:                "expenses",
 	}, "%Y")
 	if err != nil {
 		return APIError{

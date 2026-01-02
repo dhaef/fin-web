@@ -9,8 +9,10 @@ import (
 	"time"
 )
 
-var transactionsDbConn *sql.DB
-var netWorthDbConn *sql.DB
+var (
+	transactionsDbConn *sql.DB
+	netWorthDbConn     *sql.DB
+)
 
 type Controller struct {
 	Server http.Server
@@ -36,6 +38,7 @@ func buildRoutes() http.Handler {
 	r.HandleFunc("GET /annual", MakeHandler(annual))
 	r.HandleFunc("GET /net-worth/{id}", MakeHandler(netWorthItem))
 	r.HandleFunc("GET /net-worth", MakeHandler(netWorth))
+	r.HandleFunc("GET /uncategorized", MakeHandler(uncategorizedTransactions))
 	// this will match everything else so handle this in home handler
 	r.HandleFunc("GET /", MakeHandler(transactions))
 

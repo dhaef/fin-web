@@ -1,0 +1,26 @@
+{{ define "title" }}💰📈{{end}} {{ define "scripts" }}{{end}} {{define "body"}}
+<div id="transactions-table-container" class="my-1">
+  <table id="transactions-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>ID</th>
+        <th>Account</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range .Data.transactions }}
+      <tr>
+        <td>{{ .Name }}</td>
+        <td class="currency">{{ .Amount }}</td>
+        <td>{{ .Date }}</td>
+        <td>{{ .Id }}</td>
+        <td>{{ .Account }}</td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+{{end}}
