@@ -35,7 +35,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if endDate == "" {
-		transactions, err := model.QueryTransactions(transactionsDbConn, model.QueryTransactionsFilters{
+		transactions, err := model.QueryTransactions(transactionsDBConn, model.QueryTransactionsFilters{
 			OrderBy:        "date",
 			OrderDirection: "DESC",
 			Limit:          1,
@@ -58,7 +58,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		endDate = endOfThisMonth.Format("2006-01-02")
 	}
 
-	transactions, err := model.QueryTransactions(transactionsDbConn, model.QueryTransactionsFilters{
+	transactions, err := model.QueryTransactions(transactionsDBConn, model.QueryTransactionsFilters{
 		OrderBy:             orderBy,
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
@@ -83,7 +83,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	expensesCategoryCounts, err := model.CategoryCounts(transactionsDbConn, model.QueryTransactionsFilters{
+	expensesCategoryCounts, err := model.CategoryCounts(transactionsDBConn, model.QueryTransactionsFilters{
 		OrderBy:             orderBy,
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
@@ -99,7 +99,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	incomeCategoryCounts, err := model.CategoryCounts(transactionsDbConn, model.QueryTransactionsFilters{
+	incomeCategoryCounts, err := model.CategoryCounts(transactionsDBConn, model.QueryTransactionsFilters{
 		OrderBy:             orderBy,
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
@@ -121,7 +121,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 
 	startOfMonthOneYearAgo, _ := getStartAndEndOfMonth(date.AddDate(0, -11, 0))
 
-	expenseCountsByMonth, err := model.CountsByDate(transactionsDbConn, model.QueryTransactionsFilters{
+	expenseCountsByMonth, err := model.CountsByDate(transactionsDBConn, model.QueryTransactionsFilters{
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
 		Categories:          categories,
@@ -135,7 +135,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	incomeCountsByMonth, err := model.CountsByDate(transactionsDbConn, model.QueryTransactionsFilters{
+	incomeCountsByMonth, err := model.CountsByDate(transactionsDBConn, model.QueryTransactionsFilters{
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
 		Type:                "income",
@@ -188,7 +188,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 func uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
 	emptyCustomCategory := true
 	transactions, err := model.QueryTransactions(
-		transactionsDbConn,
+		transactionsDBConn,
 		model.QueryTransactionsFilters{
 			EmptyCustomCategory: &emptyCustomCategory,
 		},

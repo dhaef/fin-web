@@ -1,4 +1,4 @@
-import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 function donut(data) {
   const width = 400;
@@ -22,28 +22,28 @@ function donut(data) {
     .range(
       d3
         .quantize((t) => d3.interpolateSpectral(t * 0.8 + 0.1), data.length)
-        .reverse()
+        .reverse(),
     );
 
   const svg = d3
-    .create('svg')
-    .attr('width', width)
-    .attr('height', height)
-    .attr('viewBox', [-width / 2, -height / 2, width, height])
-    .attr('style', 'max-width: 100%; height: auto;');
+    .create("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [-width / 2, -height / 2, width, height])
+    .attr("style", "max-width: 100%; height: auto;");
 
   const namesAndColors = [];
 
   svg
-    .append('g')
+    .append("g")
     .selectAll()
     .data(pie(data))
-    .join('path')
-    .attr('fill', (d) => {
+    .join("path")
+    .attr("fill", (d) => {
       let c = color(d.data.name);
 
-      if (c === 'rgb(0, 0, 0)') {
-        c = 'rgb(254, 221, 141)';
+      if (c === "rgb(0, 0, 0)") {
+        c = "rgb(254, 221, 141)";
       }
 
       namesAndColors.push({
@@ -53,34 +53,34 @@ function donut(data) {
       });
       return c;
     })
-    .attr('d', arc)
-    .on('click', (_, i) => {
+    .attr("d", arc)
+    .on("click", (_, i) => {
       const p = new URLSearchParams(location.search);
-      p.set('categories', i.data.name);
+      p.set("categories", i.data.name);
 
       window.location = `${window.location.origin}?${p.toString()}`;
     })
-    .append('title')
+    .append("title")
     .text((d) => `${d.data.name}: ${d.data.value}`);
 
-  const legend = document.createElement('div');
+  const legend = document.createElement("div");
   let total = 0;
   for (const n of namesAndColors) {
-    const p = document.createElement('p');
+    const p = document.createElement("p");
     p.style.backgroundColor = n.color;
-    p.style.borderRadius = '5px';
-    p.style.padding = '.25rem';
-    p.style.margin = '.1rem';
+    p.style.borderRadius = "5px";
+    p.style.padding = ".25rem";
+    p.style.margin = ".1rem";
     p.textContent = `${n.name}: ${formatter.format(n.value)}`;
 
     total += n.value;
     legend.appendChild(p);
   }
 
-  const p = document.createElement('p');
-  p.style.borderRadius = '5px';
-  p.style.padding = '.25rem';
-  p.style.margin = '.1rem';
+  const p = document.createElement("p");
+  p.style.borderRadius = "5px";
+  p.style.padding = ".25rem";
+  p.style.margin = ".1rem";
   p.textContent = `total: ${formatter.format(total)}`;
   legend.appendChild(p);
 
@@ -111,94 +111,97 @@ function barChart(data, barColor, labelOffset) {
 
   // Create the SVG container.
   const svg = d3
-    .create('svg')
-    .attr('width', width)
-    .attr('height', height)
-    .attr('viewBox', [0, 0, width, height])
-    .attr('style', 'max-width: 100%; height: auto;');
+    .create("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height])
+    .attr("style", "max-width: 100%; height: auto;");
 
   // Add a rect for each bar.
   svg
-    .append('g')
+    .append("g")
     // .attr('fill', barColor)
     .selectAll()
     .data(data)
-    .join('rect')
-    .attr('fill', (d) => (d.sign === 'neg' ? 'rgb(209, 60, 75)' : barColor))
-    .attr('x', (d) => x(d.name))
-    .attr('y', (d) => y(d.value))
-    .attr('height', (d) => y(0) - y(d.value))
-    .attr('width', x.bandwidth())
-    .on('click', (_, i) => {
-      if (i.name.includes('-')) {
-        const [month, year] = i.name.split('-');
+    .join("rect")
+    .attr("fill", (d) => (d.sign === "neg" ? "rgb(209, 60, 75)" : barColor))
+    .attr("x", (d) => x(d.name))
+    .attr("y", (d) => y(d.value))
+    .attr("height", (d) => y(0) - y(d.value))
+    .attr("width", x.bandwidth())
+    .on("click", (_, i) => {
+      if (i.name.includes("-")) {
+        const [month, year] = i.name.split("-");
         const startDate = `${year}-${month}-01`;
 
         const lastDayOfMonth = new Date(Number(year), Number(month), 0);
         const endDate = `${year}-${month}-${lastDayOfMonth.getDate()}`;
 
         const p = new URLSearchParams(location.search);
-        p.set('startDate', startDate);
-        p.set('endDate', endDate);
+        p.set("startDate", startDate);
+        p.set("endDate", endDate);
 
         window
-          .open(`${window.location.origin}?${p.toString()}`, '_blank')
+          .open(`${window.location.origin}?${p.toString()}`, "_blank")
           .focus();
       }
     });
 
   // Add the x-axis and label.
   svg
-    .append('g')
-    .attr('transform', `translate(0,${height - marginBottom})`)
+    .append("g")
+    .attr("transform", `translate(0,${height - marginBottom})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
   // Add the y-axis and label, and remove the domain line.
   svg
-    .append('g')
-    .attr('transform', `translate(${marginLeft},0)`)
+    .append("g")
+    .attr("transform", `translate(${marginLeft},0)`)
     .call(d3.axisLeft(y).tickFormat((y) => y.toFixed()))
-    .call((g) => g.select('.domain').remove())
+    .call((g) => g.select(".domain").remove())
     .call((g) =>
       g
-        .append('text')
-        .attr('x', -marginLeft)
-        .attr('y', 10)
-        .attr('fill', 'currentColor')
-        .attr('text-anchor', 'start')
-        .text('Amount ($)')
+        .append("text")
+        .attr("x", -marginLeft)
+        .attr("y", 10)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "start")
+        .text("Amount ($)"),
     );
 
   svg
-    .selectAll('text.bar')
+    .selectAll("text.bar")
     .data(data)
     .enter()
-    .append('text')
-    .attr('class', 'bar')
-    .attr('text-anchor', 'middle')
-    .attr('x', function (d) {
+    .append("text")
+    .attr("class", "bar")
+    .attr("text-anchor", "middle")
+    .attr("x", function (d) {
       return x(d.name) + labelOffset;
     })
-    .attr('y', function (d) {
+    .attr("y", function (d) {
       return y(d.value) - 5;
     })
-    .attr('style', 'font-size: 10px;')
+    .attr("style", "font-size: 10px;")
     .text(function (d) {
-      return formatter.format(d.sign === 'neg' ? -d.value : d.value);
+      if (d.subValue) {
+        return `${formatter.format(d.sign === "neg" ? -d.value : d.value)} (${d.subValue})`;
+      }
+      return formatter.format(d.sign === "neg" ? -d.value : d.value);
     });
 
   // Return the SVG element.
   return { node: svg.node() };
 }
 
-const categoryDonut = document.getElementById('category-donut');
-const categoryCounts = document.getElementById('category-counts');
+const categoryDonut = document.getElementById("category-donut");
+const categoryCounts = document.getElementById("category-counts");
 if (categoryDonut && categoryCounts) {
   const counts = [];
 
   for (let i = 0; i < categoryCounts.children.length; i++) {
     const elValue = categoryCounts.children[i].textContent;
-    const [name, value] = elValue.split(':');
+    const [name, value] = elValue.split(":");
     const numberValue = Number(value);
     counts.push({ name, value: numberValue });
   }
@@ -208,14 +211,14 @@ if (categoryDonut && categoryCounts) {
   categoryDonut.appendChild(node);
 }
 
-const categoryIncomeDonut = document.getElementById('category-income-donut');
-const categoryIncomeCounts = document.getElementById('category-income-counts');
+const categoryIncomeDonut = document.getElementById("category-income-donut");
+const categoryIncomeCounts = document.getElementById("category-income-counts");
 if (categoryIncomeDonut && categoryIncomeCounts) {
   const counts = [];
 
   for (let i = 0; i < categoryIncomeCounts.children.length; i++) {
     const elValue = categoryIncomeCounts.children[i].textContent;
-    const [name, value] = elValue.split(':');
+    const [name, value] = elValue.split(":");
     const numberValue = Number(value);
     counts.push({ name, value: Math.abs(numberValue) });
   }
@@ -231,10 +234,10 @@ function buildBarChart(barId, countsId, color, labelOffset) {
   if (bar && countElements) {
     const counts = [];
     const children = Array.from(countElements.children).sort((a, b) => {
-      const [aName] = a.textContent.split(':');
-      const [bName] = b.textContent.split(':');
-      const aMonthYear = aName.split('-');
-      const bMonthYear = bName.split('-');
+      const [aName] = a.textContent.split(":");
+      const [bName] = b.textContent.split(":");
+      const aMonthYear = aName.split("-");
+      const bMonthYear = bName.split("-");
       const aDate = new Date();
       aDate.setMonth(Number(aMonthYear[0]) - 1);
       aDate.setYear(Number(aMonthYear[1]) - 1);
@@ -247,12 +250,13 @@ function buildBarChart(barId, countsId, color, labelOffset) {
 
     for (let i = 0; i < children.length; i++) {
       const elValue = children[i].textContent;
-      const [name, value] = elValue.split(':');
+      const [name, value, subValue] = elValue.split(":");
       const numberValue = Number(value);
       counts.push({
         name,
         value: Math.abs(numberValue),
-        sign: numberValue > 0 ? 'neg' : undefined,
+        subValue,
+        sign: numberValue > 0 ? "neg" : undefined,
       });
     }
 
@@ -262,33 +266,33 @@ function buildBarChart(barId, countsId, color, labelOffset) {
 }
 
 buildBarChart(
-  'previous-year-bar',
-  'previous-year-counts',
-  'rgb(254, 221, 141)',
-  44
+  "previous-year-bar",
+  "previous-year-counts",
+  "rgb(254, 221, 141)",
+  44,
 );
 buildBarChart(
-  'previous-year-income-bar',
-  'previous-year-income-counts',
-  'rgb(114, 195, 167)',
-  44
+  "previous-year-income-bar",
+  "previous-year-income-counts",
+  "rgb(114, 195, 167)",
+  44,
 );
-buildBarChart('net-income-bar', 'net-income-counts', 'rgb(66, 136, 181)', 44);
+buildBarChart("net-income-bar", "net-income-counts", "rgb(66, 136, 181)", 44);
 buildBarChart(
-  'yearly-expense-bar',
-  'yearly-expense-counts',
-  'rgb(254, 221, 141)',
-  103
-);
-buildBarChart(
-  'yearly-income-bar',
-  'yearly-income-counts',
-  'rgb(114, 195, 167)',
-  103
+  "yearly-expense-bar",
+  "yearly-expense-counts",
+  "rgb(254, 221, 141)",
+  103,
 );
 buildBarChart(
-  'yearly-net-income-bar',
-  'yearly-net-counts',
-  'rgb(66, 136, 181)',
-  103
+  "yearly-income-bar",
+  "yearly-income-counts",
+  "rgb(114, 195, 167)",
+  103,
+);
+buildBarChart(
+  "yearly-net-income-bar",
+  "yearly-net-counts",
+  "rgb(66, 136, 181)",
+  103,
 );

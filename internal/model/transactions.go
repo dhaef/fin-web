@@ -6,7 +6,7 @@ import (
 )
 
 type Transactions struct {
-	Id             string
+	ID             string
 	Account        string
 	Amount         float64
 	Description    sql.NullString
@@ -157,7 +157,7 @@ func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transa
 			&transaction.Source,
 			&transaction.Account,
 			&transaction.Category,
-			&transaction.Id,
+			&transaction.ID,
 			&transaction.CustomCategory,
 			&transaction.Description,
 		); err != nil {

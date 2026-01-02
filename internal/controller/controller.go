@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	transactionsDbConn *sql.DB
-	netWorthDbConn     *sql.DB
+	transactionsDBConn *sql.DB
+	netWorthDBConn     *sql.DB
 )
 
 type Controller struct {
@@ -19,8 +19,8 @@ type Controller struct {
 }
 
 func NewController(transactionsConn *sql.DB, netWorthConn *sql.DB) Controller {
-	transactionsDbConn = transactionsConn
-	netWorthDbConn = netWorthConn
+	transactionsDBConn = transactionsConn
+	netWorthDBConn = netWorthConn
 	return Controller{
 		Server: http.Server{
 			Addr:    ":3000",

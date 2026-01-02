@@ -22,7 +22,7 @@
 <div>
   <div id="yearly-net-counts" style="display: none">
     {{ range .Data.netCounts }}
-    <p>{{.Key}}:{{.Net}}</p>
+    <p>{{.Key}}:{{.Net}}:{{.SavePercentage}}</p>
     {{end}}
   </div>
   <h3>Net Income By Year</h3>

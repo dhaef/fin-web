@@ -1,13 +1,14 @@
 package controller
 
 import (
-	"fin-web/internal/model"
 	"fmt"
 	"net/http"
+
+	"fin-web/internal/model"
 )
 
 func netWorth(w http.ResponseWriter, r *http.Request) error {
-	netWorthItems, err := model.QueryNetWorthItems(netWorthDbConn, model.QueryNetWorthItemsFilters{
+	netWorthItems, err := model.QueryNetWorthItems(netWorthDBConn, model.QueryNetWorthItemsFilters{
 		OrderBy:        "date",
 		OrderDirection: "DESC",
 	})
@@ -36,8 +37,8 @@ func netWorthItem(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 	fmt.Println(id)
 
-	netWorthItems, err := model.QueryNetWorthItems(netWorthDbConn, model.QueryNetWorthItemsFilters{
-		Id: id,
+	netWorthItems, err := model.QueryNetWorthItems(netWorthDBConn, model.QueryNetWorthItemsFilters{
+		ID: id,
 	})
 	if err != nil {
 		return APIError{

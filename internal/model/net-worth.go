@@ -9,11 +9,11 @@ type QueryNetWorthItemsFilters struct {
 	OrderBy        string
 	OrderDirection string
 	Limit          int
-	Id             string
+	ID             string
 }
 
 type NetWorthItem struct {
-	Id            string
+	ID            string
 	Date          string
 	Cash          float32
 	Investment    float32
@@ -30,9 +30,9 @@ type NetWorthItem struct {
 func buildNetWorthItemWhere(queryStr string, args []any, filters QueryNetWorthItemsFilters) (string, []any) {
 	filterStrings := []string{}
 
-	if filters.Id != "" {
+	if filters.ID != "" {
 		filterStrings = append(filterStrings, "id = ?")
-		args = append(args, filters.Id)
+		args = append(args, filters.ID)
 	}
 
 	if len(filterStrings) > 0 {
@@ -77,7 +77,7 @@ func QueryNetWorthItems(conn *sql.DB, filters QueryNetWorthItemsFilters) ([]NetW
 	for rows.Next() {
 		netWorthItem := NetWorthItem{}
 		if err := rows.Scan(
-			&netWorthItem.Id,
+			&netWorthItem.ID,
 			&netWorthItem.Date,
 			&netWorthItem.Cash,
 			&netWorthItem.Investment,
