@@ -68,7 +68,7 @@
    <tbody>
       {{ range .Data.transactions }}
         <tr>
-          <td>{{ .Name }}</td>
+        <td><a href="/transactions/{{.ID}}">{{ .Name }}</a></td>
           <td class="currency">{{ .Amount }}</td>
           <td>{{ .Date }}</td>
           <td>{{ .CustomCategory.String }}</td>

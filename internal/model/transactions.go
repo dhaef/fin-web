@@ -3,9 +3,10 @@ package model
 import (
 	"database/sql"
 	"strconv"
+	"strings"
 )
 
-type Transactions struct {
+type Transaction struct {
 	ID             string
 	Account        string
 	Amount         float64
@@ -124,7 +125,7 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 	return queryStr, args
 }
 
-func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transactions, error) {
+func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transaction, error) {
 	queryStr := "SELECT * FROM transactions"
 	args := []any{}
 
@@ -143,13 +144,13 @@ func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transa
 		args...,
 	)
 	if err != nil {
-		return []Transactions{}, err
+		return []Transaction{}, err
 	}
 	defer rows.Close()
 
-	transactions := []Transactions{}
+	transactions := []Transaction{}
 	for rows.Next() {
-		transaction := Transactions{}
+		transaction := Transaction{}
 		if err := rows.Scan(
 			&transaction.Name,
 			&transaction.Amount,
@@ -161,7 +162,7 @@ func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transa
 			&transaction.CustomCategory,
 			&transaction.Description,
 		); err != nil {
-			return []Transactions{}, err
+			return []Transaction{}, err
 		}
 
 		transactions = append(transactions, transaction)
@@ -234,4 +235,67 @@ func CountsByDate(conn *sql.DB, filters QueryTransactionsFilters, dateStr string
 	}
 
 	return counts, nil
+}
+
+func GetTransaction(conn *sql.DB, ID string) (Transaction, error) {
+	queryStr := "SELECT * FROM transactions WHERE id = ?"
+
+	transaction := Transaction{}
+	err := conn.QueryRow(
+		queryStr,
+		ID,
+	).Scan(&transaction.Name,
+		&transaction.Amount,
+		&transaction.Date,
+		&transaction.Source,
+		&transaction.Account,
+		&transaction.Category,
+		&transaction.ID,
+		&transaction.CustomCategory,
+		&transaction.Description,
+	)
+	if err != nil {
+		return Transaction{}, err
+	}
+
+	return transaction, nil
+}
+
+type UpdateTransactionParams struct {
+	Category    *string
+	Description *string
+}
+
+func UpdateTransaction(conn *sql.DB, ID string, params UpdateTransactionParams) error {
+	queryStr := "UPDATE transactions SET"
+	updates := []string{}
+	args := []any{}
+
+	if params.Category != nil {
+		updates = append(updates, " customCategory = ?")
+		args = append(args, *params.Category)
+	}
+
+	if params.Description != nil {
+		updates = append(updates, " description = ?")
+		args = append(args, *params.Description)
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	queryStr += strings.Join(updates, ",")
+	queryStr += " WHERE id = ?"
+	args = append(args, ID)
+
+	_, err := conn.Exec(
+		queryStr,
+		args...,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

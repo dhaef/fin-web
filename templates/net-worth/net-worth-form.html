@@ -1,10 +1,105 @@
 {{ define "form" }}
-<form>
-  <label for="date">Date:</label>
-  <input name="date" value="{{.Date}}" type="text" />
-  <label for="cash">Cash:</label>
-  <input name="cash" value="{{.Cash}}" type="number" />
+<form method="POST">
+  <div class="form-item">
+    <label for="date">Date:</label>
+    <input name="date" value="{{.netWorthItem.Date}}" type="text" />
+    {{if .errs.date}}
+    <p class="form-error">{{.errs.date}}</p>
+    {{end}}
+  </div>
+
+  <div class="form-item">
+    <label for="cash">Cash:</label>
+    <input
+      name="cash"
+      value="{{.netWorthItem.Cash}}"
+      type="number"
+      step="0.01"
+    />
+    {{if .errs.cash}}
+    <p class="form-error">{{.errs.cash}}</p>
+    {{end}}
+  </div>
+
+  <div class="form-item">
+    <label for="investment">Investment:</label>
+    <input
+      name="investment"
+      value="{{.netWorthItem.Investment}}"
+      type="number"
+      step="0.01"
+    />
+    {{if .errs.investment}}
+    <p class="form-error">{{.errs.investment}}</p>
+    {{end}}
+  </div>
+
+  <div class="form-item">
+    <label for="debit">Debit:</label>
+    <input
+      name="debit"
+      value="{{.netWorthItem.Debit}}"
+      type="number"
+      step="0.01"
+    />
+    {{if .errs.debit}}
+    <p class="form-error">{{.errs.debit}}</p>
+    {{end}}
+  </div>
+
+  <div class="form-item">
+    <label for="credit">Credit:</label>
+    <input
+      name="credit"
+      value="{{.netWorthItem.Credit}}"
+      type="number"
+      step="0.01"
+    />
+    {{if .errs.credit}}
+    <p class="form-error">{{.errs.credit}}</p>
+    {{end}}
+  </div>
+
+  <div class="form-item">
+    <label for="savings">Savings:</label>
+    <input
+      name="savings"
+      value="{{.netWorthItem.Savings}}"
+      type="number"
+      step="0.01"
+    />
+    {{if .errs.savings}}
+    <p class="form-error">{{.errs.savings}}</p>
+    {{end}}
+  </div>
+
+  <div class="form-item">
+    <label for="retirement">Retirement:</label>
+    <input
+      name="retirement"
+      value="{{.netWorthItem.Retirement}}"
+      type="number"
+      step="0.01"
+    />
+    {{if .errs.retirement}}
+    <p class="form-error">{{.errs.retirement}}</p>
+    {{end}}
+  </div>
+
+  <div class="form-item">
+    <label for="loans">Loans:</label>
+    <input
+      name="loans"
+      value="{{.netWorthItem.Loans}}"
+      type="number"
+      step="0.01"
+    />
+    {{if .errs.loans}}
+    <p class="form-error">{{.errs.loans}}</p>
+    {{end}}
+  </div>
 
   <input type="submit" />
+  <a href="/net-worth">cancel</a>
 </form>
 {{ end }}

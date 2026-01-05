@@ -1,4 +1,5 @@
 {{ define "title" }}💰📈{{end}} {{ define "scripts" }}{{end}} {{define "body"}}
+<a href="/net-worth/new">Add Record</a>
 <div id="transactions-table-container" class="my-1">
   <table id="transactions-table">
     <thead>
@@ -19,8 +20,7 @@
     <tbody>
       {{ range .Data.netWorthItems }}
       <tr>
-        <td>{{ .Date }}</td>
-        <!-- <td><a href="/net-worth/{{ .Id }}">{{ .Date }}</a></td> -->
+        <td><a href="/net-worth/{{.ID}}">{{ .Date }}</a></td>
         <td class="currency">{{ .Cash }}</td>
         <td class="currency">{{ .Investment }}</td>
         <td class="currency">{{ .Debit }}</td>
@@ -30,7 +30,7 @@
         <td class="currency">{{ .Loans }}</td>
         <td class="currency">{{ .NetWorth }}</td>
         <td class="currency">{{ .Change }}</td>
-        <td>{{ .ChangePercent }}%</td>
+        <td>{{ .ChangePercent }}</td>
       </tr>
       {{ end }}
     </tbody>

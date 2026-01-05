@@ -72,3 +72,20 @@ ul {
   display: flex;
   justify-content: space-around;
 }
+
+.form-item {
+  margin-bottom: 0.5rem;
+}
+
+.form-item > input,
+.form-item > select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid rgb(118, 118, 118);
+  margin-top: 0.25rem;
+}
+
+.form-error {
+  color: red;
+}

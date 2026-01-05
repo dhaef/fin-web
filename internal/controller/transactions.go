@@ -214,3 +214,64 @@ func uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
 
 	return nil
 }
+
+func transaction(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+	transaction, err := model.GetTransaction(
+		transactionsDBConn,
+		id,
+	)
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error fetching transaction: " + err.Error(),
+		}
+	}
+
+	err = renderTemplate(w, Base{
+		Data: map[string]any{
+			"transaction": transaction,
+			"categories":  model.Categories(),
+		},
+	}, "layout", []string{"transactions/transaction.html", "layout.html"})
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+	}
+
+	return nil
+}
+
+func updateTransaction(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+
+	description := r.FormValue("description")
+	category := r.FormValue("category")
+
+	_, err := model.GetTransaction(
+		transactionsDBConn,
+		id,
+	)
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error fetching transaction: " + err.Error(),
+		}
+	}
+
+	err = model.UpdateTransaction(transactionsDBConn, id, model.UpdateTransactionParams{
+		Description: &description,
+		Category:    &category,
+	})
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error updating transaction: " + err.Error(),
+		}
+	}
+
+	http.Redirect(w, r, r.URL.Path, http.StatusSeeOther)
+	return nil
+}

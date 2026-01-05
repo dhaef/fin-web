@@ -36,9 +36,14 @@ func buildRoutes() http.Handler {
 
 	r.HandleFunc("GET /favicon.ico", MakeHandler(favicon))
 	r.HandleFunc("GET /annual", MakeHandler(annual))
+	r.HandleFunc("GET /net-worth/new", MakeHandler(newNetWorthItem))
+	r.HandleFunc("POST /net-worth/new", MakeHandler(createNetWorthItem))
 	r.HandleFunc("GET /net-worth/{id}", MakeHandler(netWorthItem))
+	r.HandleFunc("POST /net-worth/{id}", MakeHandler(updateNetWorthItem))
 	r.HandleFunc("GET /net-worth", MakeHandler(netWorth))
-	r.HandleFunc("GET /uncategorized", MakeHandler(uncategorizedTransactions))
+	r.HandleFunc("GET /transactions/uncategorized", MakeHandler(uncategorizedTransactions))
+	r.HandleFunc("GET /transactions/{id}", MakeHandler(transaction))
+	r.HandleFunc("POST /transactions/{id}", MakeHandler(updateTransaction))
 	// this will match everything else so handle this in home handler
 	r.HandleFunc("GET /", MakeHandler(transactions))
 
