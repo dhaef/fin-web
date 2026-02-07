@@ -194,6 +194,86 @@ function barChart(data, barColor, labelOffset) {
   return { node: svg.node() };
 }
 
+function lineChart(data) {
+  const width = 1200;
+  const height = 500;
+  const marginTop = 20;
+  const marginRight = 30;
+  const marginBottom = 30;
+  const marginLeft = 60;
+
+  // Declare the x (horizontal position) scale.
+  const x = d3.scaleUtc(
+    d3.extent(data, (d) => d.date),
+    [marginLeft, width - marginRight],
+  );
+
+  // Declare the y (vertical position) scale.
+  const y = d3.scaleLinear(
+    d3.extent(data, (d) => d.value),
+    [height - marginBottom, marginTop],
+  );
+
+  // Declare the line generator.
+  const line = d3
+    .line()
+    .x((d) => x(d.date))
+    .y((d) => y(d.value));
+
+  // Create the SVG container.
+  const svg = d3
+    .create("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height])
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+
+  // Add the x-axis.
+  svg
+    .append("g")
+    .attr("transform", `translate(0,${height - marginBottom})`)
+    .call(
+      d3
+        .axisBottom(x)
+        .tickFormat(d3.timeFormat("%m-%y"))
+        .ticks(width / 80)
+        .tickSizeOuter(0),
+    );
+
+  // Add the y-axis, remove the domain line, add grid lines and a label.
+  svg
+    .append("g")
+    .attr("transform", `translate(${marginLeft},0)`)
+    .call(d3.axisLeft(y).ticks(height / 40))
+    .call((g) => g.select(".domain").remove())
+    .call((g) =>
+      g
+        .selectAll(".tick line")
+        .clone()
+        .attr("x2", width - marginLeft - marginRight)
+        .attr("stroke-opacity", 0.1),
+    )
+    .call((g) =>
+      g
+        .append("text")
+        .attr("x", -marginLeft)
+        .attr("y", 10)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "start")
+        .text("Net Worth ($)"),
+    );
+
+  // Append a path for the line.
+  svg
+    .append("path")
+    .attr("fill", "none")
+    .attr("stroke", "rgb(66, 136, 181)")
+    .attr("stroke-width", 1.5)
+    .attr("d", line(data));
+
+  return { node: svg.node() };
+}
+
 const categoryDonut = document.getElementById("category-donut");
 const categoryCounts = document.getElementById("category-counts");
 if (categoryDonut && categoryCounts) {
@@ -264,6 +344,29 @@ function buildBarChart(barId, countsId, color, labelOffset) {
     bar.appendChild(node);
   }
 }
+
+// making this specific to net-worth but could make it more generic later
+function buildLineChart(chartId) {
+  const chart = document.getElementById(chartId);
+  if (chart) {
+    const netWorthItems = document.querySelectorAll(".net-worth");
+    const data = [];
+    const parseDate = d3.utcParse("%Y-%m-%d");
+    for (const nwi of Array.from(netWorthItems)) {
+      const value = Number(nwi.getAttribute("data-value"));
+      const date = nwi.getAttribute("data-date");
+
+      data.push({
+        date: parseDate(date),
+        value,
+      });
+    }
+
+    const { node } = lineChart(data);
+    chart.appendChild(node);
+  }
+}
+buildLineChart("net-worth-line-chart");
 
 buildBarChart(
   "previous-year-bar",

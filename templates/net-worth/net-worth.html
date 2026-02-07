@@ -28,7 +28,13 @@
         <td class="currency">{{ .Savings }}</td>
         <td class="currency">{{ .Retirement }}</td>
         <td class="currency">{{ .Loans }}</td>
-        <td class="currency">{{ .NetWorth }}</td>
+        <td
+          class="currency net-worth"
+          data-date="{{.Date}}"
+          data-value="{{.NetWorth}}"
+        >
+          {{ .NetWorth }}
+        </td>
         <td class="currency">{{ .Change }}</td>
         <td>{{ .ChangePercent }}</td>
       </tr>
@@ -36,4 +42,6 @@
     </tbody>
   </table>
 </div>
+
+<div id="net-worth-line-chart"></div>
 {{end}}
