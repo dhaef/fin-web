@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3"
+
+vars:
+  GREETING: Hello, world!
+
+tasks:
+  default:
+    desc: List all tasks
+    cmds:
+      - task --list
+    silent: true
+
+  start:
+    desc: Start the web app
+    cmds:
+      - go run ./cmd/api/main.go
+    env:
+      dbPath: /Users/derekheafner/dev/go/fin-web/db
+
+  normalize:
+    desc: Normalize data into database
+    cmds:
+      - go run ./cmd/normalize/main.go
+    env:
+      dbPath: /Users/derekheafner/dev/go/fin-web/db
+      dirPath: /Users/derekheafner/Downloads

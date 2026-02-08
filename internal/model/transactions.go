@@ -299,3 +299,34 @@ func UpdateTransaction(conn *sql.DB, ID string, params UpdateTransactionParams) 
 
 	return nil
 }
+
+func CreateTransaction(conn *sql.DB, transaction Transaction) error {
+	queryStr := "INSERT INTO transactions VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	args := []any{
+		transaction.Name,
+		transaction.Amount,
+		transaction.Date,
+		transaction.Source,
+		transaction.Account,
+		transaction.Category,
+		transaction.ID,
+	}
+
+	if transaction.CustomCategory.Valid {
+		args = append(args, transaction.CustomCategory.String)
+	} else {
+		args = append(args, nil)
+	}
+
+	args = append(args, transaction.Description)
+
+	_, err := conn.Exec(
+		queryStr,
+		args...,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
