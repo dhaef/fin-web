@@ -17,16 +17,14 @@ import (
 )
 
 type Worker struct {
-	DB          *sql.DB
-	DirPath     string
-	CategoryMap map[string][]string
+	DB      *sql.DB
+	DirPath string
 }
 
-func NewWorker(db *sql.DB, dp string, cm map[string][]string) *Worker {
+func NewWorker(db *sql.DB, dp string) *Worker {
 	return &Worker{
-		DB:          db,
-		DirPath:     dp,
-		CategoryMap: cm,
+		DB:      db,
+		DirPath: dp,
 	}
 }
 
@@ -81,16 +79,21 @@ func (w *Worker) Normalize() error {
 			var cc sql.NullString
 			normalizedName := strings.ToLower(r[1])
 			normalizedCategory := strings.ToLower(r[4])
-		out:
-			for cat, vals := range w.CategoryMap {
-				for _, val := range vals {
-					if strings.Contains(normalizedName, val) || strings.Contains(normalizedCategory, val) {
-						cc = sql.NullString{
-							Valid:  true,
-							String: cat,
-						}
-						break out
-					}
+
+			categories, err := model.SearchCategories(
+				w.DB,
+				[]string{normalizedName, normalizedCategory},
+			)
+			if err != nil {
+				fmt.Printf("failed to get custom category for: %s, err: %v", normalizedName, err)
+			}
+
+			if len(categories) == 0 {
+				fmt.Printf("did not find any categories for: %s", normalizedName)
+			} else {
+				cc = sql.NullString{
+					Valid:  true,
+					String: categories[0].Category,
 				}
 			}
 

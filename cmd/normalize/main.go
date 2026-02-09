@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -20,35 +19,15 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	categories, err := loadCategories()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	s := schwab.NewWorker(transactionsDB, dirPath, categories)
+	s := schwab.NewWorker(transactionsDB, dirPath)
 	err = s.Normalize()
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	c := citi.NewWorker(transactionsDB, dirPath, categories)
+	c := citi.NewWorker(transactionsDB, dirPath)
 	err = c.Normalize()
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-func loadCategories() (map[string][]string, error) {
-	data, err := os.ReadFile("categories.json")
-	if err != nil {
-		return nil, err
-	}
-
-	var result map[string][]string
-
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
 }

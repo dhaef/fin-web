@@ -26,3 +26,10 @@ tasks:
     env:
       dbPath: /Users/derekheafner/dev/go/fin-web/db
       dirPath: /Users/derekheafner/Downloads
+
+  add-cats:
+    desc: Seed categories
+    cmds:
+      - go run ./cmd/categories/main.go
+    env:
+      dbPath: /Users/derekheafner/dev/go/fin-web/db
