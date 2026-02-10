@@ -1,58 +1,69 @@
 {{ define "title" }}💰📈{{end}} {{ define "scripts" }}{{end}} {{define
 "body"}}
-<label for="startDate">Start Date:</label>
-<input
-  type="date"
-  id="startDate"
-  name="startDate"
-  value="{{.Data.startDate}}"
-/>
-<label for="endDate">End Date:</label>
-<input type="date" id="endDate" name="endDate" value="{{.Data.endDate}}" />
-<label for="sortBy">Sort By:</label>
-<select name="sortBy" id="sortBy">
-  <option value="date" {{ if eq .Data.orderBy "date" }}selected{{end}}>Date</option>
-  <option value="amount" {{ if eq .Data.orderBy "amount" }}selected{{end}}>Amount</option>
-</select>
-<label for="sortDirection">Sort By:</label>
-<select name="sortDirection" id="sortDirection">
-  <option value="ASC" {{ if eq .Data.orderDirection "ASC" }}selected{{end}}>ASC</option>
-  <option value="DESC" {{ if eq .Data.orderDirection "DESC" }}selected{{end}}>DESC</option>
-</select>
-<label for="categories">Categories:</label>
-<select name="categories" id="categories" multiple>
-  <option value="work" {{ if .Data.selectedCategories.work }}selected{{end}}>Work</option>
-  <option value="grocery" {{ if .Data.selectedCategories.grocery }}selected{{end}}>Grocery</option>
-  <option value="foodOut" {{ if .Data.selectedCategories.foodOut }}selected{{end}}>Food Out</option>
-  <option value="flights" {{ if .Data.selectedCategories.flights }}selected{{end}}>Flights</option>
-  <option value="utilities" {{ if .Data.selectedCategories.utilities }}selected{{end}}>Utilities</option>
-  <option value="rent" {{ if .Data.selectedCategories.rent }}selected{{end}}>Rent</option>
-  <option value="venmo" {{ if .Data.selectedCategories.venmo }}selected{{end}}>Venmo</option>
-  <option value="gas" {{ if .Data.selectedCategories.gas }}selected{{end}}>Gas</option>
-  <option value="car" {{ if .Data.selectedCategories.car }}selected{{end}}>Car</option>
-  <option value="rentals" {{ if .Data.selectedCategories.rentals }}selected{{end}}>Rentals</option>
-  <option value="transportation" {{ if .Data.selectedCategories.transportation }}selected{{end}}>Transportation</option>
-  <option value="healthCare" {{ if .Data.selectedCategories.healthCare }}selected{{end}}>HealthCare</option>
-  <option value="tech" {{ if .Data.selectedCategories.tech }}selected{{end}}>Tech</option>
-  <option value="entertainment" {{ if .Data.selectedCategories.entertainment }}selected{{end}}>Entertainment</option>
-  <option value="interest" {{ if .Data.selectedCategories.interest }}selected{{end}}>Interest</option>
-  <option value="entertainment" {{ if .Data.selectedCategories.entertainment }}selected{{end}}>Entertainment</option>
-  <option value="hotels" {{ if .Data.selectedCategories.hotels }}selected{{end}}>Hotels</option>
-  <option value="gym" {{ if .Data.selectedCategories.gym }}selected{{end}}>Gym</option>
-  <option value="insurance" {{ if .Data.selectedCategories.insurance }}selected{{end}}>Insurance</option>
-  <option value="taxes" {{ if .Data.selectedCategories.taxes }}selected{{end}}>Taxes</option>
-  <option value="government" {{ if .Data.selectedCategories.government }}selected{{end}}>Government</option>
-  <option value="wedding" {{ if .Data.selectedCategories.wedding }}selected{{end}}>Wedding</option>
-  <option value="mexico" {{ if .Data.selectedCategories.mexico }}selected{{end}}>Mexico</option>
-  <option value="merchandise" {{ if .Data.selectedCategories.merchandise }}selected{{end}}>Merchandise</option>
-  <option value="miscellaneousIncome" {{ if .Data.selectedCategories.miscellaneousIncome }}selected{{end}}>Miscellaneous Income</option>
-  <option value="donations" {{ if .Data.selectedCategories.donations }}selected{{end}}>Donations</option>
-</select>
-<button id="filter-transactions">Filter</button>
-<div class="my-1">
-  <p><strong>Expenses: </strong><span class="currency">{{.Data.eTotal}}</span></p>
-  <p><strong>Income: </strong><span class="currency">{{.Data.iTotal}}</span></p>
-  <p><strong>Net: </strong><span class="currency">{{.Data.total}}</span></p>
+
+<div class="filter-bar my-1">
+  <div class="filter-group">
+    <label for="startDate">Range</label>
+    <div class="input-row">
+      <input type="date" id="startDate" name="startDate" value="{{.Data.startDate}}" />
+      <span class="separator">to</span>
+      <input type="date" id="endDate" name="endDate" value="{{.Data.endDate}}" />
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <label for="sortBy">Sort By</label>
+    <div class="input-row">
+      <select name="sortBy" id="sortBy">
+        <option value="date" {{ if eq .Data.orderBy "date" }}selected{{end}}>Date</option>
+        <option value="amount" {{ if eq .Data.orderBy "amount" }}selected{{end}}>Amount</option>
+      </select>
+      <select name="sortDirection" id="sortDirection">
+        <option value="ASC" {{ if eq .Data.orderDirection "ASC" }}selected{{end}}>ASC</option>
+        <option value="DESC" {{ if eq .Data.orderDirection "DESC" }}selected{{end}}>DESC</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <label for="categories">Categories</label>
+    <select name="categories" id="categories" multiple size="1" class="multi-select">
+      <option value="work" {{ if .Data.selectedCategories.work }}selected{{end}}>Work</option>
+      <option value="grocery" {{ if .Data.selectedCategories.grocery }}selected{{end}}>Grocery</option>
+      <option value="foodOut" {{ if .Data.selectedCategories.foodOut }}selected{{end}}>Food Out</option>
+      <option value="flights" {{ if .Data.selectedCategories.flights }}selected{{end}}>Flights</option>
+      <option value="utilities" {{ if .Data.selectedCategories.utilities }}selected{{end}}>Utilities</option>
+      <option value="rent" {{ if .Data.selectedCategories.rent }}selected{{end}}>Rent</option>
+      <option value="venmo" {{ if .Data.selectedCategories.venmo }}selected{{end}}>Venmo</option>
+      <option value="gas" {{ if .Data.selectedCategories.gas }}selected{{end}}>Gas</option>
+      <option value="car" {{ if .Data.selectedCategories.car }}selected{{end}}>Car</option>
+      <option value="rentals" {{ if .Data.selectedCategories.rentals }}selected{{end}}>Rentals</option>
+      <option value="transportation" {{ if .Data.selectedCategories.transportation }}selected{{end}}>Transportation</option>
+      <option value="healthCare" {{ if .Data.selectedCategories.healthCare }}selected{{end}}>HealthCare</option>
+      <option value="tech" {{ if .Data.selectedCategories.tech }}selected{{end}}>Tech</option>
+      <option value="entertainment" {{ if .Data.selectedCategories.entertainment }}selected{{end}}>Entertainment</option>
+      <option value="interest" {{ if .Data.selectedCategories.interest }}selected{{end}}>Interest</option>
+      <option value="entertainment" {{ if .Data.selectedCategories.entertainment }}selected{{end}}>Entertainment</option>
+      <option value="hotels" {{ if .Data.selectedCategories.hotels }}selected{{end}}>Hotels</option>
+      <option value="gym" {{ if .Data.selectedCategories.gym }}selected{{end}}>Gym</option>
+      <option value="insurance" {{ if .Data.selectedCategories.insurance }}selected{{end}}>Insurance</option>
+      <option value="taxes" {{ if .Data.selectedCategories.taxes }}selected{{end}}>Taxes</option>
+      <option value="government" {{ if .Data.selectedCategories.government }}selected{{end}}>Government</option>
+      <option value="wedding" {{ if .Data.selectedCategories.wedding }}selected{{end}}>Wedding</option>
+      <option value="mexico" {{ if .Data.selectedCategories.mexico }}selected{{end}}>Mexico</option>
+      <option value="merchandise" {{ if .Data.selectedCategories.merchandise }}selected{{end}}>Merchandise</option>
+      <option value="miscellaneousIncome" {{ if .Data.selectedCategories.miscellaneousIncome }}selected{{end}}>Miscellaneous Income</option>
+      <option value="donations" {{ if .Data.selectedCategories.donations }}selected{{end}}>Donations</option>
+    </select>
+  </div>
+
+  <button id="filter-transactions" class="btn-filter">Update View</button>
+</div>
+
+<div class="my-1 flex summary">
+  <div class="card card-warning"><strong>Expenses: </strong><span class="currency">{{.Data.eTotal}}</span></div>
+  <div class="card card-growth"><strong>Income: </strong><span class="currency">{{.Data.iTotal}}</span></div>
+  <div class="card card-highlight"><strong>Net: </strong><span class="currency">{{.Data.total}}</span></div>
 </div>
 <div id="transactions-table-container" class="my-1">
   <table id="transactions-table">

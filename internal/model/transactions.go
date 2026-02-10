@@ -30,36 +30,6 @@ type QueryTransactionsFilters struct {
 	EmptyCustomCategory *bool
 }
 
-func Categories() []string {
-	return []string{
-		"work",
-		"grocery",
-		"foodOut",
-		"flights",
-		"utilities",
-		"rent",
-		"debit",
-		"venmo",
-		"gas",
-		"car",
-		"rentals",
-		"transportation",
-		"healthCare",
-		"tech",
-		"entertainment",
-		"interest",
-		"hotels",
-		"gym",
-		"insurance",
-		"taxes",
-		"government",
-		"wedding",
-		"mexico",
-		"merchandise",
-		"miscellaneousIncome",
-	}
-}
-
 func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (string, []any) {
 	filterStrings := []string{}
 

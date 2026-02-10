@@ -13,6 +13,33 @@ type Category struct {
 	Priority int
 }
 
+func GetCategories(conn *sql.DB) ([]Category, error) {
+	rows, err := conn.Query(
+		"SELECT id, category, priority FROM categories",
+	)
+	if err != nil {
+		return []Category{}, err
+	}
+	defer rows.Close()
+
+	categories := []Category{}
+	for rows.Next() {
+		category := Category{}
+		if err := rows.Scan(
+			&category.ID,
+			&category.Category,
+			&category.Priority,
+		); err != nil {
+			return []Category{}, err
+		}
+
+		categories = append(categories, category)
+	}
+
+	return categories, nil
+}
+
+// select distinct c.category, c.priority from categories as c inner join category_values as cv on c.id = cv.category_id where 'costco wholesale' LIKE '%' || value || '%' order by priority nulls last;
 func SearchCategories(conn *sql.DB, queries []string) ([]Category, error) {
 	if len(queries) == 0 {
 		return []Category{}, errors.New("at least one query is required")
