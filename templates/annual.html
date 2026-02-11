@@ -1,5 +1,5 @@
 {{ define "title" }}💰📈{{end}} {{ define "scripts" }}{{end}} {{define "body"}}
-<div>
+<div class="my-1">
   <div id="yearly-expense-counts" style="display: none">
     {{ range .Data.expenseCountsByYear }}
     <p>{{.Key}}:{{.Value}}</p>
@@ -9,7 +9,7 @@
   <div id="yearly-expense-bar" class="widget"></div>
 </div>
 
-<div>
+<div class="my-1">
   <div id="yearly-income-counts" style="display: none">
     {{ range .Data.incomeCountsByYear }}
     <p>{{.Key}}:{{.Value}}</p>
@@ -19,7 +19,7 @@
   <div id="yearly-income-bar" class="widget"></div>
 </div>
 
-<div>
+<div class="my-1">
   <div id="yearly-net-counts" style="display: none">
     {{ range .Data.netCounts }}
     <p>{{.Key}}:{{.Net}}:{{.SavePercentage}}</p>

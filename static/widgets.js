@@ -91,110 +91,113 @@ function donut(data, colorRange) {
   return { node: svg.node() };
 }
 
-function barChart(data, barColor, labelOffset) {
-  // Declare the chart dimensions and margins.
+function barChart(data, id, colors) {
+  // Dimensions & Scales
   const width = 1200;
   const height = 500;
-  const marginTop = 30;
-  const marginRight = 0;
-  const marginBottom = 30;
-  const marginLeft = 40;
+  const marginTop = 50;
+  const marginRight = 20;
+  const marginBottom = 40;
+  const marginLeft = 60;
 
-  // Declare the x (horizontal position) scale.
   const x = d3
     .scaleBand()
     .domain(data.map((d) => d.name))
     .range([marginLeft, width - marginRight])
-    .padding(0.1);
+    .padding(0.2);
 
-  // Declare the y (vertical position) scale.
   const y = d3
     .scaleLinear()
     .domain([0, d3.max(data, (d) => d.value)])
-    .range([height - marginBottom, marginTop]);
+    .range([height - marginBottom, marginTop])
+    .nice();
 
-  // Create the SVG container.
   const svg = d3
     .create("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [0, 0, width, height])
-    .attr("style", "max-width: 100%; height: auto;");
+    .attr("style", "max-width: 100%; height: auto; font-family: sans-serif;");
 
-  // Add a rect for each bar.
+  // 1. Grid Lines (Bottom Layer)
   svg
     .append("g")
-    // .attr('fill', barColor)
-    .selectAll()
+    .attr("transform", `translate(${marginLeft},0)`)
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format("$.2s")))
+    .call((g) => g.select(".domain").remove())
+    .call((g) =>
+      g
+        .selectAll(".tick line")
+        .clone()
+        .attr("x2", width - marginLeft - marginRight)
+        .attr("stroke-opacity", 0.1),
+    );
+
+  // 2. Value Labels (Hidden by default)
+  svg
+    .append("g")
+    .selectAll("text")
+    .data(data)
+    .join("text")
+    .attr("id", (_d, i) => `${id}-label-${i}`) // Using ID for faster selection
+    .attr("x", (d) => x(d.name) + x.bandwidth() / 2)
+    .attr("y", (d) => y(d.value) - 12)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#333")
+    .style("font-size", "12px")
+    .style("font-weight", "bold")
+    .style("opacity", 0)
+    .style("pointer-events", "none")
+    .style("transition", "opacity 0.2s ease, transform 0.2s ease") // Smooth CSS transition
+    .text((d) => formatter.format(d.sign === "neg" ? -d.value : d.value));
+
+  // 3. Bars
+  svg
+    .append("g")
+    .selectAll("rect")
     .data(data)
     .join("rect")
-    .attr("fill", (d) => (d.sign === "neg" ? "rgb(209, 60, 75)" : barColor))
     .attr("x", (d) => x(d.name))
     .attr("y", (d) => y(d.value))
     .attr("height", (d) => y(0) - y(d.value))
     .attr("width", x.bandwidth())
-    .on("click", (_, i) => {
-      if (i.name.includes("-")) {
-        const [month, year] = i.name.split("-");
-        const startDate = `${year}-${month}-01`;
+    .attr("fill", (d) => (d.sign === "neg" ? colors.negColor : colors.posColor))
+    .attr("rx", 4)
+    .attr("cursor", "pointer")
+    // Use standard CSS transitions for smoother, non-flickering animations
+    .style("transition", "fill-opacity 0.2s, transform 0.2s ease")
+    .style("transform-origin", "bottom")
+    .on("mouseenter", function (_event, d) {
+      const index = data.indexOf(d);
 
-        const lastDayOfMonth = new Date(Number(year), Number(month), 0);
-        const endDate = `${year}-${month}-${lastDayOfMonth.getDate()}`;
+      // 1. Highlight Bar using CSS Transform (prevents height math bugs)
+      d3.select(this)
+        .style("fill-opacity", 0.8)
+        .style("transform", "scaleY(1.02)"); // Subtle 2% growth upwards
 
-        const p = new URLSearchParams(location.search);
-        p.set("startDate", startDate);
-        p.set("endDate", endDate);
+      // 2. Show Label
+      d3.select(`#${id}-label-${index}`)
+        .style("opacity", 1)
+        .style("transform", "translateY(-5px)"); // Float the text up slightly
+    })
+    .on("mouseleave", function (_event, d) {
+      const index = data.indexOf(d);
 
-        window
-          .open(`${window.location.origin}?${p.toString()}`, "_blank")
-          .focus();
-      }
+      // 1. Reset Bar
+      d3.select(this).style("fill-opacity", 1).style("transform", "scaleY(1)");
+
+      // 2. Hide Label
+      d3.select(`#${id}-label-${index}`)
+        .style("opacity", 0)
+        .style("transform", "translateY(0)");
     });
 
-  // Add the x-axis and label.
+  // 4. X-Axis (Top Layer)
   svg
     .append("g")
     .attr("transform", `translate(0,${height - marginBottom})`)
     .call(d3.axisBottom(x).tickSizeOuter(0));
 
-  // Add the y-axis and label, and remove the domain line.
-  svg
-    .append("g")
-    .attr("transform", `translate(${marginLeft},0)`)
-    .call(d3.axisLeft(y).tickFormat((y) => y.toFixed()))
-    .call((g) => g.select(".domain").remove())
-    .call((g) =>
-      g
-        .append("text")
-        .attr("x", -marginLeft)
-        .attr("y", 10)
-        .attr("fill", "currentColor")
-        .attr("text-anchor", "start")
-        .text("Amount ($)"),
-    );
-
-  svg
-    .selectAll("text.bar")
-    .data(data)
-    .enter()
-    .append("text")
-    .attr("class", "bar")
-    .attr("text-anchor", "middle")
-    .attr("x", function (d) {
-      return x(d.name) + labelOffset;
-    })
-    .attr("y", function (d) {
-      return y(d.value) - 5;
-    })
-    .attr("style", "font-size: 10px;")
-    .text(function (d) {
-      if (d.subValue) {
-        return `${formatter.format(d.sign === "neg" ? -d.value : d.value)} (${d.subValue})`;
-      }
-      return formatter.format(d.sign === "neg" ? -d.value : d.value);
-    });
-
-  // Return the SVG element.
   return { node: svg.node() };
 }
 
@@ -431,7 +434,7 @@ if (categoryIncomeDonut && categoryIncomeCounts) {
   categoryIncomeDonut.appendChild(node);
 }
 
-function buildBarChart(barId, countsId, color, labelOffset) {
+function buildBarChart(barId, countsId, colors) {
   const bar = document.getElementById(barId);
   const countElements = document.getElementById(countsId);
   if (bar && countElements) {
@@ -463,7 +466,7 @@ function buildBarChart(barId, countsId, color, labelOffset) {
       });
     }
 
-    const { node } = barChart(counts, color, labelOffset);
+    const { node } = barChart(counts, barId, colors);
     bar.appendChild(node);
   }
 }
@@ -489,36 +492,25 @@ function buildLineChart(chartId) {
     chart.appendChild(node);
   }
 }
-buildLineChart("net-worth-line-chart");
 
-buildBarChart(
-  "previous-year-bar",
-  "previous-year-counts",
-  "rgb(254, 221, 141)",
-  44,
-);
+const defaultBarColors = {
+  posColor: "#2E865F",
+  negColor: "#D13C4B",
+};
+
+const netIncomeBarColors = {
+  posColor: "#4288b5",
+  negColor: "#D13C4B",
+};
+
+buildLineChart("net-worth-line-chart");
+buildBarChart("previous-year-bar", "previous-year-counts", defaultBarColors);
 buildBarChart(
   "previous-year-income-bar",
   "previous-year-income-counts",
-  "rgb(114, 195, 167)",
-  44,
+  defaultBarColors,
 );
-buildBarChart("net-income-bar", "net-income-counts", "rgb(66, 136, 181)", 44);
-buildBarChart(
-  "yearly-expense-bar",
-  "yearly-expense-counts",
-  "rgb(254, 221, 141)",
-  103,
-);
-buildBarChart(
-  "yearly-income-bar",
-  "yearly-income-counts",
-  "rgb(114, 195, 167)",
-  103,
-);
-buildBarChart(
-  "yearly-net-income-bar",
-  "yearly-net-counts",
-  "rgb(66, 136, 181)",
-  103,
-);
+buildBarChart("net-income-bar", "net-income-counts", netIncomeBarColors);
+buildBarChart("yearly-expense-bar", "yearly-expense-counts", defaultBarColors);
+buildBarChart("yearly-income-bar", "yearly-income-counts", defaultBarColors);
+buildBarChart("yearly-net-income-bar", "yearly-net-counts", netIncomeBarColors);
