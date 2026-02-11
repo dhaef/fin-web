@@ -1,90 +1,94 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-function donut(data) {
+function donut(data, colorRange) {
+  // 1. Setup dimensions and data calculations
   const width = 400;
-  const height = Math.min(width, 500);
+  const height = 400;
   const radius = Math.min(width, height) / 2;
+  const totalAmount = d3.sum(data, (d) => d.value);
 
+  // 2. Generators
   const arc = d3
     .arc()
-    .innerRadius(radius * 0.67)
-    .outerRadius(radius - 1);
+    .innerRadius(radius * 0.65)
+    .outerRadius(radius - 10);
+
+  const arcHover = d3
+    .arc()
+    .innerRadius(radius * 0.65)
+    .outerRadius(radius);
 
   const pie = d3
     .pie()
-    .padAngle(1 / radius)
+    .padAngle(2 / radius)
     .sort(null)
     .value((d) => d.value);
 
-  const color = d3
-    .scaleOrdinal()
-    .domain(data.map((d) => d.name))
-    .range(
+  // 3. Color Scale
+  const color = d3.scaleOrdinal().domain(data.map((d) => d.name));
+
+  if (colorRange) {
+    color.range(colorRange);
+  } else {
+    color.range(
       d3
         .quantize((t) => d3.interpolateSpectral(t * 0.8 + 0.1), data.length)
         .reverse(),
     );
+  }
 
+  // 4. Create SVG
   const svg = d3
     .create("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [-width / 2, -height / 2, width, height])
-    .attr("style", "max-width: 100%; height: auto;");
+    .attr("style", "max-width: 100%; height: auto; font-family: sans-serif;");
 
-  const namesAndColors = [];
+  // 5. Center Labels (Total)
+  const centerText = svg.append("g").attr("text-anchor", "middle");
 
+  const totalLabel = centerText
+    .append("text")
+    .attr("dy", "-0.5em")
+    .attr("fill", "#666")
+    .attr("font-size", "14px")
+    .text("Total");
+
+  const totalValue = centerText
+    .append("text")
+    .attr("dy", "1em")
+    .attr("font-size", "22px")
+    .attr("font-weight", "bold")
+    .text(formatter.format(totalAmount));
+
+  // 6. Draw Arcs with Interactions
   svg
     .append("g")
     .selectAll()
     .data(pie(data))
     .join("path")
-    .attr("fill", (d) => {
-      let c = color(d.data.name);
-
-      if (c === "rgb(0, 0, 0)") {
-        c = "rgb(254, 221, 141)";
-      }
-
-      namesAndColors.push({
-        name: d.data.name,
-        color: c,
-        value: d.data.value,
-      });
-      return c;
-    })
+    .attr("fill", (d) => color(d.data.name))
     .attr("d", arc)
-    .on("click", (_, i) => {
-      const p = new URLSearchParams(location.search);
-      p.set("categories", i.data.name);
-
-      window.location = `${window.location.origin}?${p.toString()}`;
+    .attr("cursor", "pointer")
+    .style("transition", "all 0.2s ease")
+    .on("mouseenter", function (_event, d) {
+      d3.select(this).attr("d", arcHover);
+      totalLabel.text(d.data.name);
+      totalValue.text(formatter.format(d.data.value));
     })
-    .append("title")
-    .text((d) => `${d.data.name}: ${d.data.value}`);
+    .on("mouseleave", function () {
+      d3.select(this).attr("d", arc);
+      totalLabel.text("Total");
+      totalValue.text(formatter.format(totalAmount));
+    })
+    .on("click", (_event, d) => {
+      const p = new URLSearchParams(location.search);
+      p.set("categories", d.data.name);
+      window.location = `${window.location.origin}?${p.toString()}`;
+    });
 
-  const legend = document.createElement("div");
-  let total = 0;
-  for (const n of namesAndColors) {
-    const p = document.createElement("p");
-    p.style.backgroundColor = n.color;
-    p.style.borderRadius = "5px";
-    p.style.padding = ".25rem";
-    p.style.margin = ".1rem";
-    p.textContent = `${n.name}: ${formatter.format(n.value)}`;
-
-    total += n.value;
-    legend.appendChild(p);
-  }
-
-  const p = document.createElement("p");
-  p.style.borderRadius = "5px";
-  p.style.padding = ".25rem";
-  p.style.margin = ".1rem";
-  p.textContent = `total: ${formatter.format(total)}`;
-  legend.appendChild(p);
-
-  return { node: svg.node(), legend };
+  return { node: svg.node() };
 }
 
 function barChart(data, barColor, labelOffset) {
@@ -395,8 +399,12 @@ if (categoryDonut && categoryCounts) {
     counts.push({ name, value: numberValue });
   }
 
-  const { node, legend } = donut(counts);
-  categoryDonut.appendChild(legend);
+  const { node } = donut(
+    counts,
+    d3
+      .quantize((t) => d3.interpolateYlOrRd(t * 0.7 + 0.3), counts.length)
+      .reverse(),
+  );
   categoryDonut.appendChild(node);
 }
 
@@ -412,8 +420,14 @@ if (categoryIncomeDonut && categoryIncomeCounts) {
     counts.push({ name, value: Math.abs(numberValue) });
   }
 
-  const { node, legend } = donut(counts);
-  categoryIncomeDonut.appendChild(legend);
+  const { node } = donut(counts, [
+    "#2E865F", // Deep Emerald (Main Income)
+    "#66b3a1", // Soft Teal
+    "#a5d6a7", // Fresh Mint
+    "#26a69a", // Darker Teal
+    "#81c784", // Sage Green
+    "#b2dfdb", // Light Aqua
+  ]);
   categoryIncomeDonut.appendChild(node);
 }
 

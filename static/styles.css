@@ -95,6 +95,10 @@ ul {
   margin: 3rem 0;
 }
 
+.donut-title {
+  text-align: center;
+}
+
 /* TABLE */
 /* Container for the table to handle the scroll and rounded corners */
 #transactions-table-container {
