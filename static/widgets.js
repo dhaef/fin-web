@@ -195,56 +195,76 @@ function barChart(data, barColor, labelOffset) {
 }
 
 function lineChart(data) {
+  // --- PRE-PROCESSING ---
+  // 1. Ensure dates are real Date objects and sorted (Required for bisector to work)
+  data.forEach((d) => {
+    d.date = d.date instanceof Date ? d.date : new Date(d.date);
+  });
+  data.sort((a, b) => a.date - b.date);
+
   const width = 1200;
   const height = 500;
   const marginTop = 20;
   const marginRight = 30;
   const marginBottom = 30;
-  const marginLeft = 60;
+  const marginLeft = 80;
 
-  // Declare the x (horizontal position) scale.
   const x = d3.scaleUtc(
     d3.extent(data, (d) => d.date),
     [marginLeft, width - marginRight],
   );
 
-  // Declare the y (vertical position) scale.
-  const y = d3.scaleLinear(
-    d3.extent(data, (d) => d.value),
-    [height - marginBottom, marginTop],
-  );
+  const y = d3
+    .scaleLinear(
+      d3.extent(data, (d) => d.value),
+      [height - marginBottom, marginTop],
+    )
+    .nice();
 
-  // Declare the line generator.
   const line = d3
     .line()
     .x((d) => x(d.date))
-    .y((d) => y(d.value));
+    .y((d) => y(d.value))
+    .curve(d3.curveMonotoneX);
 
-  // Create the SVG container.
+  const area = d3
+    .area()
+    .x((d) => x(d.date))
+    .y0(y(0))
+    .y1((d) => y(d.value))
+    .curve(d3.curveMonotoneX);
+
   const svg = d3
     .create("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [0, 0, width, height])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+    .attr(
+      "style",
+      "max-width: 100%; height: auto; font-family: sans-serif; overflow: visible;",
+    );
 
-  // Add the x-axis.
+  // Axes
   svg
     .append("g")
     .attr("transform", `translate(0,${height - marginBottom})`)
     .call(
       d3
         .axisBottom(x)
-        .tickFormat(d3.timeFormat("%m-%y"))
-        .ticks(width / 80)
+        .ticks(width / 100)
+        .tickFormat(d3.timeFormat("%b %Y"))
         .tickSizeOuter(0),
     );
 
-  // Add the y-axis, remove the domain line, add grid lines and a label.
   svg
     .append("g")
     .attr("transform", `translate(${marginLeft},0)`)
-    .call(d3.axisLeft(y).ticks(height / 40))
+    .call(
+      d3
+        .axisLeft(y)
+        .ticks(height / 50)
+        .tickFormat((d) => d3.format("$.2s")(d).replace("G", "B")),
+    )
     .call((g) => g.select(".domain").remove())
     .call((g) =>
       g
@@ -252,24 +272,113 @@ function lineChart(data) {
         .clone()
         .attr("x2", width - marginLeft - marginRight)
         .attr("stroke-opacity", 0.1),
-    )
-    .call((g) =>
-      g
-        .append("text")
-        .attr("x", -marginLeft)
-        .attr("y", 10)
-        .attr("fill", "currentColor")
-        .attr("text-anchor", "start")
-        .text("Net Worth ($)"),
     );
 
-  // Append a path for the line.
+  // Zero Line
+  svg
+    .append("line")
+    .attr("x1", marginLeft)
+    .attr("x2", width - marginRight)
+    .attr("y1", y(0))
+    .attr("y2", y(0))
+    .attr("stroke", "#333")
+    .attr("stroke-dasharray", "4,4")
+    .attr("opacity", 0.4);
+
+  // Paths
   svg
     .append("path")
+    .datum(data)
+    .attr("fill", "rgba(66, 136, 181, 0.1)")
+    .attr("d", area);
+  svg
+    .append("path")
+    .datum(data)
     .attr("fill", "none")
     .attr("stroke", "rgb(66, 136, 181)")
-    .attr("stroke-width", 1.5)
-    .attr("d", line(data));
+    .attr("stroke-width", 2.5)
+    .attr("d", line);
+
+  // --- TOOLTIP LOGIC ---
+  const tooltip = svg.append("g").style("display", "none");
+
+  // Vertical tracker line
+  tooltip
+    .append("line")
+    .attr("stroke", "#999")
+    .attr("stroke-width", 1)
+    .attr("stroke-dasharray", "3,3")
+    .attr("y1", marginTop)
+    .attr("y2", height - marginBottom);
+
+  // Circle marker
+  tooltip
+    .append("circle")
+    .attr("r", 6)
+    .attr("fill", "rgb(66, 136, 181)")
+    .attr("stroke", "white")
+    .attr("stroke-width", 2);
+
+  // Tooltip Label Group
+  const label = tooltip.append("g").attr("transform", "translate(0, -35)"); // Moved up to fit two lines
+
+  // Background for the label
+  label
+    .append("rect")
+    .attr("fill", "white")
+    .attr("fill-opacity", 0.9)
+    .attr("stroke", "#ccc")
+    .attr("x", -60)
+    .attr("width", 120)
+    .attr("height", 45) // Taller for two lines
+    .attr("rx", 4);
+
+  // Date text (Top line)
+  label
+    .append("text")
+    .attr("class", "tooltip-date")
+    .attr("text-anchor", "middle")
+    .attr("dy", 18)
+    .attr("font-size", "12px")
+    .attr("fill", "#666");
+
+  // Value text (Bottom line)
+  label
+    .append("text")
+    .attr("class", "tooltip-value")
+    .attr("text-anchor", "middle")
+    .attr("dy", 36)
+    .attr("font-size", "14px")
+    .attr("font-weight", "bold")
+    .attr("fill", "#333");
+
+  const bisectDate = d3.bisector((d) => d.date).left;
+  const formatDate = d3.timeFormat("%b %Y"); // e.g., "Jan 2024"
+
+  svg
+    .append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("fill", "none")
+    .attr("pointer-events", "all")
+    .on("mouseover", () => tooltip.style("display", null))
+    .on("mouseout", () => tooltip.style("display", "none"))
+    .on("mousemove", (event) => {
+      const x0 = x.invert(d3.pointer(event)[0]);
+      let i = bisectDate(data, x0, 1);
+
+      if (i >= data.length) i = data.length - 1;
+      const d0 = data[i - 1];
+      const d1 = data[i];
+      const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+
+      tooltip.attr("transform", `translate(${x(d.date)},0)`);
+      tooltip.select("circle").attr("cy", y(d.value));
+
+      // Update the two lines of text
+      tooltip.select(".tooltip-date").text(formatDate(d.date));
+      tooltip.select(".tooltip-value").text(d3.format("$,.0f")(d.value));
+    });
 
   return { node: svg.node() };
 }

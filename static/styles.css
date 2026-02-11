@@ -91,6 +91,10 @@ ul {
   gap: 1rem;
 }
 
+#net-worth-line-chart {
+  margin: 3rem 0;
+}
+
 /* TABLE */
 /* Container for the table to handle the scroll and rounded corners */
 #transactions-table-container {
