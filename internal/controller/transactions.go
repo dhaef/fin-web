@@ -156,6 +156,11 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		selectedCatMap[val] = true
 	}
 
+	cs, err := model.GetCategories(transactionsDBConn)
+	if err != nil {
+		fmt.Println("faile to get categories from DB: ", err.Error())
+	}
+
 	err = renderTemplate(w, Base{
 		Data: map[string]any{
 			"transactions":           transactions,
@@ -163,6 +168,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 			"endDate":                endDate,
 			"orderBy":                orderBy,
 			"orderDirection":         orderDirection,
+			"categories":             cs,
 			"selectedCategories":     selectedCatMap,
 			"expensesCategoryCounts": expensesCategoryCounts,
 			"incomeCategoryCounts":   incomeCategoryCounts,

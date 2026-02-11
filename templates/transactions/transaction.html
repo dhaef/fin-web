@@ -26,15 +26,15 @@
       <select name="category">
         {{ range .Data.categories }}
         <option
-          value="{{.}}"
+          value="{{.Category}}"
           {{
           if
           eq
-          .
+          .Category
           $.Data.transaction.CustomCategory.Value
           }}selected{{end}}
         >
-          {{ . }}
+          {{ .Category }}
         </option>
         {{ end }}
       </select>
