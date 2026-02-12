@@ -1,3 +1,5 @@
 /cmd/api/.env
 categories.json
 /db
+
+.DS_Store

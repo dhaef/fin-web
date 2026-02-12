@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"path"
 	"time"
+
+	"fin-web/internal/assets"
+	"fin-web/internal/templates"
 )
 
 var (
@@ -32,7 +35,8 @@ func NewController(transactionsConn *sql.DB, netWorthConn *sql.DB) Controller {
 func buildRoutes() http.Handler {
 	r := http.NewServeMux()
 
-	r.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("/Users/derekheafner/dev/go/fin-web/static"))))
+	r.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(assets.StaticAssets))))
+	// r.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("/Users/derekheafner/dev/go/fin-web/static"))))
 
 	r.HandleFunc("GET /favicon.ico", MakeHandler(favicon))
 	r.HandleFunc("GET /annual", MakeHandler(annual))
@@ -59,14 +63,7 @@ type Base struct {
 }
 
 func buildTemplatePaths(files []string) []string {
-	// ex, err := os.Executable()
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return []string{}
-	// }
-	// exPath := filepath.Dir(ex)
-	// templatesPath := path.Join(exPath, "..", "..", "templates")
-	templatesPath := path.Join("/Users/derekheafner/dev/go/fin-web", "templates")
+	templatesPath := path.Join("files")
 
 	for index, file := range files {
 		files[index] = path.Join(templatesPath, file)
@@ -78,7 +75,7 @@ func buildTemplatePaths(files []string) []string {
 func handleTemplateFiles(files []string) (*template.Template, error) {
 	filesWithFullPath := buildTemplatePaths(files)
 
-	return template.ParseFiles(filesWithFullPath...)
+	return template.ParseFS(templates.Templates, filesWithFullPath...)
 }
 
 // func render(w http.ResponseWriter, data any, files []string) error {
