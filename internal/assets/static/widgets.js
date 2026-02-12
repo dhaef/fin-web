@@ -190,6 +190,24 @@ function barChart(data, id, colors) {
       d3.select(`#${id}-label-${index}`)
         .style("opacity", 0)
         .style("transform", "translateY(0)");
+    })
+    .on("click", function (_event, d) {
+      if (
+        !location.pathname.startsWith("/transactions") &&
+        !location.pathname.startsWith("/")
+      )
+        return;
+
+      const [month, year] = d.name.split("-").map(Number);
+
+      const startDate = new Date(year, month - 1, 1);
+      // By passing 'month' (which is actually the next month index) and '0' as the day
+      const endDate = new Date(year, month, 0);
+
+      const p = new URLSearchParams(location.search);
+      p.set("startDate", startDate.toISOString().split("T")[0]);
+      p.set("endDate", endDate.toISOString().split("T")[0]);
+      window.location = `${window.location.origin}?${p.toString()}`;
     });
 
   // 4. X-Axis (Top Layer)
