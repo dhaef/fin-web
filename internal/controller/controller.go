@@ -35,8 +35,7 @@ func NewController(transactionsConn *sql.DB, netWorthConn *sql.DB) Controller {
 func buildRoutes() http.Handler {
 	r := http.NewServeMux()
 
-	r.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(assets.StaticAssets))))
-	// r.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("/Users/derekheafner/dev/go/fin-web/static"))))
+	r.Handle("GET /static/", http.FileServer(http.FS(assets.StaticAssets)))
 
 	r.HandleFunc("GET /favicon.ico", MakeHandler(favicon))
 	r.HandleFunc("GET /annual", MakeHandler(annual))
