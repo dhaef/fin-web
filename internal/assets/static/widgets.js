@@ -1,6 +1,6 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import * as d3 from "d3";
 
-function donut(data, colorRange) {
+export function donut(data, colorRange) {
   // 1. Setup dimensions and data calculations
   const width = 400;
   const height = 400;
@@ -117,7 +117,8 @@ function barChart(data, id, colors) {
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [0, 0, width, height])
-    .attr("style", "max-width: 100%; height: auto; font-family: sans-serif;");
+    .attr("style", "max-width: 100%; height: auto; font-family: sans-serif;")
+    .attr("id", `${id}-chart`);
 
   // 1. Grid Lines (Bottom Layer)
   svg
@@ -408,51 +409,11 @@ function lineChart(data) {
   return { node: svg.node() };
 }
 
-const categoryDonut = document.getElementById("category-donut");
-const categoryCounts = document.getElementById("category-counts");
-if (categoryDonut && categoryCounts) {
-  const counts = [];
-
-  for (let i = 0; i < categoryCounts.children.length; i++) {
-    const elValue = categoryCounts.children[i].textContent;
-    const [name, value] = elValue.split(":");
-    const numberValue = Number(value);
-    counts.push({ name, value: numberValue });
+export function buildBarChart(barId, countsId, colors) {
+  if (document.getElementById(`${barId}-chart`)) {
+    return;
   }
 
-  const { node } = donut(
-    counts,
-    d3
-      .quantize((t) => d3.interpolateYlOrRd(t * 0.7 + 0.3), counts.length)
-      .reverse(),
-  );
-  categoryDonut.appendChild(node);
-}
-
-const categoryIncomeDonut = document.getElementById("category-income-donut");
-const categoryIncomeCounts = document.getElementById("category-income-counts");
-if (categoryIncomeDonut && categoryIncomeCounts) {
-  const counts = [];
-
-  for (let i = 0; i < categoryIncomeCounts.children.length; i++) {
-    const elValue = categoryIncomeCounts.children[i].textContent;
-    const [name, value] = elValue.split(":");
-    const numberValue = Number(value);
-    counts.push({ name, value: Math.abs(numberValue) });
-  }
-
-  const { node } = donut(counts, [
-    "#2E865F", // Deep Emerald (Main Income)
-    "#66b3a1", // Soft Teal
-    "#a5d6a7", // Fresh Mint
-    "#26a69a", // Darker Teal
-    "#81c784", // Sage Green
-    "#b2dfdb", // Light Aqua
-  ]);
-  categoryIncomeDonut.appendChild(node);
-}
-
-function buildBarChart(barId, countsId, colors) {
   const bar = document.getElementById(barId);
   const countElements = document.getElementById(countsId);
   if (bar && countElements) {
@@ -490,7 +451,7 @@ function buildBarChart(barId, countsId, colors) {
 }
 
 // making this specific to net-worth but could make it more generic later
-function buildLineChart(chartId) {
+export function buildLineChart(chartId) {
   const chart = document.getElementById(chartId);
   if (chart) {
     const netWorthItems = document.querySelectorAll(".net-worth");
@@ -511,24 +472,12 @@ function buildLineChart(chartId) {
   }
 }
 
-const defaultBarColors = {
+export const defaultBarColors = {
   posColor: "#2E865F",
   negColor: "#D13C4B",
 };
 
-const netIncomeBarColors = {
+export const netIncomeBarColors = {
   posColor: "#4288b5",
   negColor: "#D13C4B",
 };
-
-buildLineChart("net-worth-line-chart");
-buildBarChart("previous-year-bar", "previous-year-counts", defaultBarColors);
-buildBarChart(
-  "previous-year-income-bar",
-  "previous-year-income-counts",
-  defaultBarColors,
-);
-buildBarChart("net-income-bar", "net-income-counts", netIncomeBarColors);
-buildBarChart("yearly-expense-bar", "yearly-expense-counts", defaultBarColors);
-buildBarChart("yearly-income-bar", "yearly-income-counts", defaultBarColors);
-buildBarChart("yearly-net-income-bar", "yearly-net-counts", netIncomeBarColors);

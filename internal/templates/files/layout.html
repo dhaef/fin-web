@@ -6,7 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ template "title" . }}</title>
     <link rel="stylesheet" href="/static/styles.css" />
-    {{ template "scripts" }}
+    <script type="importmap">
+      {
+        "imports": {
+          "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
+          "widgets": "/static/widgets.js",
+          "transactions": "/static/transactions.js",
+          "annual": "/static/annual.js",
+          "net-worth": "/static/net-worth.js"
+        }
+      }
+    </script>
   </head>
   <body>
     <h1 style="text-align: center">💰📈</h1>
@@ -20,7 +30,7 @@
     <div class="wrapper">{{ template "body" . }}</div>
 
     <script src="/static/app.js"></script>
-    <script type="module" src="/static/widgets.js"></script>
+    {{ template "scripts" . }}
   </body>
 </html>
 {{ end }}

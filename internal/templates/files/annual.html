@@ -1,4 +1,8 @@
-{{ define "title" }}💰📈{{end}} {{ define "scripts" }}{{end}} {{define "body"}}
+{{ define "title" }}💰📈{{end}} {{ define "scripts" }}
+<script type="module">
+  import "annual";
+</script>
+{{end}} {{define "body"}}
 <div class="my-1">
   <div id="yearly-expense-counts" style="display: none">
     {{ range .Data.expenseCountsByYear }}
