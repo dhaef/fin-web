@@ -14,6 +14,20 @@ buildBarChart(
 );
 buildBarChart("net-income-bar", "net-income-counts", netIncomeBarColors);
 
+document.getElementById("chart-select").addEventListener("change", (e) => {
+  const el = e.target;
+
+  for (const child of el.children) {
+    const chart = document.getElementById(child.value);
+
+    if (child.value === el.value) {
+      chart.classList.remove("hide");
+    } else {
+      chart.classList.add("hide");
+    }
+  }
+});
+
 const categoryDonut = document.getElementById("category-donut");
 const categoryCounts = document.getElementById("category-counts");
 if (categoryDonut && categoryCounts) {

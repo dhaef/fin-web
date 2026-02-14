@@ -3,7 +3,23 @@
   import "annual";
 </script>
 {{end}} {{define "body"}}
-<div class="my-1">
+<select id="chart-select">
+  <option selected value="yearly-net-income-bar-container">Net Income</option>
+  <option value="yearly-expense-bar-container">Expenses</option>
+  <option value="yearly-income-bar-container">Income</option>
+</select>
+
+<div id="yearly-net-income-bar-container" class="my-1">
+  <div id="yearly-net-counts" style="display: none">
+    {{ range .Data.netCounts }}
+    <p>{{.Key}}:{{.Net}}:{{.SavePercentage}}</p>
+    {{end}}
+  </div>
+  <h3>Net Income By Year</h3>
+  <div id="yearly-net-income-bar" class="widget"></div>
+</div>
+
+<div id="yearly-expense-bar-container" class="my-1 hide">
   <div id="yearly-expense-counts" style="display: none">
     {{ range .Data.expenseCountsByYear }}
     <p>{{.Key}}:{{.Value}}</p>
@@ -13,7 +29,7 @@
   <div id="yearly-expense-bar" class="widget"></div>
 </div>
 
-<div class="my-1">
+<div id="yearly-income-bar-container" class="my-1 hide">
   <div id="yearly-income-counts" style="display: none">
     {{ range .Data.incomeCountsByYear }}
     <p>{{.Key}}:{{.Value}}</p>
@@ -21,15 +37,5 @@
   </div>
   <h3>Income By Year</h3>
   <div id="yearly-income-bar" class="widget"></div>
-</div>
-
-<div class="my-1">
-  <div id="yearly-net-counts" style="display: none">
-    {{ range .Data.netCounts }}
-    <p>{{.Key}}:{{.Net}}:{{.SavePercentage}}</p>
-    {{end}}
-  </div>
-  <h3>Net Income By Year</h3>
-  <div id="yearly-net-income-bar" class="widget"></div>
 </div>
 {{end}}

@@ -96,7 +96,7 @@
 
 <div class="category-donuts">
   <div>
-    <div id="category-counts" style="display: none;">
+    <div id="category-counts" class="hide">
       {{ range .Data.expensesCategoryCounts }}
         <p>{{.Key}}:{{.Value}}</p>
       {{end}}
@@ -106,7 +106,7 @@
   </div>
   
   <div>
-    <div id="category-income-counts" style="display: none;">
+    <div id="category-income-counts" class="hide">
       {{ range .Data.incomeCategoryCounts }}
         <p>{{.Key}}:{{.Value}}</p>
       {{end}}
@@ -116,34 +116,40 @@
   </div>
 </div>
 
-<div>
-  <div id="previous-year-counts" style="display: none;">
-    {{ range .Data.expenseCountsByMonth }}
-      <p>{{.Key}}:{{.Value}}</p>
-    {{end}}
-  </div>
-  <h3>Expenses (last 12 months)</h3>
-  <div id="previous-year-bar" class="widget"></div>
-</div>
+<select id="chart-select">
+  <option selected value="net-income-bar-container">Net Income</option>
+  <option value="previous-year-bar-container">Expenses</option>
+  <option value="previous-year-income-bar-container">Income</option>
+</select>
 
-<div>
-  <div id="previous-year-income-counts" style="display: none;">
-    {{ range .Data.incomeCountsByMonth }}
-      <p>{{.Key}}:{{.Value}}</p>
-    {{end}}
-  </div>
-  <h3>Income (last 12 months)</h3>
-  <div id="previous-year-income-bar" class="widget"></div>
-</div>
-
-<div>
-  <div id="net-income-counts" style="display: none;">
+<div id="net-income-bar-container">
+  <div id="net-income-counts" class="hide">
     {{ range .Data.netCounts }}
       <p>{{.Key}}:{{.Net}}</p>
     {{end}}
   </div>
-  <h3>Net Income (last 12 months)</h3>
+  <h3>Monthly Net Income</h3>
   <div id="net-income-bar" class="widget"></div>
+</div>
+
+<div id="previous-year-bar-container" class="hide">
+  <div id="previous-year-counts" class="hide">
+    {{ range .Data.expenseCountsByMonth }}
+      <p>{{.Key}}:{{.Value}}</p>
+    {{end}}
+  </div>
+  <h3>Monthly Expenses</h3>
+  <div id="previous-year-bar" class="widget"></div>
+</div>
+
+<div id="previous-year-income-bar-container" class="hide">
+  <div id="previous-year-income-counts" class="hide">
+    {{ range .Data.incomeCountsByMonth }}
+      <p>{{.Key}}:{{.Value}}</p>
+    {{end}}
+  </div>
+  <h3>Monthly Income</h3>
+  <div id="previous-year-income-bar" class="widget"></div>
 </div>
 
 {{end}}

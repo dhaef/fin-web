@@ -21,6 +21,10 @@ body {
   margin: auto;
 }
 
+.hide {
+  display: none;
+}
+
 ul {
   list-style-position: inside;
 }
@@ -201,8 +205,8 @@ td:nth-child(5) {
 }
 
 /* Polishing the inputs */
-.filter-bar input,
-.filter-bar select {
+input,
+select {
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   padding: 6px 12px;
