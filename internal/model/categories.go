@@ -11,11 +11,12 @@ type Category struct {
 	ID       int
 	Category string
 	Priority int
+	Label    string
 }
 
 func GetCategories(conn *sql.DB) ([]Category, error) {
 	rows, err := conn.Query(
-		"SELECT id, category, priority FROM categories",
+		"SELECT id, category, priority, label FROM categories",
 	)
 	if err != nil {
 		return []Category{}, err
@@ -29,6 +30,7 @@ func GetCategories(conn *sql.DB) ([]Category, error) {
 			&category.ID,
 			&category.Category,
 			&category.Priority,
+			&category.Label,
 		); err != nil {
 			return []Category{}, err
 		}
@@ -39,13 +41,12 @@ func GetCategories(conn *sql.DB) ([]Category, error) {
 	return categories, nil
 }
 
-// select distinct c.category, c.priority from categories as c inner join category_values as cv on c.id = cv.category_id where 'costco wholesale' LIKE '%' || value || '%' order by priority nulls last;
 func SearchCategories(conn *sql.DB, queries []string) ([]Category, error) {
 	if len(queries) == 0 {
 		return []Category{}, errors.New("at least one query is required")
 	}
 
-	queryStr := "SELECT DISTINCT c.id, c.category, c.priority FROM categories AS c JOIN category_values AS cv ON c.id = cv.category_id WHERE"
+	queryStr := "SELECT DISTINCT c.id, c.category, c.priority, c.label FROM categories AS c JOIN category_values AS cv ON c.id = cv.category_id WHERE"
 	args := []any{}
 	filter := "? LIKE '%' || cv.value || '%'"
 	filters := []string{}
@@ -73,6 +74,7 @@ func SearchCategories(conn *sql.DB, queries []string) ([]Category, error) {
 			&category.ID,
 			&category.Category,
 			&category.Priority,
+			&category.Label,
 		); err != nil {
 			return []Category{}, err
 		}

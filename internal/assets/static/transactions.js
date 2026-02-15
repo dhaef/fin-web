@@ -35,9 +35,9 @@ if (categoryDonut && categoryCounts) {
 
   for (let i = 0; i < categoryCounts.children.length; i++) {
     const elValue = categoryCounts.children[i].textContent;
-    const [name, value] = elValue.split(":");
+    const [id, name, value] = elValue.split(":");
     const numberValue = Number(value);
-    counts.push({ name, value: numberValue });
+    counts.push({ id, name, value: numberValue });
   }
 
   const { node } = donut(
@@ -56,9 +56,9 @@ if (categoryIncomeDonut && categoryIncomeCounts) {
 
   for (let i = 0; i < categoryIncomeCounts.children.length; i++) {
     const elValue = categoryIncomeCounts.children[i].textContent;
-    const [name, value] = elValue.split(":");
+    const [id, name, value] = elValue.split(":");
     const numberValue = Number(value);
-    counts.push({ name, value: Math.abs(numberValue) });
+    counts.push({ id, name, value: Math.abs(numberValue) });
   }
 
   const { node } = donut(counts, [

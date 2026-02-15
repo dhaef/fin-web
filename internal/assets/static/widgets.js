@@ -84,7 +84,7 @@ export function donut(data, colorRange) {
     })
     .on("click", (_event, d) => {
       const p = new URLSearchParams(location.search);
-      p.set("categories", d.data.name);
+      p.set("categories", d.data.id);
       window.location = `${window.location.origin}?${p.toString()}`;
     });
 

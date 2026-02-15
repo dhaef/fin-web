@@ -97,7 +97,7 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 }
 
 func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transaction, error) {
-	queryStr := "select t.id, name, amount, date, account, source, description, c.id, c.category as category from transactions as t left join categories as c on category_id = c.id"
+	queryStr := "select t.id, name, amount, date, account, source, description, c.id, c.label as category from transactions as t left join categories as c on category_id = c.id"
 	args := []any{}
 
 	queryStr, args = buildWhere(queryStr, args, filters)
@@ -143,7 +143,7 @@ func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transa
 }
 
 func CategoryCounts(conn *sql.DB, filters QueryTransactionsFilters) ([]GroupByCounts, error) {
-	queryStr := "SELECT c.id, c.category as category, SUM(t.amount) FROM transactions as t left join categories as c on t.category_id = c.id"
+	queryStr := "SELECT c.id, c.label as category, SUM(t.amount) FROM transactions as t left join categories as c on t.category_id = c.id"
 	args := []any{}
 
 	queryStr, args = buildWhere(queryStr, args, filters)
@@ -210,7 +210,7 @@ func CountsByDate(conn *sql.DB, filters QueryTransactionsFilters, dateStr string
 }
 
 func GetTransaction(conn *sql.DB, ID string) (Transaction, error) {
-	queryStr := "select t.id, name, amount, date, account, source, description, c.id, c.category as category from transactions as t left join categories as c on category_id = c.id where t.id = ?"
+	queryStr := "select t.id, name, amount, date, account, source, description, c.id from transactions as t left join categories as c on category_id = c.id where t.id = ?"
 
 	transaction := Transaction{}
 	err := conn.QueryRow(
@@ -225,7 +225,6 @@ func GetTransaction(conn *sql.DB, ID string) (Transaction, error) {
 		&transaction.Source,
 		&transaction.Description,
 		&transaction.CategoryID,
-		&transaction.CustomCategory,
 	)
 	if err != nil {
 		return Transaction{}, err

@@ -33,7 +33,7 @@
     <label for="categories">Categories</label>
     <select name="categories" id="categories" multiple size="1" class="multi-select">
       {{ range .Data.categories}}
-      <option value="{{.ID}}" {{ if index $.Data.selectedCategories (printf "%v" .ID) }}selected{{end}}>{{.Category}}</option>
+      <option value="{{.ID}}" {{ if index $.Data.selectedCategories (printf "%v" .ID) }}selected{{end}}>{{.Label}}</option>
       {{end}}
     </select>
   </div>
@@ -75,7 +75,7 @@
   <div>
     <div id="category-counts" class="hide">
       {{ range .Data.expensesCategoryCounts }}
-        <p>{{.Key}}:{{.Value}}</p>
+      <p>{{.ID}}:{{.Key}}:{{.Value}}</p>
       {{end}}
     </div>
     <h3>Expenses By Category</h3>
@@ -85,7 +85,7 @@
   <div>
     <div id="category-income-counts" class="hide">
       {{ range .Data.incomeCategoryCounts }}
-        <p>{{.Key}}:{{.Value}}</p>
+      <p>{{.ID}}:{{.Key}}:{{.Value}}</p>
       {{end}}
     </div>
     <h3>Income By Category</h3>
