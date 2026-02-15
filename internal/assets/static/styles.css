@@ -69,6 +69,10 @@ ul {
   color: red;
 }
 
+.form-success {
+  color: green;
+}
+
 .card {
   padding: 1rem;
   background-color: green;

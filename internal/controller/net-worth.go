@@ -247,7 +247,7 @@ func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	ID, err := model.CreateNetWorthItem(netWorthDBConn, params)
+	_, err := model.CreateNetWorthItem(netWorthDBConn, params)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -255,6 +255,6 @@ func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	http.Redirect(w, r, "/net-worth/"+ID, http.StatusSeeOther)
+	http.Redirect(w, r, "/net-worth/", http.StatusSeeOther)
 	return nil
 }

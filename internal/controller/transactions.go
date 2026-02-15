@@ -239,10 +239,18 @@ func transaction(w http.ResponseWriter, r *http.Request) error {
 		fmt.Println("faile to get categories from DB: ", err.Error())
 	}
 
+	responseCookie, err := r.Cookie("response")
+	if err != nil && err != http.ErrNoCookie {
+		fmt.Println("error getting cookie: " + err.Error())
+	}
+
+	success := responseCookie != nil && responseCookie.Value == "success"
+
 	err = renderTemplate(w, Base{
 		Data: map[string]any{
 			"transaction": transaction,
 			"categories":  cs,
+			"success":     success,
 		},
 	}, "layout", []string{"transactions/transaction.html", "layout.html"})
 	if err != nil {
@@ -274,18 +282,7 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 		categoryID = &c
 	}
 
-	_, err := model.GetTransaction(
-		transactionsDBConn,
-		id,
-	)
-	if err != nil {
-		return APIError{
-			Status:  http.StatusInternalServerError,
-			Message: "error fetching transaction: " + err.Error(),
-		}
-	}
-
-	err = model.UpdateTransaction(transactionsDBConn, id, model.UpdateTransactionParams{
+	err := model.UpdateTransaction(transactionsDBConn, id, model.UpdateTransactionParams{
 		Description: &description,
 		CategoryID:  categoryID,
 	})
@@ -295,6 +292,16 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 			Message: "error updating transaction: " + err.Error(),
 		}
 	}
+
+	cookie := &http.Cookie{
+		Name:     "response",
+		Value:    "success",
+		Path:     "/",
+		HttpOnly: true,
+		Expires:  time.Now().Add(1 * time.Second),
+	}
+
+	http.SetCookie(w, cookie)
 
 	http.Redirect(w, r, r.URL.Path, http.StatusSeeOther)
 	return nil
