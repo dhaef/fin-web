@@ -9,14 +9,13 @@ import (
 
 type Category struct {
 	ID       int
-	Category string
 	Priority int
 	Label    string
 }
 
 func GetCategories(conn *sql.DB) ([]Category, error) {
 	rows, err := conn.Query(
-		"SELECT id, category, priority, label FROM categories",
+		"SELECT id, priority, label FROM categories",
 	)
 	if err != nil {
 		return []Category{}, err
@@ -28,7 +27,6 @@ func GetCategories(conn *sql.DB) ([]Category, error) {
 		category := Category{}
 		if err := rows.Scan(
 			&category.ID,
-			&category.Category,
 			&category.Priority,
 			&category.Label,
 		); err != nil {
@@ -46,7 +44,7 @@ func SearchCategories(conn *sql.DB, queries []string) ([]Category, error) {
 		return []Category{}, errors.New("at least one query is required")
 	}
 
-	queryStr := "SELECT DISTINCT c.id, c.category, c.priority, c.label FROM categories AS c JOIN category_values AS cv ON c.id = cv.category_id WHERE"
+	queryStr := "SELECT DISTINCT c.id, c.priority, c.label FROM categories AS c JOIN category_values AS cv ON c.id = cv.category_id WHERE"
 	args := []any{}
 	filter := "? LIKE '%' || cv.value || '%'"
 	filters := []string{}
@@ -72,7 +70,6 @@ func SearchCategories(conn *sql.DB, queries []string) ([]Category, error) {
 		category := Category{}
 		if err := rows.Scan(
 			&category.ID,
-			&category.Category,
 			&category.Priority,
 			&category.Label,
 		); err != nil {
@@ -86,7 +83,7 @@ func SearchCategories(conn *sql.DB, queries []string) ([]Category, error) {
 }
 
 func CreateCategory(conn *sql.DB, name string, priority int) (int, error) {
-	queryStr := "INSERT INTO categories (category, priority) VALUES(?, ?) RETURNING id"
+	queryStr := "INSERT INTO categories (label, priority) VALUES(?, ?) RETURNING id"
 	args := []any{
 		name,
 		priority,
