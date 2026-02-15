@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -260,6 +261,19 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 	description := r.FormValue("description")
 	category := r.FormValue("category")
 
+	var categoryID *int
+	if category != "" {
+		c, err := strconv.Atoi(category)
+		if err != nil {
+			return APIError{
+				Status:  http.StatusBadRequest,
+				Message: "category must be an int",
+			}
+		}
+
+		categoryID = &c
+	}
+
 	_, err := model.GetTransaction(
 		transactionsDBConn,
 		id,
@@ -273,7 +287,7 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 
 	err = model.UpdateTransaction(transactionsDBConn, id, model.UpdateTransactionParams{
 		Description: &description,
-		Category:    &category,
+		CategoryID:  categoryID,
 	})
 	if err != nil {
 		return APIError{

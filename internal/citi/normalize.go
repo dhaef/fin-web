@@ -76,7 +76,7 @@ func (w *Worker) Normalize() error {
 				amount = -a
 			}
 
-			var cc sql.NullString
+			var cc sql.NullInt32
 			normalizedName := strings.ToLower(r[1])
 			normalizedCategory := strings.ToLower(r[4])
 
@@ -91,9 +91,9 @@ func (w *Worker) Normalize() error {
 			if len(categories) == 0 {
 				fmt.Printf("did not find any categories for: %s", normalizedName)
 			} else {
-				cc = sql.NullString{
-					Valid:  true,
-					String: categories[0].Category,
+				cc = sql.NullInt32{
+					Valid: true,
+					Int32: int32(categories[0].ID),
 				}
 			}
 
@@ -103,14 +103,14 @@ func (w *Worker) Normalize() error {
 			}
 
 			transactions = append(transactions, model.Transaction{
-				ID:             ID,
-				Name:           r[1],
-				Source:         "citi",
-				Account:        "citi",
-				Date:           t.Format("2006-01-02"),
-				Amount:         amount,
-				CustomCategory: cc,
-				Category:       r[4],
+				ID:         ID,
+				Name:       r[1],
+				Source:     "citi",
+				Account:    "citi",
+				Date:       t.Format("2006-01-02"),
+				Amount:     amount,
+				CategoryID: cc,
+				Category:   r[4],
 			},
 			)
 		}

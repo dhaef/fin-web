@@ -16,6 +16,7 @@ type Transaction struct {
 	CustomCategory sql.NullString
 	Category       string
 	Source         string
+	CategoryID     sql.NullInt32
 }
 
 type QueryTransactionsFilters struct {
@@ -49,9 +50,9 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 			args = append(args, val)
 
 			if idx == len(filters.Categories)-1 {
-				cStr += " customCategory = ?)"
+				cStr += " c.category = ?)"
 			} else {
-				cStr += " customCategory = ? OR"
+				cStr += " c.category = ? OR"
 			}
 		}
 		filterStrings = append(filterStrings, cStr)
@@ -68,15 +69,15 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 	if len(filters.CategoriesToExclude) > 0 && filters.CategoriesToExclude[0] != "" {
 		for _, val := range filters.CategoriesToExclude {
 			args = append(args, val)
-			filterStrings = append(filterStrings, "customCategory != ?")
+			filterStrings = append(filterStrings, "c.category != ?")
 		}
 	}
 
 	if filters.EmptyCustomCategory != nil {
 		if !*filters.EmptyCustomCategory {
-			filterStrings = append(filterStrings, "customCategory IS NOT NULL")
+			filterStrings = append(filterStrings, "c.category IS NOT NULL")
 		} else {
-			filterStrings = append(filterStrings, "customCategory IS NULL")
+			filterStrings = append(filterStrings, "c.category IS NULL")
 		}
 	}
 
@@ -96,7 +97,7 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 }
 
 func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transaction, error) {
-	queryStr := "SELECT * FROM transactions"
+	queryStr := "select t.id, name, amount, date, account, source, description, c.id, c.category as category from transactions as t left join categories as c on category_id = c.id"
 	args := []any{}
 
 	queryStr, args = buildWhere(queryStr, args, filters)
@@ -122,15 +123,15 @@ func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transa
 	for rows.Next() {
 		transaction := Transaction{}
 		if err := rows.Scan(
+			&transaction.ID,
 			&transaction.Name,
 			&transaction.Amount,
 			&transaction.Date,
-			&transaction.Source,
 			&transaction.Account,
-			&transaction.Category,
-			&transaction.ID,
-			&transaction.CustomCategory,
+			&transaction.Source,
 			&transaction.Description,
+			&transaction.CategoryID,
+			&transaction.CustomCategory,
 		); err != nil {
 			return []Transaction{}, err
 		}
@@ -142,12 +143,12 @@ func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transa
 }
 
 func CategoryCounts(conn *sql.DB, filters QueryTransactionsFilters) ([]GroupByCounts, error) {
-	queryStr := "SELECT customCategory, SUM(amount) FROM transactions"
+	queryStr := "SELECT c.id, c.category as category, SUM(t.amount) FROM transactions as t left join categories as c on t.category_id = c.id"
 	args := []any{}
 
 	queryStr, args = buildWhere(queryStr, args, filters)
 
-	queryStr += " GROUP BY customCategory"
+	queryStr += " GROUP BY c.id"
 
 	rows, err := conn.Query(
 		queryStr,
@@ -162,6 +163,7 @@ func CategoryCounts(conn *sql.DB, filters QueryTransactionsFilters) ([]GroupByCo
 	for rows.Next() {
 		count := GroupByCounts{}
 		if err := rows.Scan(
+			&count.ID,
 			&count.Key,
 			&count.Value,
 		); err != nil {
@@ -175,7 +177,7 @@ func CategoryCounts(conn *sql.DB, filters QueryTransactionsFilters) ([]GroupByCo
 }
 
 func CountsByDate(conn *sql.DB, filters QueryTransactionsFilters, dateStr string) ([]GroupByCounts, error) {
-	queryStr := "SELECT strftime(\"" + dateStr + "\", date), SUM(amount) FROM transactions"
+	queryStr := "SELECT strftime(\"" + dateStr + "\", date), SUM(amount) FROM transactions as t left join categories as c on t.category_id = c.id"
 	args := []any{}
 
 	queryStr, args = buildWhere(queryStr, args, filters)
@@ -208,21 +210,22 @@ func CountsByDate(conn *sql.DB, filters QueryTransactionsFilters, dateStr string
 }
 
 func GetTransaction(conn *sql.DB, ID string) (Transaction, error) {
-	queryStr := "SELECT * FROM transactions WHERE id = ?"
+	queryStr := "select t.id, name, amount, date, account, source, description, c.id, c.category as category from transactions as t left join categories as c on category_id = c.id where t.id = ?"
 
 	transaction := Transaction{}
 	err := conn.QueryRow(
 		queryStr,
 		ID,
-	).Scan(&transaction.Name,
+	).Scan(
+		&transaction.ID,
+		&transaction.Name,
 		&transaction.Amount,
 		&transaction.Date,
-		&transaction.Source,
 		&transaction.Account,
-		&transaction.Category,
-		&transaction.ID,
-		&transaction.CustomCategory,
+		&transaction.Source,
 		&transaction.Description,
+		&transaction.CategoryID,
+		&transaction.CustomCategory,
 	)
 	if err != nil {
 		return Transaction{}, err
@@ -232,7 +235,7 @@ func GetTransaction(conn *sql.DB, ID string) (Transaction, error) {
 }
 
 type UpdateTransactionParams struct {
-	Category    *string
+	CategoryID  *int
 	Description *string
 }
 
@@ -241,9 +244,9 @@ func UpdateTransaction(conn *sql.DB, ID string, params UpdateTransactionParams) 
 	updates := []string{}
 	args := []any{}
 
-	if params.Category != nil {
-		updates = append(updates, " customCategory = ?")
-		args = append(args, *params.Category)
+	if params.CategoryID != nil {
+		updates = append(updates, " category_id = ?")
+		args = append(args, *params.CategoryID)
 	}
 
 	if params.Description != nil {
@@ -271,19 +274,19 @@ func UpdateTransaction(conn *sql.DB, ID string, params UpdateTransactionParams) 
 }
 
 func CreateTransaction(conn *sql.DB, transaction Transaction) error {
-	queryStr := "INSERT INTO transactions VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	queryStr := "INSERT INTO transactions(id, name, amount, date, source, account, category, category_id, description) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	args := []any{
+		transaction.ID,
 		transaction.Name,
 		transaction.Amount,
 		transaction.Date,
 		transaction.Source,
 		transaction.Account,
 		transaction.Category,
-		transaction.ID,
 	}
 
-	if transaction.CustomCategory.Valid {
-		args = append(args, transaction.CustomCategory.String)
+	if transaction.CategoryID.Valid {
+		args = append(args, transaction.CategoryID.Int32)
 	} else {
 		args = append(args, nil)
 	}
