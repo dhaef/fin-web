@@ -11,9 +11,9 @@ import (
 	"fin-web/internal/model"
 )
 
-var ExcludedIncomeCategories = []string{"debit"}
+var ExcludedIncomeCategories = []string{"34"}
 
-var ExpenseCategoriesToExclude = []string{"debit"}
+var ExpenseCategoriesToExclude = []string{"34"}
 
 func transactions(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {

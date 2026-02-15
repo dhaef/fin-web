@@ -50,9 +50,9 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 			args = append(args, val)
 
 			if idx == len(filters.Categories)-1 {
-				cStr += " c.category = ?)"
+				cStr += " c.id = ?)"
 			} else {
-				cStr += " c.category = ? OR"
+				cStr += " c.id = ? OR"
 			}
 		}
 		filterStrings = append(filterStrings, cStr)
@@ -69,15 +69,15 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 	if len(filters.CategoriesToExclude) > 0 && filters.CategoriesToExclude[0] != "" {
 		for _, val := range filters.CategoriesToExclude {
 			args = append(args, val)
-			filterStrings = append(filterStrings, "c.category != ?")
+			filterStrings = append(filterStrings, "c.id != ?")
 		}
 	}
 
 	if filters.EmptyCustomCategory != nil {
 		if !*filters.EmptyCustomCategory {
-			filterStrings = append(filterStrings, "c.category IS NOT NULL")
+			filterStrings = append(filterStrings, "c.id IS NOT NULL")
 		} else {
-			filterStrings = append(filterStrings, "c.category IS NULL")
+			filterStrings = append(filterStrings, "c.id IS NULL")
 		}
 	}
 

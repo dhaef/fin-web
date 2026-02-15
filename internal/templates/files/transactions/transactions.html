@@ -32,32 +32,9 @@
   <div class="filter-group">
     <label for="categories">Categories</label>
     <select name="categories" id="categories" multiple size="1" class="multi-select">
-      <option value="work" {{ if .Data.selectedCategories.work }}selected{{end}}>Work</option>
-      <option value="grocery" {{ if .Data.selectedCategories.grocery }}selected{{end}}>Grocery</option>
-      <option value="foodOut" {{ if .Data.selectedCategories.foodOut }}selected{{end}}>Food Out</option>
-      <option value="flights" {{ if .Data.selectedCategories.flights }}selected{{end}}>Flights</option>
-      <option value="utilities" {{ if .Data.selectedCategories.utilities }}selected{{end}}>Utilities</option>
-      <option value="rent" {{ if .Data.selectedCategories.rent }}selected{{end}}>Rent</option>
-      <option value="venmo" {{ if .Data.selectedCategories.venmo }}selected{{end}}>Venmo</option>
-      <option value="gas" {{ if .Data.selectedCategories.gas }}selected{{end}}>Gas</option>
-      <option value="car" {{ if .Data.selectedCategories.car }}selected{{end}}>Car</option>
-      <option value="rentals" {{ if .Data.selectedCategories.rentals }}selected{{end}}>Rentals</option>
-      <option value="transportation" {{ if .Data.selectedCategories.transportation }}selected{{end}}>Transportation</option>
-      <option value="healthCare" {{ if .Data.selectedCategories.healthCare }}selected{{end}}>HealthCare</option>
-      <option value="tech" {{ if .Data.selectedCategories.tech }}selected{{end}}>Tech</option>
-      <option value="entertainment" {{ if .Data.selectedCategories.entertainment }}selected{{end}}>Entertainment</option>
-      <option value="interest" {{ if .Data.selectedCategories.interest }}selected{{end}}>Interest</option>
-      <option value="entertainment" {{ if .Data.selectedCategories.entertainment }}selected{{end}}>Entertainment</option>
-      <option value="hotels" {{ if .Data.selectedCategories.hotels }}selected{{end}}>Hotels</option>
-      <option value="gym" {{ if .Data.selectedCategories.gym }}selected{{end}}>Gym</option>
-      <option value="insurance" {{ if .Data.selectedCategories.insurance }}selected{{end}}>Insurance</option>
-      <option value="taxes" {{ if .Data.selectedCategories.taxes }}selected{{end}}>Taxes</option>
-      <option value="government" {{ if .Data.selectedCategories.government }}selected{{end}}>Government</option>
-      <option value="wedding" {{ if .Data.selectedCategories.wedding }}selected{{end}}>Wedding</option>
-      <option value="mexico" {{ if .Data.selectedCategories.mexico }}selected{{end}}>Mexico</option>
-      <option value="merchandise" {{ if .Data.selectedCategories.merchandise }}selected{{end}}>Merchandise</option>
-      <option value="miscellaneousIncome" {{ if .Data.selectedCategories.miscellaneousIncome }}selected{{end}}>Miscellaneous Income</option>
-      <option value="donations" {{ if .Data.selectedCategories.donations }}selected{{end}}>Donations</option>
+      {{ range .Data.categories}}
+      <option value="{{.ID}}" {{ if index $.Data.selectedCategories (printf "%v" .ID) }}selected{{end}}>{{.Category}}</option>
+      {{end}}
     </select>
   </div>
 
