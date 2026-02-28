@@ -89,7 +89,7 @@ func (w *Worker) Normalize() error {
 			}
 
 			if len(categories) == 0 {
-				fmt.Printf("did not find any categories for: %s", normalizedName)
+				fmt.Printf("did not find any categories for: %s\n", normalizedName)
 			} else {
 				cc = sql.NullInt32{
 					Valid: true,
