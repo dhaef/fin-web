@@ -36,7 +36,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if endDate == "" {
-		transactions, err := model.QueryTransactions(transactionsDBConn, model.QueryTransactionsFilters{
+		transactions, err := model.QueryTransactions(dbConn, model.QueryTransactionsFilters{
 			OrderBy:        "date",
 			OrderDirection: "DESC",
 			Limit:          1,
@@ -59,7 +59,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		endDate = endOfThisMonth.Format("2006-01-02")
 	}
 
-	transactions, err := model.QueryTransactions(transactionsDBConn, model.QueryTransactionsFilters{
+	transactions, err := model.QueryTransactions(dbConn, model.QueryTransactionsFilters{
 		OrderBy:             orderBy,
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
@@ -84,7 +84,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	expensesCategoryCounts, err := model.CategoryCounts(transactionsDBConn, model.QueryTransactionsFilters{
+	expensesCategoryCounts, err := model.CategoryCounts(dbConn, model.QueryTransactionsFilters{
 		OrderBy:             orderBy,
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
@@ -100,7 +100,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	incomeCategoryCounts, err := model.CategoryCounts(transactionsDBConn, model.QueryTransactionsFilters{
+	incomeCategoryCounts, err := model.CategoryCounts(dbConn, model.QueryTransactionsFilters{
 		OrderBy:             orderBy,
 		OrderDirection:      orderDirection,
 		StartDate:           startDate,
@@ -122,7 +122,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 
 	startOfMonthOneYearAgo, _ := getStartAndEndOfMonth(date.AddDate(0, -11, 0))
 
-	expenseCountsByMonth, err := model.CountsByDate(transactionsDBConn, model.QueryTransactionsFilters{
+	expenseCountsByMonth, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
 		Categories:          categories,
@@ -136,7 +136,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	incomeCountsByMonth, err := model.CountsByDate(transactionsDBConn, model.QueryTransactionsFilters{
+	incomeCountsByMonth, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
 		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:             endDate,
 		Type:                "income",
@@ -157,7 +157,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		selectedCatMap[val] = true
 	}
 
-	cs, err := model.GetCategories(transactionsDBConn)
+	cs, err := model.GetCategories(dbConn)
 	if err != nil {
 		fmt.Println("faile to get categories from DB: ", err.Error())
 	}
@@ -194,7 +194,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 func uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
 	emptyCustomCategory := true
 	transactions, err := model.QueryTransactions(
-		transactionsDBConn,
+		dbConn,
 		model.QueryTransactionsFilters{
 			EmptyCustomCategory: &emptyCustomCategory,
 		},
@@ -224,7 +224,7 @@ func uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
 func transaction(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 	transaction, err := model.GetTransaction(
-		transactionsDBConn,
+		dbConn,
 		id,
 	)
 	if err != nil {
@@ -234,7 +234,7 @@ func transaction(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	cs, err := model.GetCategories(transactionsDBConn)
+	cs, err := model.GetCategories(dbConn)
 	if err != nil {
 		fmt.Println("faile to get categories from DB: ", err.Error())
 	}
@@ -282,7 +282,7 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 		categoryID = &c
 	}
 
-	err := model.UpdateTransaction(transactionsDBConn, id, model.UpdateTransactionParams{
+	err := model.UpdateTransaction(dbConn, id, model.UpdateTransactionParams{
 		Description: &description,
 		CategoryID:  categoryID,
 	})

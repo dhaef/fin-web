@@ -8,7 +8,7 @@ import (
 )
 
 func annual(w http.ResponseWriter, r *http.Request) error {
-	incomeCountsByYear, err := model.CountsByDate(transactionsDBConn, model.QueryTransactionsFilters{
+	incomeCountsByYear, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
 		Type:                "income",
 		CategoriesToExclude: ExcludedIncomeCategories,
 	}, "%Y")
@@ -19,7 +19,7 @@ func annual(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	expenseCountsByYear, err := model.CountsByDate(transactionsDBConn, model.QueryTransactionsFilters{
+	expenseCountsByYear, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
 		CategoriesToExclude: ExpenseCategoriesToExclude,
 		Type:                "expenses",
 	}, "%Y")

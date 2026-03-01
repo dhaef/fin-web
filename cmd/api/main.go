@@ -10,17 +10,12 @@ import (
 
 func main() {
 	dbPath := os.Getenv("dbPath")
-	transactionsDB, err := db.NewDbConnection(dbPath + "/transactions.db")
+	DB, err := db.NewDbConnection(dbPath + "/fin-web.db")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	netWorthDB, err := db.NewDbConnection(dbPath + "/net_worth.db")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	api := controller.NewController(transactionsDB, netWorthDB)
+	api := controller.NewController(DB)
 
 	err = api.Server.ListenAndServe()
 	if err != nil {

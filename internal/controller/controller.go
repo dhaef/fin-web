@@ -12,18 +12,14 @@ import (
 	"fin-web/internal/templates"
 )
 
-var (
-	transactionsDBConn *sql.DB
-	netWorthDBConn     *sql.DB
-)
+var dbConn *sql.DB
 
 type Controller struct {
 	Server http.Server
 }
 
-func NewController(transactionsConn *sql.DB, netWorthConn *sql.DB) Controller {
-	transactionsDBConn = transactionsConn
-	netWorthDBConn = netWorthConn
+func NewController(conn *sql.DB) Controller {
+	dbConn = conn
 	return Controller{
 		Server: http.Server{
 			Addr:    ":3000",

@@ -9,7 +9,7 @@ import (
 )
 
 func netWorth(w http.ResponseWriter, r *http.Request) error {
-	netWorthItems, err := model.QueryNetWorthItems(netWorthDBConn, model.QueryNetWorthItemsFilters{
+	netWorthItems, err := model.QueryNetWorthItems(dbConn, model.QueryNetWorthItemsFilters{
 		OrderBy:        "date",
 		OrderDirection: "DESC",
 	})
@@ -54,7 +54,7 @@ func netWorth(w http.ResponseWriter, r *http.Request) error {
 func netWorthItem(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	netWorthItem, err := model.GetNetWorthItem(netWorthDBConn, id)
+	netWorthItem, err := model.GetNetWorthItem(dbConn, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -193,7 +193,7 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	_, err := model.GetNetWorthItem(
-		netWorthDBConn,
+		dbConn,
 		id,
 	)
 	if err != nil {
@@ -203,7 +203,7 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = model.UpdateNetWorthItem(netWorthDBConn, id, params)
+	err = model.UpdateNetWorthItem(dbConn, id, params)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -247,7 +247,7 @@ func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	_, err := model.CreateNetWorthItem(netWorthDBConn, params)
+	_, err := model.CreateNetWorthItem(dbConn, params)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
