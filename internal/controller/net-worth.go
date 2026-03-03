@@ -255,6 +255,21 @@ func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	http.Redirect(w, r, "/net-worth/", http.StatusSeeOther)
+	http.Redirect(w, r, "/net-worth", http.StatusSeeOther)
+	return nil
+}
+
+func deleteNetWorthItem(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+
+	err := model.DeleteNetWorthItem(dbConn, id)
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error deleting net worth item: " + err.Error(),
+		}
+	}
+
+	http.Redirect(w, r, "/net-worth", http.StatusSeeOther)
 	return nil
 }

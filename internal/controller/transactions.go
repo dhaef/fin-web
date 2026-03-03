@@ -306,3 +306,18 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 	http.Redirect(w, r, r.URL.Path, http.StatusSeeOther)
 	return nil
 }
+
+func deleteTransaction(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+
+	err := model.DeleteTransaction(dbConn, id)
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error deleting transaction: " + err.Error(),
+		}
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+	return nil
+}

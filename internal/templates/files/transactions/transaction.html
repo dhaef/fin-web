@@ -61,4 +61,9 @@
     <input type="submit" />
   </form>
 </div>
+
+
+<form method="POST" action="/transactions/{{.Data.transaction.ID}}/delete">
+  <input type="submit" value="Delete" />
+</form>
 {{end}}

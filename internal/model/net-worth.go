@@ -248,3 +248,17 @@ func CreateNetWorthItem(conn *sql.DB, params NetWorthItemParams) (string, error)
 
 	return ID, nil
 }
+
+func DeleteNetWorthItem(conn *sql.DB, ID string) error {
+	queryStr := "DELETE FROM net_worth WHERE id = ?"
+
+	_, err := conn.Exec(
+		queryStr,
+		ID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -1,4 +1,5 @@
 {{ define "form" }}
+<div class="my-1">
 <form method="POST">
   <div class="form-item">
     <label for="date">Date:</label>
@@ -101,5 +102,10 @@
 
   <input type="submit" />
   <a href="/net-worth">cancel</a>
+</form>
+</div>
+
+<form method="POST" action="/net-worth/{{.netWorthItem.ID}}/delete">
+  <input type="submit" value="Delete" />
 </form>
 {{ end }}

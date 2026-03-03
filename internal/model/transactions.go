@@ -302,3 +302,17 @@ func CreateTransaction(conn *sql.DB, transaction Transaction) error {
 
 	return nil
 }
+
+func DeleteTransaction(conn *sql.DB, ID string) error {
+	queryStr := "DELETE FROM transactions WHERE id = ?"
+
+	_, err := conn.Exec(
+		queryStr,
+		ID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
