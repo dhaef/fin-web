@@ -35,16 +35,25 @@ func buildRoutes() http.Handler {
 
 	r.HandleFunc("GET /favicon.ico", MakeHandler(favicon))
 	r.HandleFunc("GET /annual", MakeHandler(annual))
+
 	r.HandleFunc("GET /net-worth/new", MakeHandler(newNetWorthItem))
 	r.HandleFunc("POST /net-worth/new", MakeHandler(createNetWorthItem))
 	r.HandleFunc("GET /net-worth/{id}", MakeHandler(netWorthItem))
 	r.HandleFunc("POST /net-worth/{id}/delete", MakeHandler(deleteNetWorthItem))
 	r.HandleFunc("POST /net-worth/{id}", MakeHandler(updateNetWorthItem))
 	r.HandleFunc("GET /net-worth", MakeHandler(netWorth))
+
 	r.HandleFunc("GET /transactions/uncategorized", MakeHandler(uncategorizedTransactions))
 	r.HandleFunc("GET /transactions/{id}", MakeHandler(transaction))
 	r.HandleFunc("POST /transactions/{id}/delete", MakeHandler(deleteTransaction))
 	r.HandleFunc("POST /transactions/{id}", MakeHandler(updateTransaction))
+
+	r.HandleFunc("GET /categories/new", MakeHandler(newCategory))
+	r.HandleFunc("POST /categories/new", MakeHandler(createCategory))
+	r.HandleFunc("GET /categories/{id}", MakeHandler(category))
+	r.HandleFunc("POST /categories/{id}/delete", MakeHandler(deleteCategory))
+	r.HandleFunc("POST /categories/{id}", MakeHandler(updateCategory))
+	r.HandleFunc("GET /categories", MakeHandler(categories))
 
 	// this will match everything else so handle this in home handler
 	r.HandleFunc("GET /", MakeHandler(transactions))

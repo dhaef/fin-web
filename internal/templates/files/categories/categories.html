@@ -1,0 +1,13 @@
+{{ define "title" }}💰📈{{end}} {{ define "scripts" }}
+{{end}} {{define
+"body"}}
+
+<a href="/categories/new">New Category</a>
+
+<ol>
+{{ range .Data.categories}}
+  <li><a href="/categories/{{.ID}}">{{.Label}}</a></li>
+{{end}}
+</ol>
+
+{{end}}

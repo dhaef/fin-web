@@ -242,3 +242,14 @@ select {
 .btn-filter:hover {
   background-color: #334155;
 }
+
+.category-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.category {
+  background-color: grey;
+  width: 25%;
+  margin: .5rem;
+}
