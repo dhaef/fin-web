@@ -11,7 +11,12 @@ import (
 
 func main() {
 	dbPath := os.Getenv("dbPath")
-	transactionsDB, err := db.NewDbConnection(dbPath + "/transactions.db")
+
+	if dbPath == "" {
+		log.Fatal("dbPath is required")
+	}
+
+	transactionsDB, err := db.NewDbConnection(dbPath)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

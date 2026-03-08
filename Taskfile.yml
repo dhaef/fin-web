@@ -17,14 +17,14 @@ tasks:
     cmds:
       - go run ./cmd/api/main.go
     env:
-      dbPath: /Users/derekheafner/dev/go/fin-web/db
+      dbPath: /Users/derekheafner/dev/go/fin-web/db/fin-web.db
 
   normalize:
     desc: Normalize data into database
     cmds:
       - go run ./cmd/normalize/main.go
     env:
-      dbPath: /Users/derekheafner/dev/go/fin-web/db
+      dbPath: /Users/derekheafner/dev/go/fin-web/db/fin-web.db
       dirPath: /Users/derekheafner/Downloads
 
   add-cats:
@@ -32,4 +32,4 @@ tasks:
     cmds:
       - go run ./cmd/categories/main.go
     env:
-      dbPath: /Users/derekheafner/dev/go/fin-web/db
+      dbPath: /Users/derekheafner/dev/go/fin-web/db/fin-web.db

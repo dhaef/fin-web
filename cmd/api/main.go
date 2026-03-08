@@ -10,7 +10,12 @@ import (
 
 func main() {
 	dbPath := os.Getenv("dbPath")
-	DB, err := db.NewDbConnection(dbPath + "/fin-web.db")
+
+	if dbPath == "" {
+		log.Fatal("dbPath is required")
+	}
+
+	DB, err := db.NewDbConnection(dbPath)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

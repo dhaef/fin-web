@@ -14,7 +14,15 @@ func main() {
 	dbPath := os.Getenv("dbPath")
 	dirPath := os.Getenv("dirPath")
 
-	transactionsDB, err := db.NewDbConnection(dbPath + "/transactions.db")
+	if dbPath == "" {
+		log.Fatal("dbPath is required")
+	}
+
+	if dirPath == "" {
+		log.Fatal("dirPath is required")
+	}
+
+	transactionsDB, err := db.NewDbConnection(dbPath)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
