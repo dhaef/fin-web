@@ -75,7 +75,7 @@ ul {
 
 .card {
   padding: 1rem;
-  background-color: green;
+  background-color: #D3D3D3;
   border-radius: 5px;
 }
 
@@ -243,13 +243,24 @@ select {
   background-color: #334155;
 }
 
-.category-grid {
-  display: flex;
-  flex-wrap: wrap;
+.category-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 15px;
+  padding: 20px;
 }
 
-.category {
-  background-color: grey;
-  width: 25%;
-  margin: .5rem;
+.category-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }

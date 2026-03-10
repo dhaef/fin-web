@@ -4,10 +4,10 @@
 
 <a href="/categories/new">New Category</a>
 
-<ol>
+<div class="category-container">
 {{ range .Data.categories}}
-  <li><a href="/categories/{{.ID}}">{{.Label}}</a></li>
+  <div class="category-link"><a href="/categories/{{.ID}}">{{.Label}}</a></div>
 {{end}}
-</ol>
+</div>
 
 {{end}}
