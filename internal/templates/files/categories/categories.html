@@ -6,7 +6,7 @@
 
 <div class="category-container">
 {{ range .Data.categories}}
-  <div class="category-link"><a href="/categories/{{.ID}}">{{.Label}}</a></div>
+  <a href="/categories/{{.ID}}"><div class="category-link">{{.Label}}</div></a>
 {{end}}
 </div>
 
