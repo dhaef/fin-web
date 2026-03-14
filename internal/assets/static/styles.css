@@ -75,7 +75,7 @@ ul {
 
 .card {
   padding: 1rem;
-  background-color: #D3D3D3;
+  background-color: #d3d3d3;
   border-radius: 5px;
 }
 
@@ -262,5 +262,5 @@ select {
   color: #333;
   font-weight: 500;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }

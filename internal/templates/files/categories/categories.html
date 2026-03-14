@@ -1,11 +1,12 @@
-{{ define "title" }}💰📈{{end}} {{ define "scripts" }} {{end}} {{define "body"}}
+{{ define "title" }}💰📈{{ end }} {{ define "scripts" }}{{ end }}
+{{ define "body" }}
+  <a href="/categories/new">New Category</a>
 
-<a href="/categories/new">New Category</a>
-
-<div class="category-container">
-  {{ range .Data.categories}}
-  <a href="/categories/{{.ID}}"><div class="category-link">{{.Label}}</div></a>
-  {{end}}
-</div>
-
-{{end}}
+  <div class="category-container">
+    {{ range .Data.categories }}
+      <a href="/categories/{{ .ID }}"
+        ><div class="category-link">{{ .Label }}</div></a
+      >
+    {{ end }}
+  </div>
+{{ end }}

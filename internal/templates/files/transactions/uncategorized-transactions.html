@@ -1,26 +1,27 @@
-{{ define "title" }}💰📈{{end}} {{ define "scripts" }}{{end}} {{define "body"}}
-<div id="transactions-table-container">
-  <table id="transactions-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Amount</th>
-        <th>Date</th>
-        <th>ID</th>
-        <th>Account</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{ range .Data.transactions }}
-      <tr>
-        <td><a href="/transactions/{{.ID}}">{{ .Name }}</a></td>
-        <td class="currency">{{ .Amount }}</td>
-        <td>{{ .Date }}</td>
-        <td>{{ .ID }}</td>
-        <td>{{ .Account }}</td>
-      </tr>
-      {{ end }}
-    </tbody>
-  </table>
-</div>
-{{end}}
+{{ define "title" }}💰📈{{ end }} {{ define "scripts" }}{{ end }}
+{{ define "body" }}
+  <div id="transactions-table-container">
+    <table id="transactions-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>ID</th>
+          <th>Account</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range .Data.transactions }}
+          <tr>
+            <td><a href="/transactions/{{ .ID }}">{{ .Name }}</a></td>
+            <td class="currency">{{ .Amount }}</td>
+            <td>{{ .Date }}</td>
+            <td>{{ .ID }}</td>
+            <td>{{ .Account }}</td>
+          </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+{{ end }}

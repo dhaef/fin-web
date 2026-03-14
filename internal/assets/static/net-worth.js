@@ -1,3 +1,3 @@
-import { buildLineChart } from "widgets";
+import { buildLineChart } from 'widgets';
 
-buildLineChart("net-worth-line-chart");
+buildLineChart('net-worth-line-chart');

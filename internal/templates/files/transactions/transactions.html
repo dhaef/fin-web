@@ -1,132 +1,183 @@
-{{ define "title" }}💰📈{{end}} {{ define "scripts" }}
-<script type="module">
-  import "transactions";
-</script>
-{{end}} {{define
-"body"}}
+{{ define "title" }}💰📈{{ end }}
+{{ define "scripts" }}
+  <script type="module">
+    import 'transactions';
+  </script>
+{{ end }}
+{{ define
+  "body"
+}}
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="startDate">Range</label>
+      <div class="input-row">
+        <input
+          type="date"
+          id="startDate"
+          name="startDate"
+          value="{{ .Data.startDate }}"
+        />
+        <span class="separator">to</span>
+        <input
+          type="date"
+          id="endDate"
+          name="endDate"
+          value="{{ .Data.endDate }}"
+        />
+      </div>
+    </div>
 
-<div class="filter-bar">
-  <div class="filter-group">
-    <label for="startDate">Range</label>
-    <div class="input-row">
-      <input type="date" id="startDate" name="startDate" value="{{.Data.startDate}}" />
-      <span class="separator">to</span>
-      <input type="date" id="endDate" name="endDate" value="{{.Data.endDate}}" />
+    <div class="filter-group">
+      <label for="sortBy">Sort By</label>
+      <div class="input-row">
+        <select name="sortBy" id="sortBy">
+          <option
+            value="date"
+            {{ if eq .Data.orderBy "date" }}selected{{ end }}
+          >
+            Date
+          </option>
+          <option
+            value="amount"
+            {{ if eq .Data.orderBy "amount" }}selected{{ end }}
+          >
+            Amount
+          </option>
+        </select>
+        <select name="sortDirection" id="sortDirection">
+          <option
+            value="ASC"
+            {{ if eq .Data.orderDirection "ASC" }}selected{{ end }}
+          >
+            ASC
+          </option>
+          <option
+            value="DESC"
+            {{ if eq .Data.orderDirection "DESC" }}selected{{ end }}
+          >
+            DESC
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label for="categories">Categories</label>
+      <select
+        name="categories"
+        id="categories"
+        multiple
+        size="1"
+        class="multi-select"
+      >
+        {{ range .Data.categories }}
+          <option
+            value="{{ .ID }}"
+            {{ if index $.Data.selectedCategories (printf "%v" .ID) }}
+              selected
+            {{ end }}
+          >
+            {{ .Label }}
+          </option>
+        {{ end }}
+      </select>
+    </div>
+
+    <button id="filter-transactions" class="btn-filter">Update View</button>
+  </div>
+
+  <div class="my-1 flex summary">
+    <div class="card card-warning">
+      <strong>Expenses: </strong
+      ><span class="currency">{{ .Data.eTotal }}</span>
+    </div>
+    <div class="card card-growth">
+      <strong>Income: </strong><span class="currency">{{ .Data.iTotal }}</span>
+    </div>
+    <div class="card card-highlight">
+      <strong>Net: </strong><span class="currency">{{ .Data.total }}</span>
     </div>
   </div>
-
-  <div class="filter-group">
-    <label for="sortBy">Sort By</label>
-    <div class="input-row">
-      <select name="sortBy" id="sortBy">
-        <option value="date" {{ if eq .Data.orderBy "date" }}selected{{end}}>Date</option>
-        <option value="amount" {{ if eq .Data.orderBy "amount" }}selected{{end}}>Amount</option>
-      </select>
-      <select name="sortDirection" id="sortDirection">
-        <option value="ASC" {{ if eq .Data.orderDirection "ASC" }}selected{{end}}>ASC</option>
-        <option value="DESC" {{ if eq .Data.orderDirection "DESC" }}selected{{end}}>DESC</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="filter-group">
-    <label for="categories">Categories</label>
-    <select name="categories" id="categories" multiple size="1" class="multi-select">
-      {{ range .Data.categories}}
-      <option value="{{.ID}}" {{ if index $.Data.selectedCategories (printf "%v" .ID) }}selected{{end}}>{{.Label}}</option>
-      {{end}}
-    </select>
-  </div>
-
-  <button id="filter-transactions" class="btn-filter">Update View</button>
-</div>
-
-<div class="my-1 flex summary">
-  <div class="card card-warning"><strong>Expenses: </strong><span class="currency">{{.Data.eTotal}}</span></div>
-  <div class="card card-growth"><strong>Income: </strong><span class="currency">{{.Data.iTotal}}</span></div>
-  <div class="card card-highlight"><strong>Net: </strong><span class="currency">{{.Data.total}}</span></div>
-</div>
-<div id="transactions-table-container" class="my-1">
-  <table id="transactions-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Amount</th>
-        <th>Date</th>
-        <th>Category</th>
-        <th>Account</th>
-      </tr>
-    </thead>
-   <tbody>
-      {{ range .Data.transactions }}
+  <div id="transactions-table-container" class="my-1">
+    <table id="transactions-table">
+      <thead>
         <tr>
-        <td><a href="/transactions/{{.ID}}">{{ .Name }}</a></td>
-          <td class="currency">{{ .Amount }}</td>
-          <td>{{ .Date }}</td>
-          <td>{{ .CustomCategory.String }}</td>
-          <td>{{ .Account }}</td>
+          <th>Name</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Account</th>
         </tr>
+      </thead>
+      <tbody>
+        {{ range .Data.transactions }}
+          <tr>
+            <td><a href="/transactions/{{ .ID }}">{{ .Name }}</a></td>
+            <td class="currency">{{ .Amount }}</td>
+            <td>{{ .Date }}</td>
+            <td>{{ .CustomCategory.String }}</td>
+            <td>{{ .Account }}</td>
+          </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="category-donuts">
+    <div>
+      <div id="category-counts" class="hide">
+        {{ range .Data.expensesCategoryCounts }}
+          <p>{{ .ID }}:{{ .Key }}:{{ .Value }}</p>
+        {{ end }}
+      </div>
+      <h3>Expenses By Category</h3>
+      <div id="category-donut" class="widget donut-widget"></div>
+    </div>
+
+    <div>
+      <div id="category-income-counts" class="hide">
+        {{ range .Data.incomeCategoryCounts }}
+          <p>{{ .ID }}:{{ .Key }}:{{ .Value }}</p>
+        {{ end }}
+      </div>
+      <h3>Income By Category</h3>
+      <div id="category-income-donut" class="widget donut-widget"></div>
+    </div>
+  </div>
+
+  <select id="chart-select">
+    <option selected value="net-income-bar-container">Net Income</option>
+    <option value="previous-year-bar-container">Expenses</option>
+    <option value="previous-year-income-bar-container">Income</option>
+  </select>
+
+  <div id="net-income-bar-container">
+    <div id="net-income-counts" class="hide">
+      {{ range .Data.netCounts }}
+        <p>{{ .Key }}:{{ .Net }}</p>
       {{ end }}
-   </tbody>
-  </table>
-</div>
-
-<div class="category-donuts">
-  <div>
-    <div id="category-counts" class="hide">
-      {{ range .Data.expensesCategoryCounts }}
-      <p>{{.ID}}:{{.Key}}:{{.Value}}</p>
-      {{end}}
     </div>
-    <h3>Expenses By Category</h3>
-    <div id="category-donut" class="widget donut-widget"></div>
+    <h3>Monthly Net Income</h3>
+    <div id="net-income-bar" class="widget"></div>
   </div>
-  
-  <div>
-    <div id="category-income-counts" class="hide">
-      {{ range .Data.incomeCategoryCounts }}
-      <p>{{.ID}}:{{.Key}}:{{.Value}}</p>
-      {{end}}
+
+  <div id="previous-year-bar-container" class="hide">
+    <div id="previous-year-counts" class="hide">
+      {{ range .Data.expenseCountsByMonth }}
+        <p>{{ .Key }}:{{ .Value }}</p>
+      {{ end }}
     </div>
-    <h3>Income By Category</h3>
-    <div id="category-income-donut" class="widget donut-widget"></div>
+    <h3>Monthly Expenses</h3>
+    <div id="previous-year-bar" class="widget"></div>
   </div>
-</div>
 
-<select id="chart-select">
-  <option selected value="net-income-bar-container">Net Income</option>
-  <option value="previous-year-bar-container">Expenses</option>
-  <option value="previous-year-income-bar-container">Income</option>
-</select>
-
-<div id="net-income-bar-container">
-  <div id="net-income-counts" class="hide">
-    {{ range .Data.netCounts }}
-      <p>{{.Key}}:{{.Net}}</p>
-    {{end}}
+  <div id="previous-year-income-bar-container" class="hide">
+    <div id="previous-year-income-counts" class="hide">
+      {{ range .Data.incomeCountsByMonth }}
+        <p>{{ .Key }}:{{ .Value }}</p>
+      {{ end }}
+    </div>
+    <h3>Monthly Income</h3>
+    <div id="previous-year-income-bar" class="widget"></div>
   </div>
-  <h3>Monthly Net Income</h3>
-  <div id="net-income-bar" class="widget"></div>
-</div>
-
-<div id="previous-year-bar-container" class="hide">
-  <div id="previous-year-counts" class="hide">
-    {{ range .Data.expenseCountsByMonth }}
-      <p>{{.Key}}:{{.Value}}</p>
-    {{end}}
-  </div>
-  <h3>Monthly Expenses</h3>
-  <div id="previous-year-bar" class="widget"></div>
-</div>
-
-<div id="previous-year-income-bar-container" class="hide">
-  <div id="previous-year-income-counts" class="hide">
-    {{ range .Data.incomeCountsByMonth }}
-      <p>{{.Key}}:{{.Value}}</p>
-    {{end}}
-  </div>
-  <h3>Monthly Income</h3>
-  <div id="previous-year-income-bar" class="widget"></div>
-</div>
-
-{{end}}
+{{ end }}

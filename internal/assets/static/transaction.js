@@ -1,4 +1,4 @@
-const successElements = document.querySelectorAll(".form-success");
+const successElements = document.querySelectorAll('.form-success');
 
 successElements.forEach((el) => {
   setTimeout(() => {
