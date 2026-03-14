@@ -2,6 +2,7 @@ package controller
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -9,17 +10,22 @@ import (
 	"time"
 
 	"fin-web/internal/assets"
+	"fin-web/internal/model"
 	"fin-web/internal/templates"
 )
 
-var dbConn *sql.DB
+var (
+	dbConn      *sql.DB
+	tiingoToken string
+)
 
 type Controller struct {
 	Server http.Server
 }
 
-func NewController(conn *sql.DB) Controller {
+func NewController(conn *sql.DB, tt string) Controller {
 	dbConn = conn
+	tiingoToken = tt
 	return Controller{
 		Server: http.Server{
 			Addr:    ":3000",
@@ -55,10 +61,24 @@ func buildRoutes() http.Handler {
 	r.HandleFunc("POST /categories/{id}", MakeHandler(updateCategory))
 	r.HandleFunc("GET /categories", MakeHandler(categories))
 
+	r.HandleFunc("GET /trades", MakeHandler(trades))
+
 	// this will match everything else so handle this in home handler
 	r.HandleFunc("GET /", MakeHandler(transactions))
 
 	return r
+}
+
+func getCache(w http.ResponseWriter, r *http.Request) error {
+	item, err := model.GetKVItem(dbConn, "test")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	fmt.Println(item)
+	w.WriteHeader(http.StatusOK)
+
+	return nil
 }
 
 func favicon(w http.ResponseWriter, r *http.Request) error {

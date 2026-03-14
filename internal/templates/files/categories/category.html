@@ -1,52 +1,64 @@
-{{ define "title" }}💰📈{{end}} {{ define "scripts" }}
-<script type="module">
-  import "category";
-</script>
-{{end}} {{define "body"}}
-<div class="my-1">
-<form id="category-form">
-  <div class="form-item">
-    <label for="label">Label:</label>
-    <input name="label" value="{{.Data.category.Label}}" type="text" />
-    <p class="form-error label-err"></p>
-  </div>
-
-  <div class="form-item">
-    <label for="priority">Priority:</label>
-    <input
-      name="priority"
-      value="{{.Data.category.Priority}}"
-      type="number"
-      step="1"
-    />
-    <p class="form-error priority-err"></p>
-  </div>
-
-
-  <div class="form-item">
-    <label>Values:</label>
-    <div id="values" class="form-item">
-      {{ range .Data.category.Values }}
-        <div>
-          <input type="text" class="value" id="{{.ID.Int64}}" value="{{.Value.String}}" />
-          <button class="rm-value-btn">🗑️</button>
-        </div>
-      {{end}}
-    </div> 
-    <p class="form-error values-err"></p>
-    <button id="add-value">Add</button>
-  </div>
-
-  <input type="submit" value="{{ if ne .Data.type "create" }}Save{{else}}Create{{end}}" />
-  <a href="/categories">cancel</a>
-</form>
-
-{{ if ne .Data.type "create" }}
-<form method="POST" action="/categories/{{.Data.category.ID}}/delete">
-  <input type="submit" value="Delete" />
-</form>
+{{ define "title" }}💰📈{{ end }}
+{{ define "scripts" }}
+  <script type="module">
+    import 'category'
+  </script>
 {{ end }}
+{{ define "body" }}
+  <div class="my-1">
+    <form id="category-form">
+      <div class="form-item">
+        <label for="label">Label:</label>
+        <input name="label" value="{{ .Data.category.Label }}" type="text" />
+        <p class="form-error label-err"></p>
+      </div>
 
-</div>
+      <div class="form-item">
+        <label for="priority">Priority:</label>
+        <input
+          name="priority"
+          value="{{ .Data.category.Priority }}"
+          type="number"
+          step="1"
+        />
+        <p class="form-error priority-err"></p>
+      </div>
 
+      <div class="form-item">
+        <label>Values:</label>
+        <div id="values" class="form-item">
+          {{ range .Data.category.Values }}
+            <div>
+              <input
+                type="text"
+                class="value"
+                id="{{ .ID.Int64 }}"
+                value="{{ .Value.String }}"
+              />
+              <button class="rm-value-btn">🗑️</button>
+            </div>
+          {{ end }}
+        </div>
+        <p class="form-error values-err"></p>
+        <button id="add-value">Add</button>
+      </div>
+
+      <input
+        type="submit"
+        value="{{ if ne .Data.type "create" }}
+          Save
+        {{ else }}
+          Create
+        {{ end }}"
+      />
+      <a href="/categories">cancel</a>
+    </form>
+
+    {{ if ne .Data.type "create" }}
+      <form method="POST" action="/categories/{{ .Data.category.ID }}/delete">
+        <input type="submit" value="Delete" />
+      </form>
+    {{ end }}
+
+  </div>
 {{ end }}

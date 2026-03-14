@@ -1,69 +1,76 @@
-{{ define "title" }}💰📈{{end}} {{ define "scripts" }}
-<script type="module">
-  import "transaction";
-</script>
-{{end}} {{define "body"}}
-<div class="my-1">
-  <form method="POST">
-    {{ if .Data.success }}
-    <div class="form-success">
-      <p>Transaction successfully updated!</p>
-    </div>
-    {{ end }}
+{{ define "title" }}💰📈{{ end }}
+{{ define "scripts" }}
+  <script type="module">
+    import 'transaction'
+  </script>
+{{ end }}
+{{ define "body" }}
+  <div class="my-1">
+    <form method="POST">
+      {{ if .Data.success }}
+        <div class="form-success">
+          <p>Transaction successfully updated!</p>
+        </div>
+      {{ end }}
 
-    <div class="form-item">
-      <label for="name">Name:</label>
-      <input name="name" disabled value="{{.Data.transaction.Name}}" />
-    </div>
 
-    <div class="form-item">
-      <label for="amount">Amount:</label>
-      <input name="amount" disabled value="{{.Data.transaction.Amount}}" />
-    </div>
+      <div class="form-item">
+        <label for="name">Name:</label>
+        <input name="name" disabled value="{{ .Data.transaction.Name }}" />
+      </div>
 
-    <div class="form-item">
-      <label for="account">Account:</label>
-      <input name="account" disabled value="{{.Data.transaction.Account}}" />
-    </div>
+      <div class="form-item">
+        <label for="amount">Amount:</label>
+        <input name="amount" disabled value="{{ .Data.transaction.Amount }}" />
+      </div>
 
-    <div class="form-item">
-      <label for="date">Date:</label>
-      <input name="date" disabled value="{{.Data.transaction.Date}}" />
-    </div>
+      <div class="form-item">
+        <label for="account">Account:</label>
+        <input
+          name="account"
+          disabled
+          value="{{ .Data.transaction.Account }}"
+        />
+      </div>
 
-    <div class="form-item">
-      <label for="category">Category:</label>
-      <select name="category">
-        {{ range .Data.categories }}
-        <option
-          value="{{.ID}}"
-          {{
-          if
-          eq
-          .ID
-          $.Data.transaction.CategoryID.Int32
-          }}selected{{end}}
-        >
-          {{ .Label }}
-        </option>
-        {{ end }}
-      </select>
-    </div>
+      <div class="form-item">
+        <label for="date">Date:</label>
+        <input name="date" disabled value="{{ .Data.transaction.Date }}" />
+      </div>
 
-    <div class="form-item">
-      <label for="description">Description:</label>
-      <input
-        name="description"
-        value="{{.Data.transaction.Description.Value}}"
-      />
-    </div>
+      <div class="form-item">
+        <label for="category">Category:</label>
+        <select name="category">
+          {{ range .Data.categories }}
+            <option
+              value="{{ .ID }}"
+              {{ if
+                eq
+                .ID
+                $.Data.transaction.CategoryID.Int32
+              }}
+                selected
+              {{ end }}
+            >
+              {{ .Label }}
+            </option>
+          {{ end }}
+        </select>
+      </div>
 
-    <input type="submit" />
+      <div class="form-item">
+        <label for="description">Description:</label>
+        <input
+          name="description"
+          value="{{ .Data.transaction.Description.Value }}"
+        />
+      </div>
+
+      <input type="submit" />
+    </form>
+  </div>
+
+  <form method="POST" action="/transactions/{{ .Data.transaction.ID }}/delete">
+    <input type="submit" value="Delete" />
   </form>
-</div>
-
-
-<form method="POST" action="/transactions/{{.Data.transaction.ID}}/delete">
-  <input type="submit" value="Delete" />
-</form>
-{{end}}
+{{ end }}

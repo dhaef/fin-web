@@ -1,0 +1,50 @@
+{{ define "title" }}💰📈{{ end }}
+{{ define "scripts" }}
+  <script type="module">
+    import 'trades'
+  </script>
+{{ end }}
+{{ define "body" }}
+  <div>
+    <div id="trades-counts" class="hide">
+      {{ range .Data.prices }}
+        <p>{{ .Ticker }}:{{ .Ticker }}:{{ .Value }}</p>
+      {{ end }}
+    </div>
+    <h3>Stocks</h3>
+    <div
+      id="trades-donut"
+      class="widget donut-widget"
+      style="margin: auto"
+    ></div>
+  </div>
+
+  <div id="transactions-table-container" class="my-1">
+    <table id="transactions-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Purchase Date</th>
+          <th>Price</th>
+          <th>Shares</th>
+          <th>Total</th>
+          <th>Type</th>
+          <th>Account</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range .Data.trades }}
+          <tr>
+            <td>{{ .Name.String }}</td>
+            <td>{{ .PurchaseDate }}</td>
+            <td class="currency">{{ .Price }}</td>
+            <td>{{ .Shares }}</td>
+            <td class="currency">{{ .Total }}</td>
+            <td>{{ .Type }}</td>
+            <td>{{ .Account }}</td>
+          </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+{{ end }}

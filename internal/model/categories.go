@@ -23,7 +23,6 @@ type CategoryValue struct {
 func GetCategories(conn *sql.DB) ([]Category, error) {
 	rows, err := conn.Query(
 		"SELECT c.id, c.label, c.priority FROM categories as c ORDER BY priority",
-		// "SELECT c.id, c.label, c.priority, cv.id as category_value_id, cv.value, cv.category_id FROM categories as c LEFT JOIN category_values as cv on c.id = cv.category_id ORDER BY priority",
 	)
 	if err != nil {
 		return []Category{}, err
@@ -31,39 +30,20 @@ func GetCategories(conn *sql.DB) ([]Category, error) {
 	defer rows.Close()
 
 	categories := []Category{}
-	// categoryValues := map[int][]CategoryValue{}
 
 	for rows.Next() {
 		category := Category{}
-		// categoryValue := CategoryValue{}
 		if err := rows.Scan(
 			&category.ID,
 			&category.Label,
 			&category.Priority,
-			// &categoryValue.ID,
-			// &categoryValue.Value,
-			// &categoryValue.CategoryID,
 		); err != nil {
 			return []Category{}, err
 		}
 
 		categories = append(categories, category)
 
-		// _, ok := categoryValues[category.ID]
-		// if ok {
-		// 	categoryValues[category.ID] = append(categoryValues[category.ID], categoryValue)
-		// } else {
-		// 	categories = append(categories, category)
-		// 	categoryValues[category.ID] = []CategoryValue{categoryValue}
-		// }
 	}
-
-	// for idx, val := range categories {
-	// 	cv, ok := categoryValues[val.ID]
-	// 	if ok {
-	// 		categories[idx].Values = cv
-	// 	}
-	// }
 
 	return categories, nil
 }

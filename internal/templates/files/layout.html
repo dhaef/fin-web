@@ -1,39 +1,41 @@
 {{ define "layout" }}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ template "title" . }}</title>
-    <link rel="stylesheet" href="/static/styles.css" />
-    <script type="importmap">
-      {
-        "imports": {
-          "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
-          "widgets": "/static/widgets.js",
-          "transactions": "/static/transactions.js",
-          "transaction": "/static/transaction.js",
-          "annual": "/static/annual.js",
-          "net-worth": "/static/net-worth.js",
-          "category": "/static/category.js"
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>{{ template "title" . }}</title>
+      <link rel="stylesheet" href="/static/styles.css" />
+      <script type="importmap">
+        {
+          "imports": {
+            "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
+            "widgets": "/static/widgets.js",
+            "transactions": "/static/transactions.js",
+            "transaction": "/static/transaction.js",
+            "annual": "/static/annual.js",
+            "net-worth": "/static/net-worth.js",
+            "category": "/static/category.js",
+            "trades": "/static/trades.js"
+          }
         }
-      }
-    </script>
-  </head>
-  <body>
-    <h1 style="text-align: center">💰📈</h1>
-    <div style="text-align: center">
-      <a href="/">Home</a>
-      <a href="/annual">Annual</a>
-      <a href="/net-worth">Net Worth</a>
-      <a href="/transactions/uncategorized">Uncategorized</a>
-      <a href="/categories">Categories</a>
-    </div>
+      </script>
+    </head>
+    <body>
+      <h1 style="text-align: center">💰📈</h1>
+      <div style="text-align: center">
+        <a href="/">Home</a>
+        <a href="/annual">Annual</a>
+        <a href="/net-worth">Net Worth</a>
+        <a href="/trades">Trades</a>
+        <a href="/transactions/uncategorized">Uncategorized</a>
+        <a href="/categories">Categories</a>
+      </div>
 
-    <div class="wrapper">{{ template "body" . }}</div>
+      <div class="wrapper">{{ template "body" . }}</div>
 
-    <script src="/static/app.js"></script>
-    {{ template "scripts" . }}
-  </body>
-</html>
+      <script src="/static/app.js"></script>
+      {{ template "scripts" . }}
+    </body>
+  </html>
 {{ end }}
