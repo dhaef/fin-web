@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -133,7 +134,7 @@ func trades(w http.ResponseWriter, r *http.Request) error {
 			"prices": prices,
 			"trades": trades,
 		},
-	}, "layout", []string{"trades.html", "layout.html"})
+	}, "layout", []string{"trades/trades.html", "layout.html"})
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -141,5 +142,247 @@ func trades(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	return nil
+}
+
+func trade(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+
+	t, err := model.GetTrade(dbConn, id)
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error getting trade: " + err.Error(),
+		}
+	}
+
+	err = renderTemplate(w, Base{
+		Data: map[string]any{
+			"trade": t,
+		},
+	}, "layout", []string{"trades/trade.html", "layout.html"})
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+	}
+
+	return nil
+}
+
+func deleteTrade(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+
+	err := model.DeleteTrade(dbConn, id)
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error deleting trade: " + err.Error(),
+		}
+	}
+
+	http.Redirect(w, r, "/trades", http.StatusSeeOther)
+	return nil
+}
+
+func newTrade(w http.ResponseWriter, r *http.Request) error {
+	err := renderTemplate(w, Base{
+		Data: map[string]any{
+			"type": "create",
+		},
+	}, "layout", []string{"trades/trade.html", "layout.html"})
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+	}
+	return nil
+}
+
+func createTrade(w http.ResponseWriter, r *http.Request) error {
+	errs := map[string]string{}
+	var err error
+
+	name := r.FormValue("name")
+	if name == "" {
+		errs["name"] = "name can't be empty"
+	}
+
+	ticker := r.FormValue("ticker")
+
+	purchaseDate := r.FormValue("purchase_date")
+	if purchaseDate == "" {
+		errs["purchase_date"] = "purchase_date can't be empty"
+	}
+
+	sharesStr := r.FormValue("shares")
+	var shares float64
+	if sharesStr != "" {
+		shares, err = strconv.ParseFloat(sharesStr, 64)
+		if err != nil {
+			errs["shares"] = "shares is not a valid float"
+		}
+	} else {
+		errs["shares"] = "shares can't be empty"
+	}
+
+	priceStr := r.FormValue("price")
+	var price float64
+	if priceStr != "" {
+		price, err = strconv.ParseFloat(priceStr, 64)
+		if err != nil {
+			errs["price"] = "price is not a valid float"
+		}
+	} else {
+		errs["price"] = "price can't be empty"
+	}
+
+	tradeType := r.FormValue("type")
+	if tradeType == "" {
+		errs["type"] = "type can't be empty"
+	}
+
+	account := r.FormValue("account")
+	if account == "" {
+		errs["account"] = "account can't be empty"
+	}
+
+	if len(errs) != 0 {
+		err := renderTemplate(w, Base{
+			Data: map[string]any{
+				"errs": errs,
+				"trade": map[string]any{
+					"Name": sql.NullString{
+						Valid:  true,
+						String: name,
+					},
+					"Ticker":       ticker,
+					"PurchaseDate": purchaseDate,
+					"Shares":       sharesStr,
+					"Price":        priceStr,
+					"Type":         tradeType,
+					"Account":      account,
+				},
+			},
+		}, "layout", []string{"trades/trade.html", "layout.html"})
+		if err != nil {
+			return APIError{
+				Status:  http.StatusInternalServerError,
+				Message: err.Error(),
+			}
+		}
+		return nil
+	}
+
+	id, err := model.CreateTrade(dbConn, name, ticker, purchaseDate, shares, price, tradeType, account)
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error creating trade: " + err.Error(),
+		}
+	}
+
+	http.Redirect(w, r, "/trades/"+strconv.Itoa(id), http.StatusSeeOther)
+	return nil
+}
+
+func updateTrade(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+
+	errs := map[string]string{}
+	var err error
+
+	name := r.FormValue("name")
+	if name == "" {
+		errs["name"] = "name can't be empty"
+	}
+
+	ticker := r.FormValue("ticker")
+
+	purchaseDate := r.FormValue("purchase_date")
+	if purchaseDate == "" {
+		errs["purchase_date"] = "purchase_date can't be empty"
+	}
+
+	sharesStr := r.FormValue("shares")
+	var shares float64
+	if sharesStr != "" {
+		shares, err = strconv.ParseFloat(sharesStr, 64)
+		if err != nil {
+			errs["shares"] = "shares is not a valid float"
+		}
+	} else {
+		errs["shares"] = "shares can't be empty"
+	}
+
+	priceStr := r.FormValue("price")
+	var price float64
+	if priceStr != "" {
+		price, err = strconv.ParseFloat(priceStr, 64)
+		if err != nil {
+			errs["price"] = "price is not a valid float"
+		}
+	} else {
+		errs["price"] = "price can't be empty"
+	}
+
+	tradeType := r.FormValue("type")
+	if tradeType == "" {
+		errs["type"] = "type can't be empty"
+	}
+
+	account := r.FormValue("account")
+	if account == "" {
+		errs["account"] = "account can't be empty"
+	}
+
+	if len(errs) != 0 {
+		err := renderTemplate(w, Base{
+			Data: map[string]any{
+				"errs": errs,
+				"trade": map[string]any{
+					"Name": sql.NullString{
+						Valid:  true,
+						String: name,
+					},
+					"Ticker":       ticker,
+					"PurchaseDate": purchaseDate,
+					"Shares":       sharesStr,
+					"Price":        priceStr,
+					"Type":         tradeType,
+					"Account":      account,
+				},
+			},
+		}, "layout", []string{"trades/trade.html", "layout.html"})
+		if err != nil {
+			return APIError{
+				Status:  http.StatusInternalServerError,
+				Message: err.Error(),
+			}
+		}
+		return nil
+	}
+
+	params := model.UpdateTradeParams{
+		Name:         &name,
+		Ticker:       &ticker,
+		PurchaseDate: &purchaseDate,
+		Shares:       &shares,
+		Price:        &price,
+		Type:         &tradeType,
+		Account:      &account,
+	}
+
+	err = model.UpdateTrade(dbConn, id, params)
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error updating trade: " + err.Error(),
+		}
+	}
+
+	http.Redirect(w, r, "/trades/"+id, http.StatusSeeOther)
 	return nil
 }

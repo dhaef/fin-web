@@ -19,6 +19,8 @@
     ></div>
   </div>
 
+  <a href="/trades/new">New Trade</a>
+
   <div id="transactions-table-container" class="my-1">
     <table id="transactions-table">
       <thead>
@@ -37,7 +39,7 @@
       <tbody>
         {{ range .Data.trades }}
           <tr>
-            <td>{{ .Name.String }}</td>
+            <td><a href="/trades/{{ .ID }}">{{ .Name.String }}</a></td>
             <td>{{ .PurchaseDate }}</td>
             <td class="currency">{{ .Price }}</td>
             <td>{{ .Shares }}</td>

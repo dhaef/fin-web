@@ -61,6 +61,11 @@ func buildRoutes() http.Handler {
 	r.HandleFunc("POST /categories/{id}", MakeHandler(updateCategory))
 	r.HandleFunc("GET /categories", MakeHandler(categories))
 
+	r.HandleFunc("GET /trades/new", MakeHandler(newTrade))
+	r.HandleFunc("POST /trades/new", MakeHandler(createTrade))
+	r.HandleFunc("POST /trades/{id}/delete", MakeHandler(deleteTrade))
+	r.HandleFunc("GET /trades/{id}", MakeHandler(trade))
+	r.HandleFunc("POST /trades/{id}", MakeHandler(updateTrade))
 	r.HandleFunc("GET /trades", MakeHandler(trades))
 
 	// this will match everything else so handle this in home handler

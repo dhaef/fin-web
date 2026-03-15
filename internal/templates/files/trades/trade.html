@@ -1,0 +1,91 @@
+{{ define "title" }}💰📈{{ end }}
+{{ define "scripts" }}
+  <script type="module">
+    import 'transaction';
+  </script>
+{{ end }}
+{{ define "body" }}
+  <div class="my-1">
+    <form method="POST">
+      {{ if .Data.success }}
+        <div class="form-success">
+          <p>Trade successfully updated!</p>
+        </div>
+      {{ end }}
+
+
+      <div class="form-item">
+        <label for="name">Name:</label>
+        <input name="name" value="{{ .Data.trade.Name.String }}" />
+        {{ if .Data.errs.name }}
+          <p class="form-error">{{ .Data.errs.name }}</p>
+        {{ end }}
+      </div>
+
+      <div class="form-item">
+        <label for="ticker">Ticker:</label>
+        <input name="ticker" value="{{ .Data.trade.Ticker }}" />
+        {{ if .Data.errs.ticker }}
+          <p class="form-error">{{ .Data.errs.ticker }}</p>
+        {{ end }}
+      </div>
+
+      <div class="form-item">
+        <label for="purchase_date">Purchase Date:</label>
+        <input name="purchase_date" value="{{ .Data.trade.PurchaseDate }}" />
+        {{ if .Data.errs.purchase_date }}
+          <p class="form-error">{{ .Data.errs.purchase_date }}</p>
+        {{ end }}
+      </div>
+
+      <div class="form-item">
+        <label for="shares">Shares:</label>
+        <input name="shares" value="{{ .Data.trade.Shares }}" />
+        {{ if .Data.errs.shares }}
+          <p class="form-error">{{ .Data.errs.shares }}</p>
+        {{ end }}
+      </div>
+
+      <div class="form-item">
+        <label for="price">Price:</label>
+        <input name="price" value="{{ .Data.trade.Price }}" />
+        {{ if .Data.errs.price }}
+          <p class="form-error">{{ .Data.errs.price }}</p>
+        {{ end }}
+      </div>
+
+      <div class="form-item">
+        <label for="type">Type:</label>
+        <input name="type" value="{{ .Data.trade.Type }}" />
+        {{ if .Data.errs.type }}
+          <p class="form-error">{{ .Data.errs.type }}</p>
+        {{ end }}
+      </div>
+
+      <div class="form-item">
+        <label for="account">Account:</label>
+        <input name="account" value="{{ .Data.trade.Account }}" />
+        {{ if .Data.errs.account }}
+          <p class="form-error">{{ .Data.errs.account }}</p>
+        {{ end }}
+      </div>
+
+      <input
+        type="submit"
+        value="{{- if ne .Data.type "create" -}}
+          Save
+        {{- else -}}
+          Create
+        {{- end -}}"
+      />
+
+      <a href="/trades">cancel</a>
+    </form>
+  </div>
+
+  {{ if ne .Data.type "create" }}
+    <form method="POST" action="/trades/{{ .Data.trade.ID }}/delete">
+      <input type="submit" value="Delete" />
+    </form>
+  {{ end }}
+{{ end }}
