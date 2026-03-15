@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -26,6 +27,7 @@ func trades(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	prices := []StockPrice{}
+	priceMap := map[string]float64{}
 
 	for _, s := range ss {
 		if s.Shares == 0 {
@@ -75,6 +77,7 @@ func trades(w http.ResponseWriter, r *http.Request) error {
 				value := float64(tickerInfo.Close) * s.Shares
 				price.Value = value
 				prices = append(prices, price)
+				priceMap[s.Ticker] = float64(tickerInfo.Close)
 				continue
 			}
 
@@ -92,9 +95,12 @@ func trades(w http.ResponseWriter, r *http.Request) error {
 			}
 		}
 		price.Price = f
+		priceMap[s.Ticker] = f
+
 		value := f * s.Shares
 		price.Value = value
 		prices = append(prices, price)
+
 	}
 
 	trades, err := model.GetTrades(dbConn)
@@ -102,6 +108,23 @@ func trades(w http.ResponseWriter, r *http.Request) error {
 		return APIError{
 			Status:  http.StatusBadRequest,
 			Message: "failed to get trades: " + err.Error(),
+		}
+	}
+
+	for idx, trade := range trades {
+		currPrice, ok := priceMap[trade.Ticker]
+		if ok {
+			cv := currPrice * trade.Shares
+			trade.CurrentValue = &cv
+			gr := ((cv - trade.Total) / trade.Total) * 100
+			grStr := fmt.Sprintf("%.2f", gr)
+			trade.GrowthRate = &grStr
+
+			if gr > 0 {
+				trade.HasPositiveGrowth = true
+			}
+
+			trades[idx] = trade
 		}
 	}
 

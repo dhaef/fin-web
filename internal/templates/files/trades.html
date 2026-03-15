@@ -27,7 +27,9 @@
           <th>Purchase Date</th>
           <th>Price</th>
           <th>Shares</th>
-          <th>Total</th>
+          <th>Purchase Value</th>
+          <th>Current Value</th>
+          <th>% Change</th>
           <th>Type</th>
           <th>Account</th>
         </tr>
@@ -40,6 +42,26 @@
             <td class="currency">{{ .Price }}</td>
             <td>{{ .Shares }}</td>
             <td class="currency">{{ .Total }}</td>
+            <td class="{{ if .CurrentValue }}currency{{ else }}{{ end }}">
+              {{ if .CurrentValue }}{{ .CurrentValue }}{{ else }}--{{ end }}
+            </td>
+            <td>
+              <span
+                class="{{ if .GrowthRate }}
+                  tag
+                  {{ if .HasPositiveGrowth }}
+                    growth-tag
+                  {{ else }}
+                    decline-tag
+                  {{ end }}
+                {{ end }}"
+                >{{ if .GrowthRate }}
+                  {{ .GrowthRate }}%
+                {{ else }}
+                  --
+                {{ end }}</span
+              >
+            </td>
             <td>{{ .Type }}</td>
             <td>{{ .Account }}</td>
           </tr>

@@ -264,3 +264,18 @@ select {
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
+.tag {
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+}
+
+.growth-tag {
+  background-color: #bbffa6;
+  border: 1px solid green;
+}
+
+.decline-tag {
+  background-color: #ff9191;
+  border: 1px solid red;
+}

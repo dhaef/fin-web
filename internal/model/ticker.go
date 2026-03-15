@@ -48,6 +48,10 @@ type Trade struct {
 	Account      string
 	Name         sql.NullString
 	Total        float64
+
+	CurrentValue      *float64
+	GrowthRate        *string
+	HasPositiveGrowth bool
 }
 
 func GetTrades(conn *sql.DB) ([]Trade, error) {
