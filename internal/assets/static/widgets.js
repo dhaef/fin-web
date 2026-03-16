@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-export function donut(data, colorRange) {
+export function donut(data, colorRange, disableNavigate) {
   // 1. Setup dimensions and data calculations
   const width = 400;
   const height = 400;
@@ -86,9 +86,11 @@ export function donut(data, colorRange) {
       totalValue.text(formatter.format(totalAmount));
     })
     .on('click', (_event, d) => {
-      const p = new URLSearchParams(location.search);
-      p.set('categories', d.data.id);
-      window.location = `${window.location.origin}?${p.toString()}`;
+      if (!disableNavigate) {
+        const p = new URLSearchParams(location.search);
+        p.set('categories', d.data.id);
+        window.location = `${window.location.origin}?${p.toString()}`;
+      }
     });
 
   return { node: svg.node() };

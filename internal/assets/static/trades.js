@@ -17,7 +17,8 @@ if (categoryDonut && categoryCounts) {
     counts,
     d3
       .quantize((t) => d3.interpolateYlOrRd(t * 0.7 + 0.3), counts.length)
-      .reverse()
+      .reverse(),
+    true
   );
   categoryDonut.appendChild(node);
 }
