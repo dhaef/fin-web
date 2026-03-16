@@ -21,128 +21,132 @@ type StockPrice struct {
 func trades(w http.ResponseWriter, r *http.Request) error {
 	ss, err := model.GetStockShares(dbConn)
 	if err != nil {
-		return APIError{
-			Status:  http.StatusInternalServerError,
-			Message: "failed to get stock shares: " + err.Error(),
-		}
+		return APIError{Status: http.StatusInternalServerError, Message: "failed to get stock shares: " + err.Error()}
 	}
 
-	prices := []StockPrice{}
-	priceMap := map[string]float64{}
-
-	for _, s := range ss {
-		if s.Shares == 0 {
-			continue
-		}
-
-		if s.Ticker == "" {
-			// get price from db??
-			continue
-		}
-
-		price := StockPrice{
-			Ticker: s.Ticker,
-		}
-
-		// request data from cache or get and set
-		item, err := model.GetKVItem(dbConn, s.Ticker)
-		if err != nil {
-			if errors.Is(err, model.ErrKVItemNotFound) {
-				stockInfoItems, err := tiingo.GetTickerInfo(tiingoToken, s.Ticker)
-				if err != nil {
-					return APIError{
-						Status:  http.StatusInternalServerError,
-						Message: "failed to get info from tiingo: " + err.Error(),
-					}
-				}
-
-				if len(stockInfoItems) == 0 {
-					return APIError{
-						Status:  http.StatusInternalServerError,
-						Message: "no stock info found for " + s.Ticker,
-					}
-				}
-
-				tickerInfo := stockInfoItems[0]
-				v := strconv.FormatFloat(float64(tickerInfo.Close), 'f', -1, 32)
-
-				err = model.PutKVItem(dbConn, s.Ticker, v, time.Hour*24)
-				if err != nil {
-					return APIError{
-						Status:  http.StatusInternalServerError,
-						Message: "failed to cache item: " + err.Error(),
-					}
-				}
-
-				price.Price = float64(tickerInfo.Close)
-				value := float64(tickerInfo.Close) * s.Shares
-				price.Value = value
-				prices = append(prices, price)
-				priceMap[s.Ticker] = float64(tickerInfo.Close)
-				continue
-			}
-
-			return APIError{
-				Status:  http.StatusBadRequest,
-				Message: "failed to get item from cache: " + err.Error(),
-			}
-		}
-
-		f, err := strconv.ParseFloat(item.Value, 64)
-		if err != nil {
-			return APIError{
-				Status:  http.StatusBadRequest,
-				Message: "failed to convert cache string to float: " + item.Value,
-			}
-		}
-		price.Price = f
-		priceMap[s.Ticker] = f
-
-		value := f * s.Shares
-		price.Value = value
-		prices = append(prices, price)
-
+	prices, priceMap, err := processStockPrices(ss)
+	if err != nil {
+		return err // processStockPrices returns APIError
 	}
 
 	trades, err := model.GetTrades(dbConn)
 	if err != nil {
-		return APIError{
-			Status:  http.StatusBadRequest,
-			Message: "failed to get trades: " + err.Error(),
+		return APIError{Status: http.StatusBadRequest, Message: "failed to get trades: " + err.Error()}
+	}
+
+	for i := range trades {
+		if price, ok := priceMap[trades[i].Ticker]; ok {
+			enrichTradeData(&trades[i], price)
 		}
 	}
 
-	for idx, trade := range trades {
-		currPrice, ok := priceMap[trade.Ticker]
-		if ok {
-			cv := currPrice * trade.Shares
-			trade.CurrentValue = &cv
-			gr := ((cv - trade.Total) / trade.Total) * 100
-			grStr := fmt.Sprintf("%.2f", gr)
-			trade.GrowthRate = &grStr
-
-			if gr > 0 {
-				trade.HasPositiveGrowth = true
-			}
-
-			trades[idx] = trade
-		}
-	}
-
-	err = renderTemplate(w, Base{
+	return renderTemplate(w, Base{
 		Data: map[string]any{
 			"prices": prices,
 			"trades": trades,
 		},
 	}, "layout", []string{"trades/trades.html", "layout.html"})
-	if err != nil {
-		return APIError{
+}
+
+func processStockPrices(ss []model.StockShare) ([]StockPrice, map[string]float64, error) {
+	prices := []StockPrice{}
+	priceMap := map[string]float64{}
+
+	for _, s := range ss {
+		if s.Shares <= 0 || s.Ticker == "" {
+			continue
+		}
+
+		currentPrice, err := getOrFetchPrice(s.Ticker)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		priceMap[s.Ticker] = currentPrice
+		prices = append(prices, StockPrice{
+			Ticker: s.Ticker,
+			Price:  currentPrice,
+			Value:  currentPrice * s.Shares,
+		})
+	}
+	return prices, priceMap, nil
+}
+
+func getOrFetchPrice(ticker string) (float64, error) {
+	// 1. Attempt to get from Cache (KV Store)
+	item, err := model.GetKVItem(dbConn, ticker)
+	if err == nil {
+		// Cache Hit: Parse and return
+		f, err := strconv.ParseFloat(item.Value, 64)
+		if err != nil {
+			return 0, APIError{
+				Status:  http.StatusBadRequest,
+				Message: fmt.Sprintf("failed to convert cache string to float for %s: %s", ticker, item.Value),
+			}
+		}
+		return f, nil
+	}
+
+	// 2. Handle Cache Miss vs. Actual DB Error
+	if !errors.Is(err, model.ErrKVItemNotFound) {
+		return 0, APIError{
 			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "failed to get item from cache: " + err.Error(),
 		}
 	}
 
-	return nil
+	// 3. Cache Miss: Fetch from Tiingo API
+	stockInfoItems, err := tiingo.GetTickerInfo(tiingoToken, ticker)
+	if err != nil {
+		return 0, APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "failed to get info from tiingo: " + err.Error(),
+		}
+	}
+
+	if len(stockInfoItems) == 0 {
+		return 0, APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "no stock info found for " + ticker,
+		}
+	}
+
+	// 4. Process API Result
+	tickerInfo := stockInfoItems[0]
+	price := float64(tickerInfo.Close)
+
+	// Convert to string for KV storage (matching your original implementation)
+	v := strconv.FormatFloat(price, 'f', -1, 32)
+
+	// 5. Update Cache for 24 hours
+	err = model.PutKVItem(dbConn, ticker, v, time.Hour*24)
+	if err != nil {
+		return 0, APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "failed to cache item: " + err.Error(),
+		}
+	}
+
+	return price, nil
+}
+
+func enrichTradeData(t *model.Trade, currentPrice float64) {
+	cv := currentPrice * t.Shares
+	t.CurrentValue = &cv
+
+	// Prevent division by zero if Total is 0
+	if t.Total == 0 {
+		zero := "0.00"
+		t.GrowthRate = &zero
+		return
+	}
+
+	// Formula: ((Current - Total) / Total) * 100
+	growth := ((cv - t.Total) / t.Total) * 100
+	growthStr := fmt.Sprintf("%.2f", growth)
+
+	t.GrowthRate = &growthStr
+	t.HasPositiveGrowth = growth > 0
 }
 
 func trade(w http.ResponseWriter, r *http.Request) error {
