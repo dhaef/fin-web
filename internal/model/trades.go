@@ -68,7 +68,6 @@ func GetTrades(conn *sql.DB) ([]Trade, error) {
 
 	for rows.Next() {
 		trade := Trade{}
-		// var purchaseDateStr string
 		if err := rows.Scan(
 			&trade.ID,
 			&trade.Ticker,

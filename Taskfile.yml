@@ -26,3 +26,8 @@ tasks:
     desc: Seed categories
     cmds:
       - go run ./cmd/categories/main.go
+
+  tui:
+    desc: Start TUI app
+    cmds:
+      - go run ./cmd/tui/main.go
