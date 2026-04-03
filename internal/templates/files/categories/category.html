@@ -45,11 +45,11 @@
 
       <input
         type="submit"
-        value="{{ if ne .Data.type "create" }}
+        value="{{ if ne .Data.type "create" -}}
           Save
-        {{ else }}
+        {{- else -}}
           Create
-        {{ end }}"
+        {{- end }}"
       />
       <a href="/categories">cancel</a>
     </form>

@@ -1,15 +1,14 @@
-package citi
+package bofa
 
 import (
-	"bufio"
 	"database/sql"
 	"encoding/csv"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"fin-web/internal/model"
-	"fin-web/internal/util"
 
 	"github.com/google/uuid"
 )
@@ -18,14 +17,14 @@ type Provider struct {
 	DB *sql.DB
 }
 
-func NewCitiProvider(db *sql.DB) *Provider {
+func NewBofaProvider(db *sql.DB) *Provider {
 	return &Provider{
 		DB: db,
 	}
 }
 
 func (p *Provider) GetPrefix() string {
-	return "From"
+	return "bofa"
 }
 
 func (p *Provider) ParseFile(filePath string) ([]model.Transaction, error) {
@@ -35,50 +34,43 @@ func (p *Provider) ParseFile(filePath string) ([]model.Transaction, error) {
 	}
 	defer file.Close()
 
-	// Skip the first 5 lines of the Citi CSV
-	bufferedReader := bufio.NewReader(file)
-	for range 5 {
-		bufferedReader.ReadString('\n')
-	}
-
-	reader := csv.NewReader(bufferedReader)
-	records, err := reader.ReadAll()
+	records, err := csv.NewReader(file).ReadAll()
 	if err != nil {
 		return nil, err
 	}
 
 	var transactions []model.Transaction
 	for _, r := range records[1:] {
-		var amount float64
-		if r[2] != "" { // Debit
-			amount, _ = util.ParseAmount(r[2])
-		} else if r[3] != "" { // Credit
-			a, _ := util.ParseAmount(r[3])
-			amount = -a
-		}
-
-		normalizedName := strings.ToLower(r[1])
-		normalizedCategory := strings.ToLower(r[4])
-
+		// Category logic (optimized: you should eventually cache these)
 		var cc sql.NullInt32
-		categories, _ := model.SearchCategories(p.DB, []string{normalizedName, normalizedCategory})
+		normalizedName := strings.ToLower(r[2])
+		categories, _ := model.SearchCategories(p.DB, []string{normalizedName}) //
+
 		if len(categories) > 0 {
 			cc = sql.NullInt32{Valid: true, Int32: int32(categories[0].ID)}
 		}
 
-		date, _ := time.Parse("Jan 02, 2006", r[0])
+		date, _ := time.Parse("01/02/2006", r[0]) //
+		amount, _ := parseAmount(r[4])
 
 		transactions = append(transactions, model.Transaction{
 			ID:         uuid.NewString(),
-			Name:       r[1],
-			Source:     "citi",
-			Account:    "citi",
+			Name:       r[2],
+			Source:     "bank_of_america",
+			Account:    "bank_of_america",
 			Date:       date.Format("2006-01-02"),
 			Amount:     amount,
 			CategoryID: cc,
-			Category:   r[4],
 		})
 	}
-
 	return transactions, nil
+}
+
+func parseAmount(amount string) (float64, error) {
+	val, err := strconv.ParseFloat(amount, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return val * -1, nil
 }

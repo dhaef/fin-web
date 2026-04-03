@@ -1,13 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
+	"fin-web/internal/bofa"
 	"fin-web/internal/citi"
 	"fin-web/internal/db"
 	"fin-web/internal/schwab"
+	"fin-web/internal/worker"
 )
 
 func main() {
@@ -27,15 +28,17 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	s := schwab.NewWorker(transactionsDB, dirPath)
-	err = s.Normalize()
-	if err != nil {
-		fmt.Println(err)
+	bw := worker.NewBaseWorker(transactionsDB, dirPath)
+
+	providers := []worker.Provider{
+		bofa.NewBofaProvider(transactionsDB),
+		citi.NewCitiProvider(transactionsDB),
+		schwab.NewSchwabProvider(transactionsDB),
 	}
 
-	c := citi.NewWorker(transactionsDB, dirPath)
-	err = c.Normalize()
-	if err != nil {
-		fmt.Println(err)
+	for _, p := range providers {
+		if err := bw.Process(p); err != nil {
+			log.Printf("Error processing provider %s: %v", p.GetPrefix(), err)
+		}
 	}
 }
