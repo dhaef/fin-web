@@ -23,17 +23,17 @@ func main() {
 		log.Fatal("dirPath is required")
 	}
 
-	transactionsDB, err := db.NewDbConnection(dbPath)
+	DB, err := db.NewDbConnection(dbPath)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	bw := worker.NewBaseWorker(transactionsDB, dirPath)
+	bw := worker.NewBaseWorker(DB, dirPath)
 
 	providers := []worker.Provider{
-		bofa.NewBofaProvider(transactionsDB),
-		citi.NewCitiProvider(transactionsDB),
-		schwab.NewSchwabProvider(transactionsDB),
+		bofa.NewBofaProvider(DB),
+		citi.NewCitiProvider(DB),
+		schwab.NewSchwabProvider(DB),
 	}
 
 	for _, p := range providers {
