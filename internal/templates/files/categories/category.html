@@ -9,7 +9,7 @@
     <form id="category-form">
       <div class="form-item">
         <label for="label">Label:</label>
-        <input name="label" value="{{ .Data.category.Label }}" type="text" />
+        <input name="label" value="{{ .Data.Category.Label }}" type="text" />
         <p class="form-error label-err"></p>
       </div>
 
@@ -17,7 +17,7 @@
         <label for="priority">Priority:</label>
         <input
           name="priority"
-          value="{{ .Data.category.Priority }}"
+          value="{{ .Data.Category.Priority }}"
           type="number"
           step="1"
         />
@@ -27,7 +27,7 @@
       <div class="form-item">
         <label>Values:</label>
         <div id="values">
-          {{ range .Data.category.Values }}
+          {{ range .Data.Category.Values }}
             <div class="form-item flex">
               <input
                 type="text"
@@ -56,7 +56,7 @@
 
     {{ if ne .Data.Type "create" }}
       <div class="my-1">
-        <form method="POST" action="/categories/{{ .Data.category.ID }}/delete">
+        <form method="POST" action="/categories/{{ .Data.Category.ID }}/delete">
           <input type="submit" value="Delete" />
         </form>
       </div>

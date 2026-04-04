@@ -3,9 +3,9 @@
     <form method="POST">
       <div class="form-item">
         <label for="date">Date:</label>
-        <input name="date" value="{{ .Data.NetWorthItem.Date }}" type="text" />
-        {{ if .Data.Errs.date }}
-          <p class="form-error">{{ .Data.Errs.date }}</p>
+        <input name="date" value="{{ .NetWorthItem.Date }}" type="text" />
+        {{ if .Errs.date }}
+          <p class="form-error">{{ .Errs.date }}</p>
         {{ end }}
       </div>
 
@@ -13,12 +13,12 @@
         <label for="cash">Cash:</label>
         <input
           name="cash"
-          value="{{ .Data.NetWorthItem.Cash }}"
+          value="{{ .NetWorthItem.Cash }}"
           type="number"
           step="0.01"
         />
-        {{ if .Data.Errs.cash }}
-          <p class="form-error">{{ .Data.Errs.cash }}</p>
+        {{ if .Errs.cash }}
+          <p class="form-error">{{ .Errs.cash }}</p>
         {{ end }}
       </div>
 
@@ -26,12 +26,12 @@
         <label for="investment">Investment:</label>
         <input
           name="investment"
-          value="{{ .Data.NetWorthItem.Investment }}"
+          value="{{ .NetWorthItem.Investment }}"
           type="number"
           step="0.01"
         />
-        {{ if .Data.Errs.investment }}
-          <p class="form-error">{{ .Data.Errs.investment }}</p>
+        {{ if .Errs.investment }}
+          <p class="form-error">{{ .Errs.investment }}</p>
         {{ end }}
       </div>
 
@@ -39,12 +39,12 @@
         <label for="debit">Debit:</label>
         <input
           name="debit"
-          value="{{ .Data.NetWorthItem.Debit }}"
+          value="{{ .NetWorthItem.Debit }}"
           type="number"
           step="0.01"
         />
-        {{ if .Data.Errs.debit }}
-          <p class="form-error">{{ .Data.Errs.debit }}</p>
+        {{ if .Errs.debit }}
+          <p class="form-error">{{ .Errs.debit }}</p>
         {{ end }}
       </div>
 
@@ -52,12 +52,12 @@
         <label for="credit">Credit:</label>
         <input
           name="credit"
-          value="{{ .Data.NetWorthItem.Credit }}"
+          value="{{ .NetWorthItem.Credit }}"
           type="number"
           step="0.01"
         />
-        {{ if .Data.Errs.credit }}
-          <p class="form-error">{{ .Data.Errs.credit }}</p>
+        {{ if .Errs.credit }}
+          <p class="form-error">{{ .Errs.credit }}</p>
         {{ end }}
       </div>
 
@@ -65,12 +65,12 @@
         <label for="savings">Savings:</label>
         <input
           name="savings"
-          value="{{ .Data.NetWorthItem.Savings }}"
+          value="{{ .NetWorthItem.Savings }}"
           type="number"
           step="0.01"
         />
-        {{ if .Data.Errs.savings }}
-          <p class="form-error">{{ .Data.Errs.savings }}</p>
+        {{ if .Errs.savings }}
+          <p class="form-error">{{ .Errs.savings }}</p>
         {{ end }}
       </div>
 
@@ -78,12 +78,12 @@
         <label for="retirement">Retirement:</label>
         <input
           name="retirement"
-          value="{{ .Data.NetWorthItem.Retirement }}"
+          value="{{ .NetWorthItem.Retirement }}"
           type="number"
           step="0.01"
         />
-        {{ if .Data.Errs.retirement }}
-          <p class="form-error">{{ .Data.Errs.retirement }}</p>
+        {{ if .Errs.retirement }}
+          <p class="form-error">{{ .Errs.retirement }}</p>
         {{ end }}
       </div>
 
@@ -91,18 +91,18 @@
         <label for="loans">Loans:</label>
         <input
           name="loans"
-          value="{{ .Data.NetWorthItem.Loans }}"
+          value="{{ .NetWorthItem.Loans }}"
           type="number"
           step="0.01"
         />
-        {{ if .Data.Errs.loans }}
-          <p class="form-error">{{ .Data.Errs.loans }}</p>
+        {{ if .Errs.loans }}
+          <p class="form-error">{{ .Errs.loans }}</p>
         {{ end }}
       </div>
 
       <input
         type="submit"
-        value="{{ if ne .Data.Type "create" -}}
+        value="{{ if ne .Type "create" -}}
           Save
         {{- else -}}
           Create
@@ -113,8 +113,8 @@
     </form>
   </div>
 
-  {{ if ne .Data.Type "create" }}
-    <form method="POST" action="/net-worth/{{ .Data.NetWorthItem.ID }}/delete">
+  {{ if ne .Type "create" }}
+    <form method="POST" action="/net-worth/{{ .NetWorthItem.ID }}/delete">
       <input type="submit" value="Delete" />
     </form>
   {{ end }}
