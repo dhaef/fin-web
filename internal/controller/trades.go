@@ -12,6 +12,18 @@ import (
 	"fin-web/internal/tiingo"
 )
 
+type TradesPage struct {
+	Prices []StockPrice
+	Trades []model.Trade
+}
+
+type TradePage struct {
+	Trade   model.Trade
+	Type    string
+	Errs    map[string]string
+	Success bool
+}
+
 type StockPrice struct {
 	Price  float64
 	Value  float64
@@ -40,10 +52,10 @@ func trades(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	return renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"prices": prices,
-			"trades": trades,
+	return renderTemplate(w, Base[TradesPage]{
+		Data: TradesPage{
+			Prices: prices,
+			Trades: trades,
 		},
 	}, "layout", []string{"trades/trades.html", "layout.html"})
 }
@@ -160,9 +172,10 @@ func trade(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"trade": t,
+	err = renderTemplate(w, Base[TradePage]{
+		Data: TradePage{
+			Trade: t,
+			Type:  "edit",
 		},
 	}, "layout", []string{"trades/trade.html", "layout.html"})
 	if err != nil {
@@ -191,9 +204,9 @@ func deleteTrade(w http.ResponseWriter, r *http.Request) error {
 }
 
 func newTrade(w http.ResponseWriter, r *http.Request) error {
-	err := renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"type": "create",
+	err := renderTemplate(w, Base[TradePage]{
+		Data: TradePage{
+			Type: "create",
 		},
 	}, "layout", []string{"trades/trade.html", "layout.html"})
 	if err != nil {
@@ -254,21 +267,20 @@ func createTrade(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if len(errs) != 0 {
-		err := renderTemplate(w, Base[map[string]any]{
-			Data: map[string]any{
-				"errs": errs,
-				"trade": map[string]any{
-					"Name": sql.NullString{
-						Valid:  true,
-						String: name,
-					},
-					"Ticker":       ticker,
-					"PurchaseDate": purchaseDate,
-					"Shares":       sharesStr,
-					"Price":        priceStr,
-					"Type":         tradeType,
-					"Account":      account,
-				},
+		trade := model.Trade{
+			Name:         sql.NullString{Valid: true, String: name},
+			Ticker:       ticker,
+			PurchaseDate: purchaseDate,
+			Shares:       shares,
+			Price:        price,
+			Type:         tradeType,
+			Account:      account,
+		}
+		err := renderTemplate(w, Base[TradePage]{
+			Data: TradePage{
+				Trade: trade,
+				Errs:  errs,
+				Type:  "create",
 			},
 		}, "layout", []string{"trades/trade.html", "layout.html"})
 		if err != nil {
@@ -343,21 +355,20 @@ func updateTrade(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if len(errs) != 0 {
-		err := renderTemplate(w, Base[map[string]any]{
-			Data: map[string]any{
-				"errs": errs,
-				"trade": map[string]any{
-					"Name": sql.NullString{
-						Valid:  true,
-						String: name,
-					},
-					"Ticker":       ticker,
-					"PurchaseDate": purchaseDate,
-					"Shares":       sharesStr,
-					"Price":        priceStr,
-					"Type":         tradeType,
-					"Account":      account,
-				},
+		trade := model.Trade{
+			Name:         sql.NullString{Valid: true, String: name},
+			Ticker:       ticker,
+			PurchaseDate: purchaseDate,
+			Shares:       shares,
+			Price:        price,
+			Type:         tradeType,
+			Account:      account,
+		}
+		err := renderTemplate(w, Base[TradePage]{
+			Data: TradePage{
+				Trade: trade,
+				Errs:  errs,
+				Type:  "edit",
 			},
 		}, "layout", []string{"trades/trade.html", "layout.html"})
 		if err != nil {

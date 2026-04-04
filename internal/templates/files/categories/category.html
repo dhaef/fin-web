@@ -45,7 +45,7 @@
 
       <input
         type="submit"
-        value="{{ if ne .Data.type "create" -}}
+        value="{{ if ne .Data.Type "create" -}}
           Save
         {{- else -}}
           Create
@@ -54,7 +54,7 @@
       <a href="/categories">cancel</a>
     </form>
 
-    {{ if ne .Data.type "create" }}
+    {{ if ne .Data.Type "create" }}
       <div class="my-1">
         <form method="POST" action="/categories/{{ .Data.category.ID }}/delete">
           <input type="submit" value="Delete" />

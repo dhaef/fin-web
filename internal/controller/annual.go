@@ -7,6 +7,12 @@ import (
 	"fin-web/internal/model"
 )
 
+type AnnualPage struct {
+	IncomeCountsByYear  []model.GroupByCounts
+	ExpenseCountsByYear []model.GroupByCounts
+	NetCounts           []NetCounts
+}
+
 func annual(w http.ResponseWriter, r *http.Request) error {
 	incomeCountsByYear, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
 		Type:                "income",
@@ -32,11 +38,11 @@ func annual(w http.ResponseWriter, r *http.Request) error {
 
 	netCounts := getNetCounts(expenseCountsByYear, incomeCountsByYear)
 
-	err = renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"incomeCountsByYear":  incomeCountsByYear,
-			"expenseCountsByYear": expenseCountsByYear,
-			"netCounts":           netCounts,
+	err = renderTemplate(w, Base[AnnualPage]{
+		Data: AnnualPage{
+			IncomeCountsByYear:  incomeCountsByYear,
+			ExpenseCountsByYear: expenseCountsByYear,
+			NetCounts:           netCounts,
 		},
 	}, "layout", []string{"annual.html", "layout.html"})
 	if err != nil {

@@ -13,7 +13,7 @@
 
   <div id="yearly-net-income-bar-container" class="my-1">
     <div id="yearly-net-counts" style="display: none">
-      {{ range .Data.netCounts }}
+      {{ range .Data.NetCounts }}
         <p>{{ .Key }}:{{ .Net }}:{{ .SavePercentage }}</p>
       {{ end }}
     </div>
@@ -23,7 +23,7 @@
 
   <div id="yearly-expense-bar-container" class="my-1 hide">
     <div id="yearly-expense-counts" style="display: none">
-      {{ range .Data.expenseCountsByYear }}
+      {{ range .Data.ExpenseCountsByYear }}
         <p>{{ .Key }}:{{ .Value }}</p>
       {{ end }}
     </div>
@@ -33,7 +33,7 @@
 
   <div id="yearly-income-bar-container" class="my-1 hide">
     <div id="yearly-income-counts" style="display: none">
-      {{ range .Data.incomeCountsByYear }}
+      {{ range .Data.IncomeCountsByYear }}
         <p>{{ .Key }}:{{ .Value }}</p>
       {{ end }}
     </div>

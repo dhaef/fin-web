@@ -18,7 +18,7 @@
         <label for="name">Name:</label>
         <input name="name" value="{{ .Data.trade.Name.String }}" />
         {{ if .Data.errs.name }}
-          <p class="form-error">{{ .Data.errs.name }}</p>
+          <p class="form-error">{{ .Data.Errs.name }}</p>
         {{ end }}
       </div>
 
@@ -26,7 +26,7 @@
         <label for="ticker">Ticker:</label>
         <input name="ticker" value="{{ .Data.trade.Ticker }}" />
         {{ if .Data.errs.ticker }}
-          <p class="form-error">{{ .Data.errs.ticker }}</p>
+          <p class="form-error">{{ .Data.Errs.ticker }}</p>
         {{ end }}
       </div>
 
@@ -34,7 +34,7 @@
         <label for="purchase_date">Purchase Date:</label>
         <input name="purchase_date" value="{{ .Data.trade.PurchaseDate }}" />
         {{ if .Data.errs.purchase_date }}
-          <p class="form-error">{{ .Data.errs.purchase_date }}</p>
+          <p class="form-error">{{ .Data.Errs.purchase_date }}</p>
         {{ end }}
       </div>
 
@@ -42,7 +42,7 @@
         <label for="shares">Shares:</label>
         <input name="shares" value="{{ .Data.trade.Shares }}" />
         {{ if .Data.errs.shares }}
-          <p class="form-error">{{ .Data.errs.shares }}</p>
+          <p class="form-error">{{ .Data.Errs.shares }}</p>
         {{ end }}
       </div>
 
@@ -50,7 +50,7 @@
         <label for="price">Price:</label>
         <input name="price" value="{{ .Data.trade.Price }}" />
         {{ if .Data.errs.price }}
-          <p class="form-error">{{ .Data.errs.price }}</p>
+          <p class="form-error">{{ .Data.Errs.price }}</p>
         {{ end }}
       </div>
 
@@ -58,7 +58,7 @@
         <label for="type">Type:</label>
         <input name="type" value="{{ .Data.trade.Type }}" />
         {{ if .Data.errs.type }}
-          <p class="form-error">{{ .Data.errs.type }}</p>
+          <p class="form-error">{{ .Data.Errs.type }}</p>
         {{ end }}
       </div>
 
@@ -66,13 +66,13 @@
         <label for="account">Account:</label>
         <input name="account" value="{{ .Data.trade.Account }}" />
         {{ if .Data.errs.account }}
-          <p class="form-error">{{ .Data.errs.account }}</p>
+          <p class="form-error">{{ .Data.Errs.account }}</p>
         {{ end }}
       </div>
 
       <input
         type="submit"
-        value="{{- if ne .Data.type "create" -}}
+        value="{{- if ne .Data.Type "create" -}}
           Save
         {{- else -}}
           Create
@@ -83,7 +83,7 @@
     </form>
   </div>
 
-  {{ if ne .Data.type "create" }}
+  {{ if ne .Data.Type "create" }}
     <form method="POST" action="/trades/{{ .Data.trade.ID }}/delete">
       <input type="submit" value="Delete" />
     </form>

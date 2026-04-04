@@ -8,6 +8,21 @@ import (
 	"fin-web/internal/model"
 )
 
+type NetWorthPage struct {
+	NetWorthItems []model.NetWorthItem
+}
+
+type NetWorthItemPage struct {
+	NetWorthItem model.NetWorthItem
+	Type         string
+}
+
+type NetWorthFormPage struct {
+	NetWorthItem model.NetWorthItemParams
+	Errs         map[string]string
+	Type         string
+}
+
 func netWorth(w http.ResponseWriter, r *http.Request) error {
 	netWorthItems, err := model.QueryNetWorthItems(dbConn, model.QueryNetWorthItemsFilters{
 		OrderBy:        "date",
@@ -37,9 +52,9 @@ func netWorth(w http.ResponseWriter, r *http.Request) error {
 
 	}
 
-	err = renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"netWorthItems": netWorthItems,
+	err = renderTemplate(w, Base[NetWorthPage]{
+		Data: NetWorthPage{
+			NetWorthItems: netWorthItems,
 		},
 	}, "layout", []string{"net-worth/net-worth.html", "layout.html"})
 	if err != nil {
@@ -62,9 +77,10 @@ func netWorthItem(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"netWorthItem": netWorthItem,
+	err = renderTemplate(w, Base[NetWorthItemPage]{
+		Data: NetWorthItemPage{
+			NetWorthItem: netWorthItem,
+			Type:         "edit",
 		},
 	}, "layout", []string{"net-worth/net-worth-form.html", "net-worth/net-worth-item.html", "layout.html"})
 	if err != nil {
@@ -177,10 +193,11 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 
 	params, errs := validateNetWorthForm(r)
 	if len(errs) != 0 {
-		err := renderTemplate(w, Base[map[string]any]{
-			Data: map[string]any{
-				"errs":         errs,
-				"netWorthItem": params,
+		err := renderTemplate(w, Base[NetWorthFormPage]{
+			Data: NetWorthFormPage{
+				NetWorthItem: params,
+				Errs:         errs,
+				Type:         "edit",
 			},
 		}, "layout", []string{"net-worth/net-worth-form.html", "net-worth/net-worth-item.html", "layout.html"})
 		if err != nil {
@@ -216,9 +233,9 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 }
 
 func newNetWorthItem(w http.ResponseWriter, r *http.Request) error {
-	err := renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"type": "create",
+	err := renderTemplate(w, Base[NetWorthFormPage]{
+		Data: NetWorthFormPage{
+			Type: "create",
 		},
 	}, "layout", []string{"net-worth/net-worth-form.html", "net-worth/net-worth-item.html", "layout.html"})
 	if err != nil {
@@ -234,10 +251,11 @@ func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	params, errs := validateNetWorthForm(r)
 
 	if len(errs) != 0 {
-		err := renderTemplate(w, Base[map[string]any]{
-			Data: map[string]any{
-				"errs":         errs,
-				"netWorthItem": params,
+		err := renderTemplate(w, Base[NetWorthFormPage]{
+			Data: NetWorthFormPage{
+				NetWorthItem: params,
+				Errs:         errs,
+				Type:         "create",
 			},
 		}, "layout", []string{"net-worth/net-worth-form.html", "net-worth/net-worth-item.html", "layout.html"})
 		if err != nil {

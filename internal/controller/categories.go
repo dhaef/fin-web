@@ -8,6 +8,15 @@ import (
 	"fin-web/internal/model"
 )
 
+type CategoriesPage struct {
+	Categories []model.Category
+}
+
+type CategoryPage struct {
+	Category model.Category
+	Type     string
+}
+
 func categories(w http.ResponseWriter, r *http.Request) error {
 	categories, err := model.GetCategories(dbConn)
 	if err != nil {
@@ -17,9 +26,9 @@ func categories(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"categories": categories,
+	err = renderTemplate(w, Base[CategoriesPage]{
+		Data: CategoriesPage{
+			Categories: categories,
 		},
 	}, "layout", []string{"categories/categories.html", "layout.html"})
 	if err != nil {
@@ -43,9 +52,10 @@ func category(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"category": c,
+	err = renderTemplate(w, Base[CategoryPage]{
+		Data: CategoryPage{
+			Category: c,
+			Type:     "edit",
 		},
 	}, "layout", []string{"categories/category.html", "layout.html"})
 	if err != nil {
@@ -59,9 +69,9 @@ func category(w http.ResponseWriter, r *http.Request) error {
 }
 
 func newCategory(w http.ResponseWriter, r *http.Request) error {
-	err := renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"type": "create",
+	err := renderTemplate(w, Base[CategoryPage]{
+		Data: CategoryPage{
+			Type: "create",
 		},
 	}, "layout", []string{"categories/category.html", "layout.html"})
 	if err != nil {

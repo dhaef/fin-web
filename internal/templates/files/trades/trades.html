@@ -7,7 +7,7 @@
 {{ define "body" }}
   <div>
     <div id="trades-counts" class="hide">
-      {{ range .Data.prices }}
+      {{ range .Data.Prices }}
         <p>{{ .Ticker }}:{{ .Ticker }}:{{ .Value }}</p>
       {{ end }}
     </div>
@@ -37,7 +37,7 @@
         </tr>
       </thead>
       <tbody>
-        {{ range .Data.trades }}
+        {{ range .Data.Trades }}
           <tr>
             <td><a href="/trades/{{ .ID }}">{{ .Name.String }}</a></td>
             <td>{{ .PurchaseDate }}</td>
