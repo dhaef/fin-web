@@ -18,9 +18,35 @@ type NetWorthItemPage struct {
 }
 
 type NetWorthFormPage struct {
-	NetWorthItem model.NetWorthItemParams
-	Errs         map[string]string
-	Type         string
+	Form NetWorthFormData
+	Errs map[string]string
+	Type string
+}
+
+type NetWorthFormData struct {
+	Date       string
+	Cash       string
+	Investment string
+	Debit      string
+	Credit     string
+	Savings    string
+	Retirement string
+	Loans      string
+	ID         string
+}
+
+func ptrToString(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
+}
+
+func ptrToStringFloat32(p *float32) string {
+	if p == nil {
+		return ""
+	}
+	return fmt.Sprintf("%f", *p)
 }
 
 func netWorth(w http.ResponseWriter, r *http.Request) error {
@@ -77,10 +103,22 @@ func netWorthItem(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base[NetWorthItemPage]{
-		Data: NetWorthItemPage{
-			NetWorthItem: netWorthItem,
-			Type:         "edit",
+	form := NetWorthFormData{
+		Date:       netWorthItem.Date,
+		Cash:       fmt.Sprintf("%f", netWorthItem.Cash),
+		Investment: fmt.Sprintf("%f", netWorthItem.Investment),
+		Debit:      fmt.Sprintf("%f", netWorthItem.Debit),
+		Credit:     fmt.Sprintf("%f", netWorthItem.Credit),
+		Savings:    fmt.Sprintf("%f", netWorthItem.Savings),
+		Retirement: fmt.Sprintf("%f", netWorthItem.Retirement),
+		Loans:      fmt.Sprintf("%f", netWorthItem.Loans),
+		ID:         netWorthItem.ID,
+	}
+
+	err = renderTemplate(w, Base[NetWorthFormPage]{
+		Data: NetWorthFormPage{
+			Form: form,
+			Type: "edit",
 		},
 	}, "layout", []string{"net-worth/net-worth-form.html", "net-worth/net-worth-item.html", "layout.html"})
 	if err != nil {
@@ -193,11 +231,21 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 
 	params, errs := validateNetWorthForm(r)
 	if len(errs) != 0 {
+		form := NetWorthFormData{
+			Date:       ptrToString(params.Date),
+			Cash:       ptrToStringFloat32(params.Cash),
+			Investment: ptrToStringFloat32(params.Investment),
+			Debit:      ptrToStringFloat32(params.Debit),
+			Credit:     ptrToStringFloat32(params.Credit),
+			Savings:    ptrToStringFloat32(params.Savings),
+			Retirement: ptrToStringFloat32(params.Retirement),
+			Loans:      ptrToStringFloat32(params.Loans),
+		}
 		err := renderTemplate(w, Base[NetWorthFormPage]{
 			Data: NetWorthFormPage{
-				NetWorthItem: params,
-				Errs:         errs,
-				Type:         "edit",
+				Form: form,
+				Errs: errs,
+				Type: "edit",
 			},
 		}, "layout", []string{"net-worth/net-worth-form.html", "net-worth/net-worth-item.html", "layout.html"})
 		if err != nil {
@@ -251,11 +299,21 @@ func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	params, errs := validateNetWorthForm(r)
 
 	if len(errs) != 0 {
+		form := NetWorthFormData{
+			Date:       ptrToString(params.Date),
+			Cash:       ptrToStringFloat32(params.Cash),
+			Investment: ptrToStringFloat32(params.Investment),
+			Debit:      ptrToStringFloat32(params.Debit),
+			Credit:     ptrToStringFloat32(params.Credit),
+			Savings:    ptrToStringFloat32(params.Savings),
+			Retirement: ptrToStringFloat32(params.Retirement),
+			Loans:      ptrToStringFloat32(params.Loans),
+		}
 		err := renderTemplate(w, Base[NetWorthFormPage]{
 			Data: NetWorthFormPage{
-				NetWorthItem: params,
-				Errs:         errs,
-				Type:         "create",
+				Form: form,
+				Errs: errs,
+				Type: "create",
 			},
 		}, "layout", []string{"net-worth/net-worth-form.html", "net-worth/net-worth-item.html", "layout.html"})
 		if err != nil {
