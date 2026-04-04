@@ -37,7 +37,7 @@ func netWorth(w http.ResponseWriter, r *http.Request) error {
 
 	}
 
-	err = renderTemplate(w, Base{
+	err = renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"netWorthItems": netWorthItems,
 		},
@@ -62,7 +62,7 @@ func netWorthItem(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base{
+	err = renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"netWorthItem": netWorthItem,
 		},
@@ -177,7 +177,7 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 
 	params, errs := validateNetWorthForm(r)
 	if len(errs) != 0 {
-		err := renderTemplate(w, Base{
+		err := renderTemplate(w, Base[map[string]any]{
 			Data: map[string]any{
 				"errs":         errs,
 				"netWorthItem": params,
@@ -216,7 +216,7 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 }
 
 func newNetWorthItem(w http.ResponseWriter, r *http.Request) error {
-	err := renderTemplate(w, Base{
+	err := renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"type": "create",
 		},
@@ -234,7 +234,7 @@ func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	params, errs := validateNetWorthForm(r)
 
 	if len(errs) != 0 {
-		err := renderTemplate(w, Base{
+		err := renderTemplate(w, Base[map[string]any]{
 			Data: map[string]any{
 				"errs":         errs,
 				"netWorthItem": params,

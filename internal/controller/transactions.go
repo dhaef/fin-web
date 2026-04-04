@@ -17,7 +17,7 @@ var ExpenseCategoriesToExclude = []string{"34"}
 
 func transactions(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {
-		return renderTemplate(w, "", "layout", []string{"not-found.html", "layout.html"})
+		return renderTemplate(w, Base[any]{}, "layout", []string{"not-found.html", "layout.html"})
 	}
 
 	q := r.URL.Query()
@@ -162,7 +162,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		fmt.Println("faile to get categories from DB: ", err.Error())
 	}
 
-	err = renderTemplate(w, Base{
+	err = renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"transactions":           transactions,
 			"startDate":              startDate,
@@ -192,6 +192,10 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type UncategorizedTransactionsPage struct {
+	Transactions []model.Transaction
+}
+
 func uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
 	emptyCustomCategory := true
 	transactions, err := model.QueryTransactions(
@@ -207,9 +211,9 @@ func uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base{
-		Data: map[string]any{
-			"transactions": transactions,
+	err = renderTemplate(w, Base[UncategorizedTransactionsPage]{
+		Data: UncategorizedTransactionsPage{
+			Transactions: transactions,
 		},
 	}, "layout", []string{"transactions/uncategorized-transactions.html", "layout.html"})
 	if err != nil {
@@ -220,6 +224,12 @@ func uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	return nil
+}
+
+type TransactionPage struct {
+	Transaction model.Transaction
+	Categories  []model.Category
+	Success     bool
 }
 
 func transaction(w http.ResponseWriter, r *http.Request) error {
@@ -247,11 +257,11 @@ func transaction(w http.ResponseWriter, r *http.Request) error {
 
 	success := responseCookie != nil && responseCookie.Value == "success"
 
-	err = renderTemplate(w, Base{
-		Data: map[string]any{
-			"transaction": transaction,
-			"categories":  cs,
-			"success":     success,
+	err = renderTemplate(w, Base[TransactionPage]{
+		Data: TransactionPage{
+			Transaction: transaction,
+			Categories:  cs,
+			Success:     success,
 		},
 	}, "layout", []string{"transactions/transaction.html", "layout.html"})
 	if err != nil {

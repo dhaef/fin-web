@@ -32,7 +32,7 @@ func annual(w http.ResponseWriter, r *http.Request) error {
 
 	netCounts := getNetCounts(expenseCountsByYear, incomeCountsByYear)
 
-	err = renderTemplate(w, Base{
+	err = renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"incomeCountsByYear":  incomeCountsByYear,
 			"expenseCountsByYear": expenseCountsByYear,

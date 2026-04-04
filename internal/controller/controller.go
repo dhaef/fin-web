@@ -90,8 +90,8 @@ func favicon(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-type Base struct {
-	Data any
+type Base[T any] struct {
+	Data T
 }
 
 func buildTemplatePaths(files []string) []string {
@@ -110,7 +110,7 @@ func handleTemplateFiles(files []string) (*template.Template, error) {
 	return template.ParseFS(templates.Templates, filesWithFullPath...)
 }
 
-func renderTemplate(w http.ResponseWriter, data any, name string, files []string) error {
+func renderTemplate[T any](w http.ResponseWriter, data Base[T], name string, files []string) error {
 	t, err := handleTemplateFiles(files)
 	if err != nil {
 		return err
@@ -147,7 +147,7 @@ func MakeHandler(h apiFunc) http.HandlerFunc {
 					return
 				}
 
-				renderTemplate(w, "", "layout", []string{"not-found.html", "layout.html"})
+				renderTemplate(w, Base[any]{}, "layout", []string{"not-found.html", "layout.html"})
 			}
 		}
 

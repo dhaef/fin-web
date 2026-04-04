@@ -17,7 +17,7 @@ func categories(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base{
+	err = renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"categories": categories,
 		},
@@ -43,7 +43,7 @@ func category(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base{
+	err = renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"category": c,
 		},
@@ -59,7 +59,7 @@ func category(w http.ResponseWriter, r *http.Request) error {
 }
 
 func newCategory(w http.ResponseWriter, r *http.Request) error {
-	err := renderTemplate(w, Base{
+	err := renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"type": "create",
 		},

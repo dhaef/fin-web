@@ -7,7 +7,7 @@
 {{ define "body" }}
   <div class="my-1">
     <form method="POST">
-      {{ if .Data.success }}
+      {{ if .Data.Success }}
         <div class="form-success">
           <p>Transaction successfully updated!</p>
         </div>
@@ -16,12 +16,12 @@
 
       <div class="form-item">
         <label for="name">Name:</label>
-        <input name="name" disabled value="{{ .Data.transaction.Name }}" />
+        <input name="name" disabled value="{{ .Data.Transaction.Name }}" />
       </div>
 
       <div class="form-item">
         <label for="amount">Amount:</label>
-        <input name="amount" disabled value="{{ .Data.transaction.Amount }}" />
+        <input name="amount" disabled value="{{ .Data.Transaction.Amount }}" />
       </div>
 
       <div class="form-item">
@@ -29,25 +29,25 @@
         <input
           name="account"
           disabled
-          value="{{ .Data.transaction.Account }}"
+          value="{{ .Data.Transaction.Account }}"
         />
       </div>
 
       <div class="form-item">
         <label for="date">Date:</label>
-        <input name="date" disabled value="{{ .Data.transaction.Date }}" />
+        <input name="date" disabled value="{{ .Data.Transaction.Date }}" />
       </div>
 
       <div class="form-item">
         <label for="category">Category:</label>
         <select name="category">
-          {{ range .Data.categories }}
+          {{ range .Data.Categories }}
             <option
               value="{{ .ID }}"
               {{ if
                 eq
                 .ID
-                $.Data.transaction.CategoryID.Int32
+                $.Data.Transaction.CategoryID.Int32
               }}
                 selected
               {{ end }}
@@ -62,7 +62,7 @@
         <label for="description">Description:</label>
         <input
           name="description"
-          value="{{ .Data.transaction.Description.Value }}"
+          value="{{ .Data.Transaction.Description.Value }}"
         />
       </div>
 
@@ -70,7 +70,7 @@
     </form>
   </div>
 
-  <form method="POST" action="/transactions/{{ .Data.transaction.ID }}/delete">
+  <form method="POST" action="/transactions/{{ .Data.Transaction.ID }}/delete">
     <input type="submit" value="Delete" />
   </form>
 {{ end }}

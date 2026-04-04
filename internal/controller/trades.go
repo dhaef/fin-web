@@ -40,7 +40,7 @@ func trades(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	return renderTemplate(w, Base{
+	return renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"prices": prices,
 			"trades": trades,
@@ -160,7 +160,7 @@ func trade(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = renderTemplate(w, Base{
+	err = renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"trade": t,
 		},
@@ -191,7 +191,7 @@ func deleteTrade(w http.ResponseWriter, r *http.Request) error {
 }
 
 func newTrade(w http.ResponseWriter, r *http.Request) error {
-	err := renderTemplate(w, Base{
+	err := renderTemplate(w, Base[map[string]any]{
 		Data: map[string]any{
 			"type": "create",
 		},
@@ -254,7 +254,7 @@ func createTrade(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if len(errs) != 0 {
-		err := renderTemplate(w, Base{
+		err := renderTemplate(w, Base[map[string]any]{
 			Data: map[string]any{
 				"errs": errs,
 				"trade": map[string]any{
@@ -343,7 +343,7 @@ func updateTrade(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if len(errs) != 0 {
-		err := renderTemplate(w, Base{
+		err := renderTemplate(w, Base[map[string]any]{
 			Data: map[string]any{
 				"errs": errs,
 				"trade": map[string]any{
