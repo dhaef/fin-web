@@ -95,7 +95,9 @@
       <strong>Income: </strong><span class="currency">{{ .Data.iTotal }}</span>
     </div>
     <div class="card card-highlight">
-      <strong>Net: </strong><span class="currency">{{ .Data.total }}</span>
+      <strong>Net: </strong
+      ><span class="currency">{{ .Data.total }}</span>
+      ({{ .Data.savedPercent }}%)
     </div>
   </div>
   <div id="transactions-table-container" class="my-1">

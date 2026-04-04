@@ -178,6 +178,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 			"eTotal":                 eTotal,
 			"iTotal":                 iTotal,
 			"total":                  iTotal - eTotal,
+			"savedPercent":           math.Round(((iTotal - eTotal) / iTotal) * 100),
 			"netCounts":              netCounts,
 		},
 	}, "layout", []string{"transactions/transactions.html", "layout.html"})
