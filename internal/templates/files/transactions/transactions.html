@@ -15,14 +15,14 @@
           type="date"
           id="startDate"
           name="startDate"
-          value="{{ .Data.startDate }}"
+          value="{{ .Data.StartDate }}"
         />
         <span class="separator">to</span>
         <input
           type="date"
           id="endDate"
           name="endDate"
-          value="{{ .Data.endDate }}"
+          value="{{ .Data.EndDate }}"
         />
       </div>
     </div>
@@ -33,13 +33,13 @@
         <select name="sortBy" id="sortBy">
           <option
             value="date"
-            {{ if eq .Data.orderBy "date" }}selected{{ end }}
+            {{ if eq .Data.OrderBy "date" }}selected{{ end }}
           >
             Date
           </option>
           <option
             value="amount"
-            {{ if eq .Data.orderBy "amount" }}selected{{ end }}
+            {{ if eq .Data.OrderBy "amount" }}selected{{ end }}
           >
             Amount
           </option>
@@ -47,13 +47,13 @@
         <select name="sortDirection" id="sortDirection">
           <option
             value="ASC"
-            {{ if eq .Data.orderDirection "ASC" }}selected{{ end }}
+            {{ if eq .Data.OrderDirection "ASC" }}selected{{ end }}
           >
             ASC
           </option>
           <option
             value="DESC"
-            {{ if eq .Data.orderDirection "DESC" }}selected{{ end }}
+            {{ if eq .Data.OrderDirection "DESC" }}selected{{ end }}
           >
             DESC
           </option>
@@ -70,10 +70,10 @@
         size="1"
         class="multi-select"
       >
-        {{ range .Data.categories }}
+        {{ range .Data.Categories }}
           <option
             value="{{ .ID }}"
-            {{ if index $.Data.selectedCategories (printf "%v" .ID) }}
+            {{ if index $.Data.SelectedCategories (printf "%v" .ID) }}
               selected
             {{ end }}
           >
@@ -89,15 +89,15 @@
   <div class="my-1 flex summary">
     <div class="card card-warning">
       <strong>Expenses: </strong
-      ><span class="currency">{{ .Data.eTotal }}</span>
+      ><span class="currency">{{ .Data.ETotal }}</span>
     </div>
     <div class="card card-growth">
-      <strong>Income: </strong><span class="currency">{{ .Data.iTotal }}</span>
+      <strong>Income: </strong><span class="currency">{{ .Data.ITotal }}</span>
     </div>
     <div class="card card-highlight">
       <strong>Net: </strong
-      ><span class="currency">{{ .Data.total }}</span>
-      ({{ .Data.savedPercent }}%)
+      ><span class="currency">{{ .Data.Total }}</span>
+      ({{ .Data.SavedPercent }}%)
     </div>
   </div>
   <div id="transactions-table-container" class="my-1">
@@ -112,7 +112,7 @@
         </tr>
       </thead>
       <tbody>
-        {{ range .Data.transactions }}
+        {{ range .Data.Transactions }}
           <tr>
             <td><a href="/transactions/{{ .ID }}">{{ .Name }}</a></td>
             <td class="currency">{{ .Amount }}</td>
@@ -128,7 +128,7 @@
   <div class="category-donuts">
     <div>
       <div id="category-counts" class="hide">
-        {{ range .Data.expensesCategoryCounts }}
+        {{ range .Data.ExpensesCategoryCounts }}
           <p>{{ .ID }}:{{ .Key }}:{{ .Value }}</p>
         {{ end }}
       </div>
@@ -138,7 +138,7 @@
 
     <div>
       <div id="category-income-counts" class="hide">
-        {{ range .Data.incomeCategoryCounts }}
+        {{ range .Data.IncomeCategoryCounts }}
           <p>{{ .ID }}:{{ .Key }}:{{ .Value }}</p>
         {{ end }}
       </div>
@@ -155,7 +155,7 @@
 
   <div id="net-income-bar-container">
     <div id="net-income-counts" class="hide">
-      {{ range .Data.netCounts }}
+        {{ range .Data.NetCounts }}
         <p>{{ .Key }}:{{ .Net }}</p>
       {{ end }}
     </div>
@@ -165,7 +165,7 @@
 
   <div id="previous-year-bar-container" class="hide">
     <div id="previous-year-counts" class="hide">
-      {{ range .Data.expenseCountsByMonth }}
+        {{ range .Data.ExpenseCountsByMonth }}
         <p>{{ .Key }}:{{ .Value }}</p>
       {{ end }}
     </div>
@@ -175,7 +175,7 @@
 
   <div id="previous-year-income-bar-container" class="hide">
     <div id="previous-year-income-counts" class="hide">
-      {{ range .Data.incomeCountsByMonth }}
+        {{ range .Data.IncomeCountsByMonth }}
         <p>{{ .Key }}:{{ .Value }}</p>
       {{ end }}
     </div>

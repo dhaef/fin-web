@@ -15,6 +15,25 @@ var ExcludedIncomeCategories = []string{"34"}
 
 var ExpenseCategoriesToExclude = []string{"34"}
 
+type TransactionsPage struct {
+	Transactions           []model.Transaction
+	StartDate              string
+	EndDate                string
+	OrderBy                string
+	OrderDirection         string
+	Categories             []model.Category
+	SelectedCategories     map[string]bool
+	ExpensesCategoryCounts []model.GroupByCounts
+	IncomeCategoryCounts   []model.GroupByCounts
+	ExpenseCountsByMonth   []model.GroupByCounts
+	IncomeCountsByMonth    []model.GroupByCounts
+	ETotal                 float64
+	ITotal                 float64
+	Total                  float64
+	SavedPercent           int
+	NetCounts              []NetCounts
+}
+
 func transactions(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {
 		return renderTemplate(w, Base[any]{}, "layout", []string{"not-found.html", "layout.html"})
@@ -162,24 +181,24 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		fmt.Println("faile to get categories from DB: ", err.Error())
 	}
 
-	err = renderTemplate(w, Base[map[string]any]{
-		Data: map[string]any{
-			"transactions":           transactions,
-			"startDate":              startDate,
-			"endDate":                endDate,
-			"orderBy":                orderBy,
-			"orderDirection":         orderDirection,
-			"categories":             cs,
-			"selectedCategories":     selectedCatMap,
-			"expensesCategoryCounts": expensesCategoryCounts,
-			"incomeCategoryCounts":   incomeCategoryCounts,
-			"expenseCountsByMonth":   expenseCountsByMonth,
-			"incomeCountsByMonth":    incomeCountsByMonth,
-			"eTotal":                 eTotal,
-			"iTotal":                 iTotal,
-			"total":                  iTotal - eTotal,
-			"savedPercent":           math.Round(((iTotal - eTotal) / iTotal) * 100),
-			"netCounts":              netCounts,
+	err = renderTemplate(w, Base[TransactionsPage]{
+		Data: TransactionsPage{
+			Transactions:           transactions,
+			StartDate:              startDate,
+			EndDate:                endDate,
+			OrderBy:                orderBy,
+			OrderDirection:         orderDirection,
+			Categories:             cs,
+			SelectedCategories:     selectedCatMap,
+			ExpensesCategoryCounts: expensesCategoryCounts,
+			IncomeCategoryCounts:   incomeCategoryCounts,
+			ExpenseCountsByMonth:   expenseCountsByMonth,
+			IncomeCountsByMonth:    incomeCountsByMonth,
+			ETotal:                 eTotal,
+			ITotal:                 iTotal,
+			Total:                  iTotal - eTotal,
+			SavedPercent:           int(math.Round(((iTotal - eTotal) / iTotal) * 100)),
+			NetCounts:              netCounts,
 		},
 	}, "layout", []string{"transactions/transactions.html", "layout.html"})
 	if err != nil {
@@ -231,6 +250,8 @@ type TransactionPage struct {
 	Categories  []model.Category
 	Success     bool
 }
+
+
 
 func transaction(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
