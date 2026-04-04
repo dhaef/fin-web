@@ -210,7 +210,8 @@ td:nth-child(5) {
 
 /* Polishing the inputs */
 input,
-select {
+select,
+button {
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   padding: 6px 12px;
@@ -241,6 +242,18 @@ select {
 
 .btn-filter:hover {
   background-color: #334155;
+}
+
+.value {
+  border-radius: 6px 0 0 6px !important;
+  border-right: 0 !important;
+}
+
+.rm-value-btn {
+  margin-top: 0.25rem;
+  border: 1px solid rgb(118, 118, 118);
+  border-left: 0;
+  border-radius: 0 6px 6px 0;
 }
 
 .category-container {

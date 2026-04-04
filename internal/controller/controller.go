@@ -110,14 +110,6 @@ func handleTemplateFiles(files []string) (*template.Template, error) {
 	return template.ParseFS(templates.Templates, filesWithFullPath...)
 }
 
-// func render(w http.ResponseWriter, data any, files []string) error {
-// 	t, err := handleTemplateFiles(files)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return t.Execute(w, data)
-// }
-
 func renderTemplate(w http.ResponseWriter, data any, name string, files []string) error {
 	t, err := handleTemplateFiles(files)
 	if err != nil {

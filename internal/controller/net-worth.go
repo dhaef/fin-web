@@ -217,7 +217,9 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 
 func newNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	err := renderTemplate(w, Base{
-		Data: map[string]any{},
+		Data: map[string]any{
+			"type": "create",
+		},
 	}, "layout", []string{"net-worth/net-worth-form.html", "net-worth/net-worth-item.html", "layout.html"})
 	if err != nil {
 		return APIError{

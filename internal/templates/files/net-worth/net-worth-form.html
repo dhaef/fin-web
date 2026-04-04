@@ -100,12 +100,22 @@
         {{ end }}
       </div>
 
-      <input type="submit" />
+      <input
+        type="submit"
+        value="{{ if ne .type "create" -}}
+          Save
+        {{- else -}}
+          Create
+        {{- end }}"
+      />
+
       <a href="/net-worth">cancel</a>
     </form>
   </div>
 
-  <form method="POST" action="/net-worth/{{ .netWorthItem.ID }}/delete">
-    <input type="submit" value="Delete" />
-  </form>
+  {{ if ne .type "create" }}
+    <form method="POST" action="/net-worth/{{ .netWorthItem.ID }}/delete">
+      <input type="submit" value="Delete" />
+    </form>
+  {{ end }}
 {{ end }}
