@@ -19,7 +19,10 @@ var baseStyle = lipgloss.NewStyle().
 	BorderForeground(lipgloss.Color("240"))
 
 type TransactionsTable struct {
-	table table.Model
+	table     table.Model
+	startDate string
+	endDate   string
+	dbConn    *sql.DB
 }
 
 func NewTransactionsTable(dbConn *sql.DB) TransactionsTable {
@@ -42,12 +45,22 @@ func NewTransactionsTable(dbConn *sql.DB) TransactionsTable {
 	startDate := firstDayOfThisMonth.Format("2006-01-02")
 	endDate := endOfThisMonth.Format("2006-01-02")
 
-	transactions, err = model.QueryTransactions(dbConn, model.QueryTransactionsFilters{
-		OrderBy:        "amount",
-		OrderDirection: "desc",
-		StartDate:      startDate,
-		EndDate:        endDate,
-		// Categories:          categories,
+	tt := TransactionsTable{
+		startDate: startDate,
+		endDate:   endDate,
+		dbConn:    dbConn,
+	}
+	tt.refreshTable()
+
+	return tt
+}
+
+func (t *TransactionsTable) refreshTable() {
+	transactions, err := model.QueryTransactions(t.dbConn, model.QueryTransactionsFilters{
+		OrderBy:             "amount",
+		OrderDirection:      "desc",
+		StartDate:           t.startDate,
+		EndDate:             t.endDate,
 		CategoriesToExclude: []string{"34"},
 	})
 	if err != nil {
@@ -64,17 +77,17 @@ func NewTransactionsTable(dbConn *sql.DB) TransactionsTable {
 
 	rows := make([]table.Row, len(transactions))
 
-	for idx, t := range transactions {
+	for idx, tr := range transactions {
 		rows[idx] = table.Row{
-			t.Name,
-			strconv.FormatFloat(t.Amount, 'f', 2, 64),
-			t.Date,
-			t.CustomCategory.String,
-			t.Account,
+			tr.Name,
+			strconv.FormatFloat(tr.Amount, 'f', 2, 64),
+			tr.Date,
+			tr.CustomCategory.String,
+			tr.Account,
 		}
 	}
 
-	t := table.New(
+	t.table = table.New(
 		table.WithColumns(columns),
 		table.WithRows(rows),
 		table.WithFocused(false),
@@ -92,9 +105,7 @@ func NewTransactionsTable(dbConn *sql.DB) TransactionsTable {
 		Foreground(lipgloss.Color("229")).
 		Background(lipgloss.Color("57")).
 		Bold(false)
-	t.SetStyles(s)
-
-	return TransactionsTable{table: t}
+	t.table.SetStyles(s)
 }
 
 func (t TransactionsTable) Init() tea.Cmd {
@@ -102,7 +113,15 @@ func (t TransactionsTable) Init() tea.Cmd {
 }
 
 func (t TransactionsTable) View() tea.View {
-	return tea.NewView(baseStyle.Render(t.table.View()) + "\n  " + t.table.HelpView() + "\n")
+	dateRangeStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("240")).
+		Bold(true)
+
+	helpStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("240"))
+
+	header := dateRangeStyle.Render(fmt.Sprintf("  %s → %s  (←/→: prev/next month  esc: blur  t: focus table  q: quit", t.startDate, t.endDate))
+	return tea.NewView(baseStyle.Render(t.table.View()) + "\n" + header + "\n" + helpStyle.Render("  "+t.table.HelpView()) + "\n")
 }
 
 func (t TransactionsTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -118,6 +137,26 @@ func (t TransactionsTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			t.table.Focus()
 		case "q", "ctrl+c":
 			return t, tea.Quit
+		case "left":
+			if t.startDate != "" && t.endDate != "" {
+				start, _ := time.Parse("2006-01-02", t.startDate)
+				end, _ := time.Parse("2006-01-02", t.endDate)
+				start = start.AddDate(0, -1, 0)
+				end = end.AddDate(0, -1, 0)
+				t.startDate = start.Format("2006-01-02")
+				t.endDate = end.Format("2006-01-02")
+				t.refreshTable()
+			}
+		case "right":
+			if t.startDate != "" && t.endDate != "" {
+				start, _ := time.Parse("2006-01-02", t.startDate)
+				end, _ := time.Parse("2006-01-02", t.endDate)
+				start = start.AddDate(0, 1, 0)
+				end = end.AddDate(0, 1, 0)
+				t.startDate = start.Format("2006-01-02")
+				t.endDate = end.Format("2006-01-02")
+				t.refreshTable()
+			}
 		case "enter":
 
 			return t, tea.Batch(
