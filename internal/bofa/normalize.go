@@ -3,6 +3,7 @@ package bofa
 import (
 	"database/sql"
 	"encoding/csv"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -50,8 +51,14 @@ func (p *Provider) ParseFile(filePath string) ([]model.Transaction, error) {
 			cc = sql.NullInt32{Valid: true, Int32: int32(categories[0].ID)}
 		}
 
-		date, _ := time.Parse("01/02/2006", r[0]) //
-		amount, _ := parseAmount(r[4])
+		date, err := time.Parse("01/02/2006", r[0])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse date %q: %w", r[0], err)
+		}
+		amount, err := parseAmount(r[4])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse amount %q: %w", r[4], err)
+		}
 
 		transactions = append(transactions, model.Transaction{
 			ID:         uuid.NewString(),
