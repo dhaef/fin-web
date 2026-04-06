@@ -9,11 +9,11 @@ import (
 )
 
 func main() {
-	dbPath := os.Getenv("dbPath")
-	tiingoToken := os.Getenv("tiingoToken")
+	dbPath := os.Getenv("DB_PATH")
+	tiingoToken := os.Getenv("TIINGO_TOKEN")
 
-	if dbPath == "" {
-		log.Fatal("dbPath is required")
+	if tiingoToken == "" {
+		log.Fatal("TIINGO_TOKEN is required")
 	}
 
 	if tiingoToken == "" {

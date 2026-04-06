@@ -12,11 +12,11 @@ import (
 )
 
 func main() {
-	dbPath := os.Getenv("dbPath")
-	dirPath := os.Getenv("dirPath")
+	dbPath := os.Getenv("DB_PATH")
+	dirPath := os.Getenv("DIR_PATH")
 
-	if dbPath == "" {
-		log.Fatal("dbPath is required")
+	if dirPath == "" {
+		log.Fatal("DIR_PATH is required")
 	}
 
 	if dirPath == "" {

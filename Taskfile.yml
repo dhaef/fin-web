@@ -30,9 +30,9 @@ tasks:
   upload-db:
     desc: Upload DB to remote server
     cmds:
-      - scp $dbPath $REMOTE_PATH
+      - scp $DB_PATH $REMOTE_PATH
 
   download-db:
     desc: Download DB from remote server
     cmds:
-      - scp $REMOTE_PATH $dbPath
+      - scp $REMOTE_PATH $DB_PATH
