@@ -26,3 +26,13 @@ tasks:
     desc: Seed categories
     cmds:
       - go run ./cmd/categories/main.go
+
+  upload-db:
+    desc: Upload DB to remote server
+    cmds:
+      - scp $dbPath $REMOTE_PATH
+
+  download-db:
+    desc: Download DB from remote server
+    cmds:
+      - scp $REMOTE_PATH $dbPath
