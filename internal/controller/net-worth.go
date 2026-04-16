@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"fin-web/internal/model"
 )
@@ -284,6 +285,9 @@ func newNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	err := renderTemplate(w, Base[NetWorthFormPage]{
 		Data: NetWorthFormPage{
 			Type: "create",
+			Form: NetWorthFormData{
+				Date: time.Now().Format("2006-01-02"),
+			},
 		},
 	}, "layout", []string{"net-worth/net-worth-form.html", "net-worth/net-worth-item.html", "layout.html"})
 	if err != nil {
