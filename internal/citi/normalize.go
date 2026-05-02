@@ -54,7 +54,7 @@ func (p *Provider) ParseFile(filePath string) ([]model.Transaction, error) {
 			amount, _ = util.ParseAmount(r[2])
 		} else if r[3] != "" { // Credit
 			a, _ := util.ParseAmount(r[3])
-			amount = -a
+			amount = a
 		}
 
 		normalizedName := strings.ToLower(r[1])
