@@ -83,13 +83,21 @@
       </select>
     </div>
 
-    <button id="filter-transactions" class="btn-filter">Update View</button>
+    <button id="filter-transactions" class="btn-filter">Filter</button>
   </div>
 
   <div class="my-1 flex summary">
     <div class="card card-warning">
-      <strong>Expenses: </strong
-      ><span class="currency">{{ .Data.ETotal }}</span>
+      
+      <details>
+        <summary>
+          <strong>Expenses: </strong><span class="currency">{{ .Data.ETotal }}</span>
+        </summary>
+        <div>
+        <p><strong>Fixed: </strong><span class="currency">{{.Data.FixedCosts}}</span> ({{.Data.FixedCostsPercent}}%)</p>
+          <p><strong>Fun: </strong><span class="currency">{{.Data.GuiltFree}}</span> ({{.Data.GuiltFreePercent}}%)</p>
+        </div>
+    </details>
     </div>
     <div class="card card-growth">
       <strong>Income: </strong><span class="currency">{{ .Data.ITotal }}</span>

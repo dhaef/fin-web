@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -32,7 +33,14 @@ type TransactionsPage struct {
 	Total                  float64
 	SavedPercent           int
 	NetCounts              []NetCounts
+	FixedCosts             float64
+	FixedCostsPercent      int
+	GuiltFree              float64
+	GuiltFreePercent       int
 }
+
+// TODO: should get move to the category DB record
+var fixedCostCategories = []int{31, 36, 39, 43, 45, 46, 51, 54, 56, 57}
 
 func transactions(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {
@@ -93,11 +101,25 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	cs, err := model.GetCategories(dbConn)
+	if err != nil {
+		fmt.Println("faile to get categories from DB: ", err.Error())
+	}
+
 	var eTotal float64
 	var iTotal float64
+
+	var fixedCosts float64
+	var guiltFree float64
+
 	for _, val := range transactions {
 		if val.Amount >= 0 {
 			eTotal += val.Amount
+			if slices.Contains(fixedCostCategories, int(val.CategoryID.Int32)) {
+				fixedCosts += val.Amount
+			} else {
+				guiltFree += val.Amount
+			}
 		} else {
 			iTotal += math.Abs(val.Amount)
 		}
@@ -176,11 +198,6 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		selectedCatMap[val] = true
 	}
 
-	cs, err := model.GetCategories(dbConn)
-	if err != nil {
-		fmt.Println("faile to get categories from DB: ", err.Error())
-	}
-
 	err = renderTemplate(w, Base[TransactionsPage]{
 		Data: TransactionsPage{
 			Transactions:           transactions,
@@ -199,6 +216,10 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 			Total:                  iTotal - eTotal,
 			SavedPercent:           int(math.Round(((iTotal - eTotal) / iTotal) * 100)),
 			NetCounts:              netCounts,
+			FixedCosts:             fixedCosts,
+			FixedCostsPercent:      int(math.Round((fixedCosts / iTotal) * 100)),
+			GuiltFree:              guiltFree,
+			GuiltFreePercent:       int(math.Round((guiltFree / iTotal) * 100)),
 		},
 	}, "layout", []string{"transactions/transactions.html", "layout.html"})
 	if err != nil {
@@ -250,8 +271,6 @@ type TransactionPage struct {
 	Categories  []model.Category
 	Success     bool
 }
-
-
 
 func transaction(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
