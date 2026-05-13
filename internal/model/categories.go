@@ -8,10 +8,12 @@ import (
 )
 
 type Category struct {
-	ID       int
-	Priority int
-	Label    string
-	Values   []CategoryValue
+	ID        int
+	Priority  int
+	Label     string
+	Values    []CategoryValue
+	Type      sql.NullString
+	IsIgnored bool
 }
 
 type CategoryValue struct {
@@ -22,7 +24,7 @@ type CategoryValue struct {
 
 func GetCategories(conn *sql.DB) ([]Category, error) {
 	rows, err := conn.Query(
-		"SELECT c.id, c.label, c.priority FROM categories as c ORDER BY priority",
+		"SELECT c.id, c.label, c.priority, c.type, c.is_ignored FROM categories as c ORDER BY priority",
 	)
 	if err != nil {
 		return []Category{}, err
@@ -37,6 +39,8 @@ func GetCategories(conn *sql.DB) ([]Category, error) {
 			&category.ID,
 			&category.Label,
 			&category.Priority,
+			&category.Type,
+			&category.IsIgnored,
 		); err != nil {
 			return []Category{}, err
 		}
@@ -50,7 +54,7 @@ func GetCategories(conn *sql.DB) ([]Category, error) {
 
 func GetCategory(conn *sql.DB, ID string) (Category, error) {
 	rows, err := conn.Query(
-		"SELECT c.id, c.label, c.priority, cv.id as category_value_id, cv.value, cv.category_id FROM categories as c LEFT JOIN category_values as cv on c.id = cv.category_id WHERE c.id = ?",
+		"SELECT c.id, c.label, c.priority, c.type, c.is_ignored, cv.id as category_value_id, cv.value, cv.category_id FROM categories as c LEFT JOIN category_values as cv on c.id = cv.category_id WHERE c.id = ?",
 		ID,
 	)
 	if err != nil {
@@ -67,6 +71,8 @@ func GetCategory(conn *sql.DB, ID string) (Category, error) {
 			&category.ID,
 			&category.Label,
 			&category.Priority,
+			&category.Type,
+			&category.IsIgnored,
 			&categoryValue.ID,
 			&categoryValue.Value,
 			&categoryValue.CategoryID,
@@ -89,7 +95,7 @@ func SearchCategories(conn *sql.DB, queries []string) ([]Category, error) {
 		return []Category{}, errors.New("at least one query is required")
 	}
 
-	queryStr := "SELECT DISTINCT c.id, c.priority, c.label FROM categories AS c JOIN category_values AS cv ON c.id = cv.category_id WHERE"
+	queryStr := "SELECT DISTINCT c.id, c.priority, c.label, c.type, c.is_ignored FROM categories AS c JOIN category_values AS cv ON c.id = cv.category_id WHERE"
 	args := []any{}
 	filter := "? LIKE '%' || cv.value || '%'"
 	filters := []string{}
@@ -117,6 +123,8 @@ func SearchCategories(conn *sql.DB, queries []string) ([]Category, error) {
 			&category.ID,
 			&category.Priority,
 			&category.Label,
+			&category.Type,
+			&category.IsIgnored,
 		); err != nil {
 			return []Category{}, err
 		}
@@ -127,11 +135,13 @@ func SearchCategories(conn *sql.DB, queries []string) ([]Category, error) {
 	return categories, nil
 }
 
-func CreateCategory(conn *sql.DB, name string, priority int) (int, error) {
-	queryStr := "INSERT INTO categories (label, priority) VALUES(?, ?) RETURNING id"
+func CreateCategory(conn *sql.DB, name string, priority int, categoryType string, isIgnored bool) (int, error) {
+	queryStr := "INSERT INTO categories (label, priority, type, is_ignored) VALUES(?, ?, ?, ?) RETURNING id"
 	args := []any{
 		name,
 		priority,
+		categoryType,
+		isIgnored,
 	}
 
 	var lastInsertID int
@@ -147,8 +157,10 @@ func CreateCategory(conn *sql.DB, name string, priority int) (int, error) {
 }
 
 type UpdateCategoryParams struct {
-	Label    *string
-	Priority *int
+	Label        *string
+	Priority     *int
+	CategoryType *string
+	IsIgnored    *bool
 }
 
 func UpdateCategory(conn *sql.DB, ID string, params UpdateCategoryParams) error {
@@ -164,6 +176,16 @@ func UpdateCategory(conn *sql.DB, ID string, params UpdateCategoryParams) error 
 	if params.Priority != nil {
 		updates = append(updates, " priority = ?")
 		args = append(args, *params.Priority)
+	}
+
+	if params.CategoryType != nil {
+		updates = append(updates, " type = ?")
+		args = append(args, *params.CategoryType)
+	}
+
+	if params.IsIgnored != nil {
+		updates = append(updates, " is_ignored = ?")
+		args = append(args, *params.IsIgnored)
 	}
 
 	if len(updates) == 0 {

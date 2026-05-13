@@ -4,7 +4,7 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   // clear errors on submit
-  const errElements = ['label', 'priority', 'values'];
+  const errElements = ['label', 'priority', 'values', 'type', 'is_ignored'];
   for (const i of errElements) {
     const el = document.querySelector(`.${i}-err`);
     if (el) {
@@ -14,6 +14,10 @@ form.addEventListener('submit', async (e) => {
 
   const label = form.querySelector('input[name="label"]')?.value;
   const priority = form.querySelector('input[name="priority"]')?.value;
+  const categoryType = form.querySelector(
+    'select[name="category_type"]'
+  )?.value;
+  const isIgnored = form.querySelector('input[name="is_ignored"]')?.checked;
   const values = [];
 
   for (const v of form.querySelectorAll('.value')) {
@@ -28,6 +32,8 @@ form.addEventListener('submit', async (e) => {
   const formData = new FormData();
   formData.append('label', label);
   formData.append('priority', priority);
+  formData.append('category_type', categoryType);
+  formData.append('is_ignored', isIgnored);
   formData.append('values', JSON.stringify(values));
 
   const resp = await fetch(document.location.pathname, {

@@ -25,6 +25,72 @@
       </div>
 
       <div class="form-item">
+        <label for="type">Type:</label>
+        <select name="category_type">
+          <option>Select Type...</option>
+          <option
+            value="income"
+            {{ if
+              eq
+              "income"
+              $.Data.Category.Type.String
+            }}
+              selected
+            {{ end }}
+          >
+            Income
+          </option>
+          <option
+            value="fixed"
+            {{ if
+              eq
+              "fixed"
+              $.Data.Category.Type.String
+            }}
+              selected
+            {{ end }}
+          >
+            Fixed
+          </option>
+          <option
+            value="fun"
+            {{ if
+              eq
+              "fun"
+              $.Data.Category.Type.String
+            }}
+              selected
+            {{ end }}
+          >
+            Fun
+          </option>
+          <option
+            value="neutral"
+            {{ if
+              eq
+              "neutral"
+              $.Data.Category.Type.String
+            }}
+              selected
+            {{ end }}
+          >
+            Neutral
+          </option>
+        </select>
+        <p class="form-error type-err"></p>
+      </div>
+
+      <div class="form-item">
+        <label for="is_ignored">Is Ignored:</label>
+        <input
+          name="is_ignored"
+          type="checkbox"
+          {{ if .Data.Category.IsIgnored }}checked{{ end }}
+        />
+        <p class="form-error is_ignored-err"></p>
+      </div>
+
+      <div class="form-item">
         <label>Values:</label>
         <div id="values">
           {{ range .Data.Category.Values }}

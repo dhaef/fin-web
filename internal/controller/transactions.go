@@ -4,17 +4,12 @@ import (
 	"fmt"
 	"math"
 	"net/http"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
 
 	"fin-web/internal/model"
 )
-
-var ExcludedIncomeCategories = []string{"34"}
-
-var ExpenseCategoriesToExclude = []string{"34"}
 
 type TransactionsPage struct {
 	Transactions           []model.Transaction
@@ -38,9 +33,6 @@ type TransactionsPage struct {
 	GuiltFree              float64
 	GuiltFreePercent       int
 }
-
-// TODO: should get move to the category DB record
-var fixedCostCategories = []int{31, 36, 39, 43, 45, 46, 51, 54, 56, 57}
 
 func transactions(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {
@@ -87,12 +79,11 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	transactions, err := model.QueryTransactions(dbConn, model.QueryTransactionsFilters{
-		OrderBy:             orderBy,
-		OrderDirection:      orderDirection,
-		StartDate:           startDate,
-		EndDate:             endDate,
-		Categories:          categories,
-		CategoriesToExclude: ExcludedIncomeCategories,
+		OrderBy:        orderBy,
+		OrderDirection: orderDirection,
+		StartDate:      startDate,
+		EndDate:        endDate,
+		Categories:     categories,
 	})
 	if err != nil {
 		return APIError{
@@ -106,33 +97,66 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		fmt.Println("faile to get categories from DB: ", err.Error())
 	}
 
-	var eTotal float64
-	var iTotal float64
+	eTotal, err := model.SumTransactions(dbConn, model.QueryTransactionsFilters{
+		StartDate:  startDate,
+		EndDate:    endDate,
+		Categories: categories,
+		Type:       "expenses",
+	})
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error suming transactions: " + err.Error(),
+		}
+	}
 
-	var fixedCosts float64
-	var guiltFree float64
+	iTotal, err := model.SumTransactions(dbConn, model.QueryTransactionsFilters{
+		StartDate:  startDate,
+		EndDate:    endDate,
+		Categories: categories,
+		Type:       "income",
+	})
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error suming transactions: " + err.Error(),
+		}
+	}
+	iTotal = math.Abs(iTotal)
 
-	for _, val := range transactions {
-		if val.Amount >= 0 {
-			eTotal += val.Amount
-			if slices.Contains(fixedCostCategories, int(val.CategoryID.Int32)) {
-				fixedCosts += val.Amount
-			} else {
-				guiltFree += val.Amount
-			}
-		} else {
-			iTotal += math.Abs(val.Amount)
+	fixedCosts, err := model.SumTransactions(dbConn, model.QueryTransactionsFilters{
+		StartDate:  startDate,
+		EndDate:    endDate,
+		Categories: categories,
+		Type:       "fixed",
+	})
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error suming transactions: " + err.Error(),
+		}
+	}
+
+	guiltFree, err := model.SumTransactions(dbConn, model.QueryTransactionsFilters{
+		StartDate:  startDate,
+		EndDate:    endDate,
+		Categories: categories,
+		Type:       "fun",
+	})
+	if err != nil {
+		return APIError{
+			Status:  http.StatusInternalServerError,
+			Message: "error suming transactions: " + err.Error(),
 		}
 	}
 
 	expensesCategoryCounts, err := model.CategoryCounts(dbConn, model.QueryTransactionsFilters{
-		OrderBy:             orderBy,
-		OrderDirection:      orderDirection,
-		StartDate:           startDate,
-		EndDate:             endDate,
-		Categories:          categories,
-		CategoriesToExclude: ExpenseCategoriesToExclude,
-		Type:                "expenses",
+		OrderBy:        orderBy,
+		OrderDirection: orderDirection,
+		StartDate:      startDate,
+		EndDate:        endDate,
+		Categories:     categories,
+		Type:           "expenses",
 	})
 	if err != nil {
 		return APIError{
@@ -142,12 +166,11 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	incomeCategoryCounts, err := model.CategoryCounts(dbConn, model.QueryTransactionsFilters{
-		OrderBy:             orderBy,
-		OrderDirection:      orderDirection,
-		StartDate:           startDate,
-		EndDate:             endDate,
-		Type:                "income",
-		CategoriesToExclude: ExcludedIncomeCategories,
+		OrderBy:        orderBy,
+		OrderDirection: orderDirection,
+		StartDate:      startDate,
+		EndDate:        endDate,
+		Type:           "income",
 	})
 	if err != nil {
 		return APIError{
@@ -164,11 +187,10 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	startOfMonthOneYearAgo, _ := getStartAndEndOfMonth(date.AddDate(0, -11, 0))
 
 	expenseCountsByMonth, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
-		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
-		EndDate:             endDate,
-		Categories:          categories,
-		Type:                "expenses",
-		CategoriesToExclude: ExpenseCategoriesToExclude,
+		StartDate:  startOfMonthOneYearAgo.Format("2006-01-02"),
+		EndDate:    endDate,
+		Categories: categories,
+		Type:       "expenses",
 	}, "%m-%Y")
 	if err != nil {
 		return APIError{
@@ -178,10 +200,9 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	incomeCountsByMonth, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
-		StartDate:           startOfMonthOneYearAgo.Format("2006-01-02"),
-		EndDate:             endDate,
-		Type:                "income",
-		CategoriesToExclude: ExcludedIncomeCategories,
+		StartDate: startOfMonthOneYearAgo.Format("2006-01-02"),
+		EndDate:   endDate,
+		Type:      "income",
 	}, "%m-%Y")
 	if err != nil {
 		return APIError{
@@ -319,6 +340,7 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 
 	description := r.FormValue("description")
 	category := r.FormValue("category")
+	isReimbursementStr := r.FormValue("is_reimbursement")
 
 	var categoryID *int
 	if category != "" {
@@ -333,9 +355,15 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 		categoryID = &c
 	}
 
+	var isReimbursement bool
+	if isReimbursementStr == "on" {
+		isReimbursement = true
+	}
+
 	err := model.UpdateTransaction(dbConn, id, model.UpdateTransactionParams{
-		Description: &description,
-		CategoryID:  categoryID,
+		Description:     &description,
+		CategoryID:      categoryID,
+		IsReimbursement: &isReimbursement,
 	})
 	if err != nil {
 		return APIError{

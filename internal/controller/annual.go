@@ -15,8 +15,7 @@ type AnnualPage struct {
 
 func annual(w http.ResponseWriter, r *http.Request) error {
 	incomeCountsByYear, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
-		Type:                "income",
-		CategoriesToExclude: ExcludedIncomeCategories,
+		Type: "income",
 	}, "%Y")
 	if err != nil {
 		return APIError{
@@ -26,8 +25,7 @@ func annual(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	expenseCountsByYear, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
-		CategoriesToExclude: ExpenseCategoriesToExclude,
-		Type:                "expenses",
+		Type: "expenses",
 	}, "%Y")
 	if err != nil {
 		return APIError{

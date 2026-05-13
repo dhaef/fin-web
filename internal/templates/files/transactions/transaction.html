@@ -66,6 +66,15 @@
         />
       </div>
 
+      <div class="form-item">
+        <label for="is_reimbursement">Is Reimbursement:</label>
+        <input
+          name="is_reimbursement"
+          type="checkbox"
+          {{ if .Data.Transaction.IsReimbursement }}checked{{ end }}
+        />
+      </div>
+
       <input type="submit" value="Save" />
     </form>
   </div>

@@ -91,6 +91,8 @@ type CategoryValueFormItem struct {
 func createCategory(w http.ResponseWriter, r *http.Request) error {
 	labelStr := r.FormValue("label")
 	priorityStr := r.FormValue("priority")
+	typeStr := r.FormValue("type")
+	isIgnoredStr := r.FormValue("is_ignored")
 	valuesStr := r.FormValue("values")
 
 	var values []CategoryValueFormItem
@@ -106,6 +108,10 @@ func createCategory(w http.ResponseWriter, r *http.Request) error {
 
 	if labelStr == "" {
 		errs["label"] = "label can not be empty"
+	}
+
+	if typeStr == "" {
+		errs["type"] = "type can not be empty"
 	}
 
 	var priority int
@@ -125,13 +131,19 @@ func createCategory(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	var isIgnored bool
+	isIgnored, err = strconv.ParseBool(isIgnoredStr)
+	if err != nil {
+		errs["is_ignored"] = err.Error()
+	}
+
 	if len(errs) != 0 {
 		return encode(w, r, http.StatusBadRequest, map[string]any{
 			"errs": errs,
 		})
 	}
 
-	ID, err := model.CreateCategory(dbConn, labelStr, priority)
+	ID, err := model.CreateCategory(dbConn, labelStr, priority, typeStr, isIgnored)
 	if err != nil {
 		if err.Error() == "Error: This value already exists in the table." {
 			return encode(w, r, http.StatusBadRequest, map[string]any{
@@ -167,6 +179,8 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 	labelStr := r.FormValue("label")
 	priorityStr := r.FormValue("priority")
 	valuesStr := r.FormValue("values")
+	typeStr := r.FormValue("category_type")
+	isIgnoredStr := r.FormValue("is_ignored")
 
 	var values []CategoryValueFormItem
 	err := json.Unmarshal([]byte(valuesStr), &values)
@@ -181,6 +195,10 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 
 	if labelStr == "" {
 		errs["label"] = "label can not be empty"
+	}
+
+	if typeStr == "" {
+		errs["type"] = "type can not be empty"
 	}
 
 	var priority int
@@ -200,6 +218,12 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	var isIgnored bool
+	isIgnored, err = strconv.ParseBool(isIgnoredStr)
+	if err != nil {
+		errs["is_ignored"] = err.Error()
+	}
+
 	if len(errs) != 0 {
 		return encode(w, r, http.StatusBadRequest, map[string]any{
 			"errs": errs,
@@ -215,8 +239,10 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	err = model.UpdateCategory(dbConn, id, model.UpdateCategoryParams{
-		Label:    &labelStr,
-		Priority: &priority,
+		Label:        &labelStr,
+		Priority:     &priority,
+		CategoryType: &typeStr,
+		IsIgnored:    &isIgnored,
 	})
 	if err != nil {
 		if err.Error() == "Error: This value already exists in another row." {

@@ -7,16 +7,17 @@ import (
 )
 
 type Transaction struct {
-	ID             string
-	Account        string
-	Amount         float64
-	Description    sql.NullString
-	Date           string
-	Name           string
-	CustomCategory sql.NullString
-	Category       string
-	Source         string
-	CategoryID     sql.NullInt32
+	ID              string
+	Account         string
+	Amount          float64
+	Description     sql.NullString
+	Date            string
+	Name            string
+	CustomCategory  sql.NullString
+	Category        string
+	Source          string
+	CategoryID      sql.NullInt32
+	IsReimbursement bool
 }
 
 type QueryTransactionsFilters struct {
@@ -25,10 +26,10 @@ type QueryTransactionsFilters struct {
 	StartDate           string
 	EndDate             string
 	Categories          []string
-	CategoriesToExclude []string
 	Limit               int
 	Type                string
 	EmptyCustomCategory *bool
+	Types               []string
 }
 
 func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (string, []any) {
@@ -59,19 +60,22 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 	}
 
 	if filters.Type == "income" {
-		filterStrings = append(filterStrings, "amount < 0")
+		filterStrings = append(filterStrings, "(c.type = 'income' OR (c.type = 'neutral' AND amount < 0))")
 	}
 
 	if filters.Type == "expenses" {
-		filterStrings = append(filterStrings, "amount >= 0")
+		filterStrings = append(filterStrings, "(c.type = 'fixed' OR c.type = 'fun' OR (c.type = 'neutral' AND amount >= 0))")
 	}
 
-	if len(filters.CategoriesToExclude) > 0 && filters.CategoriesToExclude[0] != "" {
-		for _, val := range filters.CategoriesToExclude {
-			args = append(args, val)
-			filterStrings = append(filterStrings, "c.id != ?")
-		}
+	if filters.Type == "fixed" {
+		filterStrings = append(filterStrings, "(c.type = 'fixed' OR (c.type = 'neutral' AND amount >= 0))")
 	}
+
+	if filters.Type == "fun" {
+		filterStrings = append(filterStrings, "c.type = 'fun'")
+	}
+
+	filterStrings = append(filterStrings, "is_ignored = 0")
 
 	if filters.EmptyCustomCategory != nil {
 		if !*filters.EmptyCustomCategory {
@@ -97,7 +101,7 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 }
 
 func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transaction, error) {
-	queryStr := "select t.id, name, amount, date, account, source, description, c.id, c.label as category from transactions as t left join categories as c on category_id = c.id"
+	queryStr := "select t.id, name, amount, date, account, source, description, c.id, c.label as category, is_reimbursement from transactions as t left join categories as c on category_id = c.id"
 	args := []any{}
 
 	queryStr, args = buildWhere(queryStr, args, filters)
@@ -132,6 +136,7 @@ func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transa
 			&transaction.Description,
 			&transaction.CategoryID,
 			&transaction.CustomCategory,
+			&transaction.IsReimbursement,
 		); err != nil {
 			return []Transaction{}, err
 		}
@@ -176,6 +181,26 @@ func CategoryCounts(conn *sql.DB, filters QueryTransactionsFilters) ([]GroupByCo
 	return counts, nil
 }
 
+func SumTransactions(conn *sql.DB, filters QueryTransactionsFilters) (float64, error) {
+	queryStr := "select SUM(amount) from transactions as t left join categories as c on category_id = c.id"
+	args := []any{}
+
+	queryStr, args = buildWhere(queryStr, args, filters)
+
+	var count float64
+	err := conn.QueryRow(
+		queryStr,
+		args...,
+	).Scan(
+		&count,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func CountsByDate(conn *sql.DB, filters QueryTransactionsFilters, dateStr string) ([]GroupByCounts, error) {
 	queryStr := "SELECT strftime(\"" + dateStr + "\", date), SUM(amount) FROM transactions as t left join categories as c on t.category_id = c.id"
 	args := []any{}
@@ -210,7 +235,7 @@ func CountsByDate(conn *sql.DB, filters QueryTransactionsFilters, dateStr string
 }
 
 func GetTransaction(conn *sql.DB, ID string) (Transaction, error) {
-	queryStr := "select t.id, name, amount, date, account, source, description, c.id from transactions as t left join categories as c on category_id = c.id where t.id = ?"
+	queryStr := "select t.id, name, amount, date, account, source, description, c.id, is_reimbursement from transactions as t left join categories as c on category_id = c.id where t.id = ?"
 
 	transaction := Transaction{}
 	err := conn.QueryRow(
@@ -225,6 +250,7 @@ func GetTransaction(conn *sql.DB, ID string) (Transaction, error) {
 		&transaction.Source,
 		&transaction.Description,
 		&transaction.CategoryID,
+		&transaction.IsReimbursement,
 	)
 	if err != nil {
 		return Transaction{}, err
@@ -234,8 +260,9 @@ func GetTransaction(conn *sql.DB, ID string) (Transaction, error) {
 }
 
 type UpdateTransactionParams struct {
-	CategoryID  *int
-	Description *string
+	CategoryID      *int
+	Description     *string
+	IsReimbursement *bool
 }
 
 func UpdateTransaction(conn *sql.DB, ID string, params UpdateTransactionParams) error {
@@ -251,6 +278,11 @@ func UpdateTransaction(conn *sql.DB, ID string, params UpdateTransactionParams) 
 	if params.Description != nil {
 		updates = append(updates, " description = ?")
 		args = append(args, *params.Description)
+	}
+
+	if params.IsReimbursement != nil {
+		updates = append(updates, " is_reimbursement = ?")
+		args = append(args, *params.IsReimbursement)
 	}
 
 	if len(updates) == 0 {
@@ -273,7 +305,7 @@ func UpdateTransaction(conn *sql.DB, ID string, params UpdateTransactionParams) 
 }
 
 func CreateTransaction(conn *sql.DB, transaction Transaction) error {
-	queryStr := "INSERT INTO transactions(id, name, amount, date, source, account, category, category_id, description) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	queryStr := "INSERT INTO transactions(id, name, amount, date, source, account, category, category_id, description, is_reimbursement) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	args := []any{
 		transaction.ID,
 		transaction.Name,
@@ -282,6 +314,7 @@ func CreateTransaction(conn *sql.DB, transaction Transaction) error {
 		transaction.Source,
 		transaction.Account,
 		transaction.Category,
+		transaction.IsReimbursement,
 	}
 
 	if transaction.CategoryID.Valid {
