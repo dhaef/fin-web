@@ -314,7 +314,6 @@ func CreateTransaction(conn *sql.DB, transaction Transaction) error {
 		transaction.Source,
 		transaction.Account,
 		transaction.Category,
-		transaction.IsReimbursement,
 	}
 
 	if transaction.CategoryID.Valid {
@@ -324,6 +323,7 @@ func CreateTransaction(conn *sql.DB, transaction Transaction) error {
 	}
 
 	args = append(args, transaction.Description)
+	args = append(args, transaction.IsReimbursement)
 
 	_, err := conn.Exec(
 		queryStr,
