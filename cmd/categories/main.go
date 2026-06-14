@@ -27,8 +27,10 @@ func main() {
 	}
 
 	var result map[string]struct {
-		Values   []string `json:"values"`
-		Priority int      `json:"priority"`
+		Values    []string `json:"values"`
+		Priority  int      `json:"priority"`
+		Type      string   `json:"type"`
+		IsIgnored bool     `json:"is_ignored"`
 	}
 
 	err = json.Unmarshal(fileBytes, &result)
@@ -40,7 +42,11 @@ func main() {
 		categoryID := 0
 		for i, v := range data.Values {
 			if i == 0 {
-				id, err := model.CreateCategory(transactionsDB, category, data.Priority)
+				catType := data.Type
+				if catType == "" {
+					catType = "neutral"
+				}
+				id, err := model.CreateCategory(transactionsDB, category, data.Priority, catType, data.IsIgnored)
 				if err != nil {
 					log.Fatalf("Error creating category: %v", err)
 				}
