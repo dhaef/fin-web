@@ -70,7 +70,12 @@ func getNetCounts(expenses []model.GroupByCounts, income []model.GroupByCounts) 
 		expenseAmount, ok := expenseMap[item.Key]
 		if ok {
 			net := item.Value + expenseAmount
-			roundedString := fmt.Sprintf("%.2f%%", (net/item.Value)*100)
+			var roundedString string
+			if item.Value != 0 {
+				roundedString = fmt.Sprintf("%.2f%%", (net/item.Value)*100)
+			} else {
+				roundedString = "0.00%"
+			}
 
 			amountAndPercents = append(amountAndPercents, NetCounts{
 				Net:            net,
