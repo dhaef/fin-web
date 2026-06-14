@@ -12,12 +12,12 @@ func main() {
 	dbPath := os.Getenv("DB_PATH")
 	tiingoToken := os.Getenv("TIINGO_TOKEN")
 
-	if tiingoToken == "" {
-		log.Fatal("TIINGO_TOKEN is required")
+	if dbPath == "" {
+		log.Fatal("DB_PATH is required")
 	}
 
 	if tiingoToken == "" {
-		log.Fatal("tiingoToken is required")
+		log.Fatal("TIINGO_TOKEN is required")
 	}
 
 	DB, err := db.NewDbConnection(dbPath)
