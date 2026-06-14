@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+// type is a way to total up each transaction.
+// income, fixed, and fun all all set types. if something is an income but is positive it works as a reimbursement.
+// neutral takes the type based on the amount being positive or negative (negative being an income)
+
 type Category struct {
 	ID        int
 	Priority  int
