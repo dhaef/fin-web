@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
@@ -54,7 +53,7 @@ func fetch(headers map[string]string, url string) ([]byte, error) {
 		bytes.NewBuffer([]byte("")),
 	)
 	if err != nil {
-		log.Fatalf("building request: %v", err)
+		return nil, fmt.Errorf("building request: %w", err)
 	}
 
 	for key, value := range headers {
@@ -64,7 +63,7 @@ func fetch(headers map[string]string, url string) ([]byte, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatalf("making request: %v", err)
+		return nil, fmt.Errorf("making request: %w", err)
 	}
 
 	defer resp.Body.Close()
@@ -75,7 +74,7 @@ func fetch(headers map[string]string, url string) ([]byte, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("reading body: %v", err)
+		return nil, fmt.Errorf("reading body: %w", err)
 	}
 
 	return body, nil
