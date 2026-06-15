@@ -60,7 +60,39 @@ func QueryNetWorthItems(conn *sql.DB, filters QueryNetWorthItemsFilters) ([]NetW
 	queryStr, args = buildNetWorthItemWhere(queryStr, args, filters)
 
 	if filters.OrderBy != "" {
-		queryStr += " ORDER BY " + filters.OrderBy + " " + filters.OrderDirection
+		var cleanOrderBy string
+		switch strings.ToLower(filters.OrderBy) {
+		case "date":
+			cleanOrderBy = "date"
+		case "cash":
+			cleanOrderBy = "cash"
+		case "investment":
+			cleanOrderBy = "investment"
+		case "debit":
+			cleanOrderBy = "debit"
+		case "credit":
+			cleanOrderBy = "credit"
+		case "savings":
+			cleanOrderBy = "savings"
+		case "retirement":
+			cleanOrderBy = "retirement"
+		case "loans":
+			cleanOrderBy = "loans"
+		default:
+			cleanOrderBy = "date" // safe fallback
+		}
+
+		var cleanDirection string
+		switch strings.ToUpper(filters.OrderDirection) {
+		case "ASC":
+			cleanDirection = "ASC"
+		case "DESC":
+			cleanDirection = "DESC"
+		default:
+			cleanDirection = "DESC" // safe fallback
+		}
+
+		queryStr += " ORDER BY " + cleanOrderBy + " " + cleanDirection
 	}
 
 	if filters.Limit > 0 {

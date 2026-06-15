@@ -107,7 +107,29 @@ func QueryTransactions(conn *sql.DB, filters QueryTransactionsFilters) ([]Transa
 	queryStr, args = buildWhere(queryStr, args, filters)
 
 	if filters.OrderBy != "" {
-		queryStr += " ORDER BY " + filters.OrderBy + " " + filters.OrderDirection
+		var cleanOrderBy string
+		switch strings.ToLower(filters.OrderBy) {
+		case "date":
+			cleanOrderBy = "date"
+		case "amount":
+			cleanOrderBy = "amount"
+		case "name":
+			cleanOrderBy = "name"
+		default:
+			cleanOrderBy = "amount" // safe fallback
+		}
+
+		var cleanDirection string
+		switch strings.ToUpper(filters.OrderDirection) {
+		case "ASC":
+			cleanDirection = "ASC"
+		case "DESC":
+			cleanDirection = "DESC"
+		default:
+			cleanDirection = "DESC" // safe fallback
+		}
+
+		queryStr += " ORDER BY " + cleanOrderBy + " " + cleanDirection
 	}
 
 	if filters.Limit > 0 {
