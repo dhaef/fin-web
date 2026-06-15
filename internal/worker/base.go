@@ -46,11 +46,25 @@ func (bw *BaseWorker) Process(p Provider) error {
 			continue
 		}
 
+		var insertedIDs []string
+		var failed bool
+
 		for _, t := range transactions {
 			if err := model.CreateTransaction(bw.DB, t); err != nil {
 				fmt.Printf("failed to create transaction %s: %v\n", t.Name, err)
+				failed = true
 				break
 			}
+			insertedIDs = append(insertedIDs, t.ID)
+		}
+
+		if failed {
+			for _, id := range insertedIDs {
+				if err := model.DeleteTransaction(bw.DB, id); err != nil {
+					fmt.Printf("failed to rollback transaction ID %s: %v\n", id, err)
+				}
+			}
+			continue
 		}
 
 		err = os.Remove(filePath)
