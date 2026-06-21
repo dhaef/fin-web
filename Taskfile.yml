@@ -17,6 +17,13 @@ tasks:
     cmds:
       - go run ./cmd/api/main.go
 
+  test:
+    desc: Run the test suite
+    # -linkmode=external avoids a "missing LC_UUID" dyld crash when linking
+    # the cgo go-sqlite3 driver into test binaries on macOS.
+    cmds:
+      - go test -ldflags=-linkmode=external ./...
+
   normalize:
     desc: Normalize data into database
     cmds:
