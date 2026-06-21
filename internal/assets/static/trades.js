@@ -1,17 +1,10 @@
 import { donut } from 'widgets';
 import * as d3 from 'd3';
 
-const categoryDonut = document.getElementById('trades-donut');
-const categoryCounts = document.getElementById('trades-counts');
-if (categoryDonut && categoryCounts) {
-  const counts = [];
-
-  for (let i = 0; i < categoryCounts.children.length; i++) {
-    const elValue = categoryCounts.children[i].textContent;
-    const [id, name, value] = elValue.split(':');
-    const numberValue = Number(value);
-    counts.push({ id, name, value: numberValue });
-  }
+const tradesDonut = document.getElementById('trades-donut');
+const tradesCountsEl = document.getElementById('trades-counts');
+if (tradesDonut && tradesCountsEl) {
+  const counts = JSON.parse(tradesCountsEl.textContent);
 
   const { node } = donut(
     counts,
@@ -20,5 +13,5 @@ if (categoryDonut && categoryCounts) {
       .reverse(),
     true
   );
-  categoryDonut.appendChild(node);
+  tradesDonut.appendChild(node);
 }

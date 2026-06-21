@@ -29,16 +29,9 @@ document.getElementById('chart-select').addEventListener('change', (e) => {
 });
 
 const categoryDonut = document.getElementById('category-donut');
-const categoryCounts = document.getElementById('category-counts');
-if (categoryDonut && categoryCounts) {
-  const counts = [];
-
-  for (let i = 0; i < categoryCounts.children.length; i++) {
-    const elValue = categoryCounts.children[i].textContent;
-    const [id, name, value] = elValue.split(':');
-    const numberValue = Number(value);
-    counts.push({ id, name, value: numberValue });
-  }
+const categoryCountsEl = document.getElementById('category-counts');
+if (categoryDonut && categoryCountsEl) {
+  const counts = JSON.parse(categoryCountsEl.textContent);
 
   const { node } = donut(
     counts,
@@ -50,16 +43,12 @@ if (categoryDonut && categoryCounts) {
 }
 
 const categoryIncomeDonut = document.getElementById('category-income-donut');
-const categoryIncomeCounts = document.getElementById('category-income-counts');
-if (categoryIncomeDonut && categoryIncomeCounts) {
-  const counts = [];
-
-  for (let i = 0; i < categoryIncomeCounts.children.length; i++) {
-    const elValue = categoryIncomeCounts.children[i].textContent;
-    const [id, name, value] = elValue.split(':');
-    const numberValue = Number(value);
-    counts.push({ id, name, value: Math.abs(numberValue) });
-  }
+const categoryIncomeCountsEl = document.getElementById('category-income-counts');
+if (categoryIncomeDonut && categoryIncomeCountsEl) {
+  const counts = JSON.parse(categoryIncomeCountsEl.textContent).map((d) => ({
+    ...d,
+    value: Math.abs(d.value),
+  }));
 
   const { node } = donut(counts, [
     '#2E865F', // Deep Emerald (Main Income)

@@ -135,21 +135,17 @@
 
   <div class="category-donuts">
     <div>
-      <div id="category-counts" class="hide">
-        {{ range .Data.ExpensesCategoryCounts }}
-          <p>{{ .ID }}:{{ .Key }}:{{ .Value }}</p>
-        {{ end }}
-      </div>
+      <script id="category-counts" type="application/json">
+        [{{ range $i, $e := .Data.ExpensesCategoryCounts }}{{ if $i }},{{ end }}{"id":"{{ $e.ID }}","name":"{{ $e.Key }}","value":{{ $e.Value }}}{{ end }}]
+      </script>
       <h3>Expenses By Category</h3>
       <div id="category-donut" class="widget donut-widget"></div>
     </div>
 
     <div>
-      <div id="category-income-counts" class="hide">
-        {{ range .Data.IncomeCategoryCounts }}
-          <p>{{ .ID }}:{{ .Key }}:{{ .Value }}</p>
-        {{ end }}
-      </div>
+      <script id="category-income-counts" type="application/json">
+        [{{ range $i, $e := .Data.IncomeCategoryCounts }}{{ if $i }},{{ end }}{"id":"{{ $e.ID }}","name":"{{ $e.Key }}","value":{{ $e.Value }}}{{ end }}]
+      </script>
       <h3>Income By Category</h3>
       <div id="category-income-donut" class="widget donut-widget"></div>
     </div>
@@ -162,31 +158,25 @@
   </select>
 
   <div id="net-income-bar-container">
-    <div id="net-income-counts" class="hide">
-        {{ range .Data.NetCounts }}
-        <p>{{ .Key }}:{{ .Net }}</p>
-      {{ end }}
-    </div>
+    <script id="net-income-counts" type="application/json">
+      [{{ range $i, $e := .Data.NetCounts }}{{ if $i }},{{ end }}{"name":"{{ $e.Key }}","value":{{ $e.Net }}}{{ end }}]
+    </script>
     <h3>Monthly Net Income</h3>
     <div id="net-income-bar" class="widget"></div>
   </div>
 
   <div id="previous-year-bar-container" class="hide">
-    <div id="previous-year-counts" class="hide">
-        {{ range .Data.ExpenseCountsByMonth }}
-        <p>{{ .Key }}:{{ .Value }}</p>
-      {{ end }}
-    </div>
+    <script id="previous-year-counts" type="application/json">
+      [{{ range $i, $e := .Data.ExpenseCountsByMonth }}{{ if $i }},{{ end }}{"name":"{{ $e.Key }}","value":{{ $e.Value }}}{{ end }}]
+    </script>
     <h3>Monthly Expenses</h3>
     <div id="previous-year-bar" class="widget"></div>
   </div>
 
   <div id="previous-year-income-bar-container" class="hide">
-    <div id="previous-year-income-counts" class="hide">
-        {{ range .Data.IncomeCountsByMonth }}
-        <p>{{ .Key }}:{{ .Value }}</p>
-      {{ end }}
-    </div>
+    <script id="previous-year-income-counts" type="application/json">
+      [{{ range $i, $e := .Data.IncomeCountsByMonth }}{{ if $i }},{{ end }}{"name":"{{ $e.Key }}","value":{{ $e.Value }}}{{ end }}]
+    </script>
     <h3>Monthly Income</h3>
     <div id="previous-year-income-bar" class="widget"></div>
   </div>

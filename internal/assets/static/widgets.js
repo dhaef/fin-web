@@ -420,35 +420,22 @@ export function buildBarChart(barId, countsId, colors) {
   }
 
   const bar = document.getElementById(barId);
-  const countElements = document.getElementById(countsId);
-  if (bar && countElements) {
-    const counts = [];
-    const children = Array.from(countElements.children).sort((a, b) => {
-      const [aName] = a.textContent.split(':');
-      const [bName] = b.textContent.split(':');
-      const aMonthYear = aName.split('-');
-      const bMonthYear = bName.split('-');
-      const aDate = new Date();
-      aDate.setMonth(Number(aMonthYear[0]) - 1);
-      aDate.setYear(Number(aMonthYear[1]) - 1);
-      const bDate = new Date();
-      bDate.setMonth(Number(bMonthYear[0]) - 1);
-      bDate.setYear(Number(bMonthYear[1]) - 1);
+  const dataEl = document.getElementById(countsId);
+  if (bar && dataEl) {
+    const raw = JSON.parse(dataEl.textContent);
 
-      return aDate.getTime() - bDate.getTime();
-    });
-
-    for (let i = 0; i < children.length; i++) {
-      const elValue = children[i].textContent;
-      const [name, value, subValue] = elValue.split(':');
-      const numberValue = Number(value);
-      counts.push({
-        name,
-        value: Math.abs(numberValue),
-        subValue,
-        sign: numberValue > 0 ? 'neg' : undefined,
-      });
-    }
+    const counts = raw
+      .sort((a, b) => {
+        const [aMonth, aYear] = a.name.split('-').map(Number);
+        const [bMonth, bYear] = b.name.split('-').map(Number);
+        return new Date(aYear, aMonth - 1) - new Date(bYear, bMonth - 1);
+      })
+      .map((d) => ({
+        name: d.name,
+        value: Math.abs(d.value),
+        subValue: d.subValue,
+        sign: d.value > 0 ? 'neg' : undefined,
+      }));
 
     const { node } = barChart(counts, barId, colors);
     bar.appendChild(node);

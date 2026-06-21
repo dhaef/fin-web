@@ -12,31 +12,25 @@
   </select>
 
   <div id="yearly-net-income-bar-container" class="my-1">
-    <div id="yearly-net-counts" style="display: none">
-      {{ range .Data.NetCounts }}
-        <p>{{ .Key }}:{{ .Net }}:{{ .SavePercentage }}</p>
-      {{ end }}
-    </div>
+    <script id="yearly-net-counts" type="application/json">
+      [{{ range $i, $e := .Data.NetCounts }}{{ if $i }},{{ end }}{"name":"{{ $e.Key }}","value":{{ $e.Net }},"subValue":"{{ $e.SavePercentage }}"}{{ end }}]
+    </script>
     <h3>Net Income By Year</h3>
     <div id="yearly-net-income-bar" class="widget"></div>
   </div>
 
   <div id="yearly-expense-bar-container" class="my-1 hide">
-    <div id="yearly-expense-counts" style="display: none">
-      {{ range .Data.ExpenseCountsByYear }}
-        <p>{{ .Key }}:{{ .Value }}</p>
-      {{ end }}
-    </div>
+    <script id="yearly-expense-counts" type="application/json">
+      [{{ range $i, $e := .Data.ExpenseCountsByYear }}{{ if $i }},{{ end }}{"name":"{{ $e.Key }}","value":{{ $e.Value }}}{{ end }}]
+    </script>
     <h3>Expenses By Year</h3>
     <div id="yearly-expense-bar" class="widget"></div>
   </div>
 
   <div id="yearly-income-bar-container" class="my-1 hide">
-    <div id="yearly-income-counts" style="display: none">
-      {{ range .Data.IncomeCountsByYear }}
-        <p>{{ .Key }}:{{ .Value }}</p>
-      {{ end }}
-    </div>
+    <script id="yearly-income-counts" type="application/json">
+      [{{ range $i, $e := .Data.IncomeCountsByYear }}{{ if $i }},{{ end }}{"name":"{{ $e.Key }}","value":{{ $e.Value }}}{{ end }}]
+    </script>
     <h3>Income By Year</h3>
     <div id="yearly-income-bar" class="widget"></div>
   </div>

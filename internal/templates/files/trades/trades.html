@@ -6,11 +6,9 @@
 {{ end }}
 {{ define "body" }}
   <div>
-    <div id="trades-counts" class="hide">
-      {{ range .Data.Prices }}
-        <p>{{ .Ticker }}:{{ .Ticker }}:{{ .Value }}</p>
-      {{ end }}
-    </div>
+    <script id="trades-counts" type="application/json">
+      [{{ range $i, $e := .Data.Prices }}{{ if $i }},{{ end }}{"id":"{{ $e.Ticker }}","name":"{{ $e.Ticker }}","value":{{ $e.Value }}}{{ end }}]
+    </script>
     <h3>Stocks</h3>
     <div
       id="trades-donut"
