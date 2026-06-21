@@ -11,6 +11,7 @@ import (
 func main() {
 	dbPath := os.Getenv("DB_PATH")
 	tiingoToken := os.Getenv("TIINGO_TOKEN")
+	port := os.Getenv("PORT")
 
 	if dbPath == "" {
 		log.Fatal("DB_PATH is required")
@@ -20,12 +21,16 @@ func main() {
 		log.Fatal("TIINGO_TOKEN is required")
 	}
 
+	if port == "" {
+		port = "3000"
+	}
+
 	DB, err := db.NewDbConnection(dbPath)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	api := controller.NewController(DB, tiingoToken)
+	api := controller.NewController(DB, tiingoToken, port)
 
 	err = api.Server.ListenAndServe()
 	if err != nil {

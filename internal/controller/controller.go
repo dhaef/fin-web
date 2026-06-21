@@ -18,13 +18,13 @@ type Controller struct {
 	Server      http.Server
 }
 
-func NewController(conn *sql.DB, tt string) Controller {
+func NewController(conn *sql.DB, tt string, port string) Controller {
 	c := Controller{
 		db:          conn,
 		tiingoToken: tt,
 	}
 	c.Server = http.Server{
-		Addr:    ":3000",
+		Addr:    ":" + port,
 		Handler: c.buildRoutes(),
 	}
 	return c
