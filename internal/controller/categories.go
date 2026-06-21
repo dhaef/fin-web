@@ -17,8 +17,8 @@ type CategoryPage struct {
 	Type     string
 }
 
-func categories(w http.ResponseWriter, r *http.Request) error {
-	categories, err := model.GetCategories(dbConn)
+func (c *Controller) categories(w http.ResponseWriter, r *http.Request) error {
+	categories, err := model.GetCategories(c.db)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -41,10 +41,10 @@ func categories(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func category(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) category(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	c, err := model.GetCategory(dbConn, id)
+	cat, err := model.GetCategory(c.db, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -54,7 +54,7 @@ func category(w http.ResponseWriter, r *http.Request) error {
 
 	err = renderTemplate(w, Base[CategoryPage]{
 		Data: CategoryPage{
-			Category: c,
+			Category: cat,
 			Type:     "edit",
 		},
 	}, "layout", []string{"categories/category.html", "layout.html"})
@@ -68,7 +68,7 @@ func category(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func newCategory(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) newCategory(w http.ResponseWriter, r *http.Request) error {
 	err := renderTemplate(w, Base[CategoryPage]{
 		Data: CategoryPage{
 			Type: "create",
@@ -88,7 +88,7 @@ type CategoryValueFormItem struct {
 	Value string  `json:"value"`
 }
 
-func createCategory(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) createCategory(w http.ResponseWriter, r *http.Request) error {
 	labelStr := r.FormValue("label")
 	priorityStr := r.FormValue("priority")
 	typeStr := r.FormValue("type")
@@ -143,7 +143,7 @@ func createCategory(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	ID, err := model.CreateCategory(dbConn, labelStr, priority, typeStr, isIgnored)
+	ID, err := model.CreateCategory(c.db, labelStr, priority, typeStr, isIgnored)
 	if err != nil {
 		if err.Error() == "Error: This value already exists in the table." {
 			return encode(w, r, http.StatusBadRequest, map[string]any{
@@ -160,7 +160,7 @@ func createCategory(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	for _, v := range values {
-		_, err = model.CreateCategoryValue(dbConn, ID, v.Value)
+		_, err = model.CreateCategoryValue(c.db, ID, v.Value)
 		if err != nil {
 			return APIError{
 				Status:  http.StatusInternalServerError,
@@ -174,7 +174,7 @@ func createCategory(w http.ResponseWriter, r *http.Request) error {
 	})
 }
 
-func updateCategory(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) updateCategory(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 	labelStr := r.FormValue("label")
 	priorityStr := r.FormValue("priority")
@@ -230,7 +230,7 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	currCategory, err := model.GetCategory(dbConn, id)
+	currCategory, err := model.GetCategory(c.db, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -238,7 +238,7 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = model.UpdateCategory(dbConn, id, model.UpdateCategoryParams{
+	err = model.UpdateCategory(c.db, id, model.UpdateCategoryParams{
 		Label:        &labelStr,
 		Priority:     &priority,
 		CategoryType: &typeStr,
@@ -287,7 +287,7 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	for _, v := range valuesToCreate {
-		_, err = model.CreateCategoryValue(dbConn, currCategory.ID, v)
+		_, err = model.CreateCategoryValue(c.db, currCategory.ID, v)
 		if err != nil {
 			return APIError{
 				Status:  http.StatusInternalServerError,
@@ -297,7 +297,7 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	for _, v := range valuesToUpdate {
-		err = model.UpdateCategoryValue(dbConn, *v.ID, model.UpdateCategoryValueParams{
+		err = model.UpdateCategoryValue(c.db, *v.ID, model.UpdateCategoryValueParams{
 			Value: &v.Value,
 		})
 		if err != nil {
@@ -309,7 +309,7 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	for _, v := range valuesToDelete {
-		err = model.DeleteCategoryValue(dbConn, int(v.ID.Int64))
+		err = model.DeleteCategoryValue(c.db, int(v.ID.Int64))
 		if err != nil {
 			return APIError{
 				Status:  http.StatusInternalServerError,
@@ -323,11 +323,11 @@ func updateCategory(w http.ResponseWriter, r *http.Request) error {
 	})
 }
 
-func deleteCategory(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) deleteCategory(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
 	// get and delete category values
-	c, err := model.GetCategory(dbConn, id)
+	cat, err := model.GetCategory(c.db, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -335,9 +335,9 @@ func deleteCategory(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	for _, val := range c.Values {
+	for _, val := range cat.Values {
 		if val.ID.Valid {
-			err = model.DeleteCategoryValue(dbConn, int(val.ID.Int64))
+			err = model.DeleteCategoryValue(c.db, int(val.ID.Int64))
 			if err != nil {
 				return APIError{
 					Status:  http.StatusInternalServerError,
@@ -347,7 +347,7 @@ func deleteCategory(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = model.DeleteCategory(dbConn, id)
+	err = model.DeleteCategory(c.db, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,

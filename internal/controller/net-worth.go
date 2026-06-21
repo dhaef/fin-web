@@ -50,8 +50,8 @@ func ptrToStringFloat32(p *float32) string {
 	return fmt.Sprintf("%f", *p)
 }
 
-func netWorth(w http.ResponseWriter, r *http.Request) error {
-	netWorthItems, err := model.QueryNetWorthItems(dbConn, model.QueryNetWorthItemsFilters{
+func (c *Controller) netWorth(w http.ResponseWriter, r *http.Request) error {
+	netWorthItems, err := model.QueryNetWorthItems(c.db, model.QueryNetWorthItemsFilters{
 		OrderBy:        "date",
 		OrderDirection: "DESC",
 	})
@@ -93,10 +93,10 @@ func netWorth(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func netWorthItem(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) netWorthItem(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	netWorthItem, err := model.GetNetWorthItem(dbConn, id)
+	netWorthItem, err := model.GetNetWorthItem(c.db, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -227,7 +227,7 @@ func ToPtr[T any](v T) *T {
 	return &v
 }
 
-func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
 	params, errs := validateNetWorthForm(r)
@@ -259,7 +259,7 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	_, err := model.GetNetWorthItem(
-		dbConn,
+		c.db,
 		id,
 	)
 	if err != nil {
@@ -269,7 +269,7 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	err = model.UpdateNetWorthItem(dbConn, id, params)
+	err = model.UpdateNetWorthItem(c.db, id, params)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -281,7 +281,7 @@ func updateNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func newNetWorthItem(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) newNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	err := renderTemplate(w, Base[NetWorthFormPage]{
 		Data: NetWorthFormPage{
 			Type: "create",
@@ -299,7 +299,7 @@ func newNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	params, errs := validateNetWorthForm(r)
 
 	if len(errs) != 0 {
@@ -329,7 +329,7 @@ func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	_, err := model.CreateNetWorthItem(dbConn, params)
+	_, err := model.CreateNetWorthItem(c.db, params)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -341,10 +341,10 @@ func createNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func deleteNetWorthItem(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) deleteNetWorthItem(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	err := model.DeleteNetWorthItem(dbConn, id)
+	err := model.DeleteNetWorthItem(c.db, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,

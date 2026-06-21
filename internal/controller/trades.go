@@ -30,18 +30,18 @@ type StockPrice struct {
 	Ticker string
 }
 
-func trades(w http.ResponseWriter, r *http.Request) error {
-	ss, err := model.GetStockShares(dbConn)
+func (c *Controller) trades(w http.ResponseWriter, r *http.Request) error {
+	ss, err := model.GetStockShares(c.db)
 	if err != nil {
 		return APIError{Status: http.StatusInternalServerError, Message: "failed to get stock shares: " + err.Error()}
 	}
 
-	prices, priceMap, err := processStockPrices(ss)
+	prices, priceMap, err := c.processStockPrices(ss)
 	if err != nil {
 		return err // processStockPrices returns APIError
 	}
 
-	trades, err := model.GetTrades(dbConn)
+	trades, err := model.GetTrades(c.db)
 	if err != nil {
 		return APIError{Status: http.StatusBadRequest, Message: "failed to get trades: " + err.Error()}
 	}
@@ -60,7 +60,7 @@ func trades(w http.ResponseWriter, r *http.Request) error {
 	}, "layout", []string{"trades/trades.html", "layout.html"})
 }
 
-func processStockPrices(ss []model.StockShare) ([]StockPrice, map[string]float64, error) {
+func (c *Controller) processStockPrices(ss []model.StockShare) ([]StockPrice, map[string]float64, error) {
 	prices := []StockPrice{}
 	priceMap := map[string]float64{}
 
@@ -69,7 +69,7 @@ func processStockPrices(ss []model.StockShare) ([]StockPrice, map[string]float64
 			continue
 		}
 
-		currentPrice, err := getOrFetchPrice(s.Ticker)
+		currentPrice, err := c.getOrFetchPrice(s.Ticker)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -84,9 +84,9 @@ func processStockPrices(ss []model.StockShare) ([]StockPrice, map[string]float64
 	return prices, priceMap, nil
 }
 
-func getOrFetchPrice(ticker string) (float64, error) {
+func (c *Controller) getOrFetchPrice(ticker string) (float64, error) {
 	// 1. Attempt to get from Cache (KV Store)
-	item, err := model.GetKVItem(dbConn, ticker)
+	item, err := model.GetKVItem(c.db, ticker)
 	if err == nil {
 		// Cache Hit: Parse and return
 		f, err := strconv.ParseFloat(item.Value, 64)
@@ -108,7 +108,7 @@ func getOrFetchPrice(ticker string) (float64, error) {
 	}
 
 	// 3. Cache Miss: Fetch from Tiingo API
-	stockInfoItems, err := tiingo.GetTickerInfo(tiingoToken, ticker)
+	stockInfoItems, err := tiingo.GetTickerInfo(c.tiingoToken, ticker)
 	if err != nil {
 		return 0, APIError{
 			Status:  http.StatusInternalServerError,
@@ -131,7 +131,7 @@ func getOrFetchPrice(ticker string) (float64, error) {
 	v := strconv.FormatFloat(price, 'f', -1, 32)
 
 	// 5. Update Cache for 24 hours
-	err = model.PutKVItem(dbConn, ticker, v, time.Hour*24)
+	err = model.PutKVItem(c.db, ticker, v, time.Hour*24)
 	if err != nil {
 		return 0, APIError{
 			Status:  http.StatusInternalServerError,
@@ -161,10 +161,10 @@ func enrichTradeData(t *model.Trade, currentPrice float64) {
 	t.HasPositiveGrowth = growth > 0
 }
 
-func trade(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) trade(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	t, err := model.GetTrade(dbConn, id)
+	t, err := model.GetTrade(c.db, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -188,10 +188,10 @@ func trade(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func deleteTrade(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) deleteTrade(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	err := model.DeleteTrade(dbConn, id)
+	err := model.DeleteTrade(c.db, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -203,7 +203,7 @@ func deleteTrade(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func newTrade(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) newTrade(w http.ResponseWriter, r *http.Request) error {
 	err := renderTemplate(w, Base[TradePage]{
 		Data: TradePage{
 			Type: "create",
@@ -218,7 +218,7 @@ func newTrade(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func createTrade(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) createTrade(w http.ResponseWriter, r *http.Request) error {
 	errs := map[string]string{}
 	var err error
 
@@ -292,7 +292,7 @@ func createTrade(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	id, err := model.CreateTrade(dbConn, name, ticker, purchaseDate, shares, price, tradeType, account)
+	id, err := model.CreateTrade(c.db, name, ticker, purchaseDate, shares, price, tradeType, account)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,
@@ -304,7 +304,7 @@ func createTrade(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func updateTrade(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) updateTrade(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
 	errs := map[string]string{}
@@ -390,7 +390,7 @@ func updateTrade(w http.ResponseWriter, r *http.Request) error {
 		Account:      &account,
 	}
 
-	err = model.UpdateTrade(dbConn, id, params)
+	err = model.UpdateTrade(c.db, id, params)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,

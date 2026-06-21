@@ -234,40 +234,17 @@ func UpdateNetWorthItem(conn *sql.DB, ID string, params NetWorthItemParams) erro
 func CreateNetWorthItem(conn *sql.DB, params NetWorthItemParams) (string, error) {
 	ID := uuid.NewString()
 	queryStr := "INSERT INTO net_worth(id, date, cash, investment, debit, credit, savings, retirement, loans) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	args := []any{}
 
-	args = append(args, ID)
-
-	if params.Date != nil {
-		args = append(args, *params.Date)
-	}
-
-	if params.Cash != nil {
-		args = append(args, *params.Cash)
-	}
-
-	if params.Investment != nil {
-		args = append(args, *params.Investment)
-	}
-
-	if params.Debit != nil {
-		args = append(args, *params.Debit)
-	}
-
-	if params.Credit != nil {
-		args = append(args, *params.Credit)
-	}
-
-	if params.Savings != nil {
-		args = append(args, *params.Savings)
-	}
-
-	if params.Retirement != nil {
-		args = append(args, *params.Retirement)
-	}
-
-	if params.Loans != nil {
-		args = append(args, *params.Loans)
+	args := []any{
+		ID,
+		valOrNil(params.Date),
+		valOrNil(params.Cash),
+		valOrNil(params.Investment),
+		valOrNil(params.Debit),
+		valOrNil(params.Credit),
+		valOrNil(params.Savings),
+		valOrNil(params.Retirement),
+		valOrNil(params.Loans),
 	}
 
 	_, err := conn.Exec(
@@ -279,6 +256,13 @@ func CreateNetWorthItem(conn *sql.DB, params NetWorthItemParams) (string, error)
 	}
 
 	return ID, nil
+}
+
+func valOrNil[T any](p *T) any {
+	if p == nil {
+		return nil
+	}
+	return *p
 }
 
 func DeleteNetWorthItem(conn *sql.DB, ID string) error {

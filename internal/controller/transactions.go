@@ -34,7 +34,7 @@ type TransactionsPage struct {
 	GuiltFreePercent       int
 }
 
-func transactions(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) transactions(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {
 		return renderTemplate(w, Base[any]{}, "layout", []string{"not-found.html", "layout.html"})
 	}
@@ -55,7 +55,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if endDate == "" {
-		transactions, err := model.QueryTransactions(dbConn, model.QueryTransactionsFilters{
+		transactions, err := model.QueryTransactions(c.db, model.QueryTransactionsFilters{
 			OrderBy:        "date",
 			OrderDirection: "DESC",
 			Limit:          1,
@@ -78,7 +78,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		endDate = endOfThisMonth.Format("2006-01-02")
 	}
 
-	transactions, err := model.QueryTransactions(dbConn, model.QueryTransactionsFilters{
+	transactions, err := model.QueryTransactions(c.db, model.QueryTransactionsFilters{
 		OrderBy:        orderBy,
 		OrderDirection: orderDirection,
 		StartDate:      startDate,
@@ -92,12 +92,12 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	cs, err := model.GetCategories(dbConn)
+	cs, err := model.GetCategories(c.db)
 	if err != nil {
 		fmt.Println("faile to get categories from DB: ", err.Error())
 	}
 
-	eTotal, err := model.SumTransactions(dbConn, model.QueryTransactionsFilters{
+	eTotal, err := model.SumTransactions(c.db, model.QueryTransactionsFilters{
 		StartDate:  startDate,
 		EndDate:    endDate,
 		Categories: categories,
@@ -110,7 +110,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	iTotal, err := model.SumTransactions(dbConn, model.QueryTransactionsFilters{
+	iTotal, err := model.SumTransactions(c.db, model.QueryTransactionsFilters{
 		StartDate:  startDate,
 		EndDate:    endDate,
 		Categories: categories,
@@ -124,7 +124,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 	}
 	iTotal = math.Abs(iTotal)
 
-	fixedCosts, err := model.SumTransactions(dbConn, model.QueryTransactionsFilters{
+	fixedCosts, err := model.SumTransactions(c.db, model.QueryTransactionsFilters{
 		StartDate:  startDate,
 		EndDate:    endDate,
 		Categories: categories,
@@ -137,7 +137,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	guiltFree, err := model.SumTransactions(dbConn, model.QueryTransactionsFilters{
+	guiltFree, err := model.SumTransactions(c.db, model.QueryTransactionsFilters{
 		StartDate:  startDate,
 		EndDate:    endDate,
 		Categories: categories,
@@ -150,7 +150,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	expensesCategoryCounts, err := model.CategoryCounts(dbConn, model.QueryTransactionsFilters{
+	expensesCategoryCounts, err := model.CategoryCounts(c.db, model.QueryTransactionsFilters{
 		OrderBy:        orderBy,
 		OrderDirection: orderDirection,
 		StartDate:      startDate,
@@ -165,7 +165,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	incomeCategoryCounts, err := model.CategoryCounts(dbConn, model.QueryTransactionsFilters{
+	incomeCategoryCounts, err := model.CategoryCounts(c.db, model.QueryTransactionsFilters{
 		OrderBy:        orderBy,
 		OrderDirection: orderDirection,
 		StartDate:      startDate,
@@ -186,7 +186,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 
 	startOfMonthOneYearAgo, _ := getStartAndEndOfMonth(date.AddDate(0, -11, 0))
 
-	expenseCountsByMonth, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
+	expenseCountsByMonth, err := model.CountsByDate(c.db, model.QueryTransactionsFilters{
 		StartDate:  startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:    endDate,
 		Categories: categories,
@@ -199,7 +199,7 @@ func transactions(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	incomeCountsByMonth, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
+	incomeCountsByMonth, err := model.CountsByDate(c.db, model.QueryTransactionsFilters{
 		StartDate: startOfMonthOneYearAgo.Format("2006-01-02"),
 		EndDate:   endDate,
 		Type:      "income",
@@ -257,10 +257,10 @@ type UncategorizedTransactionsPage struct {
 	Transactions []model.Transaction
 }
 
-func uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) uncategorizedTransactions(w http.ResponseWriter, r *http.Request) error {
 	emptyCustomCategory := true
 	transactions, err := model.QueryTransactions(
-		dbConn,
+		c.db,
 		model.QueryTransactionsFilters{
 			EmptyCustomCategory: &emptyCustomCategory,
 		},
@@ -293,10 +293,10 @@ type TransactionPage struct {
 	Success     bool
 }
 
-func transaction(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) transaction(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 	transaction, err := model.GetTransaction(
-		dbConn,
+		c.db,
 		id,
 	)
 	if err != nil {
@@ -306,7 +306,7 @@ func transaction(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	cs, err := model.GetCategories(dbConn)
+	cs, err := model.GetCategories(c.db)
 	if err != nil {
 		fmt.Println("faile to get categories from DB: ", err.Error())
 	}
@@ -335,7 +335,7 @@ func transaction(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func updateTransaction(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) updateTransaction(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
 	description := r.FormValue("description")
@@ -360,7 +360,7 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 		isReimbursement = true
 	}
 
-	err := model.UpdateTransaction(dbConn, id, model.UpdateTransactionParams{
+	err := model.UpdateTransaction(c.db, id, model.UpdateTransactionParams{
 		Description:     &description,
 		CategoryID:      categoryID,
 		IsReimbursement: &isReimbursement,
@@ -386,10 +386,10 @@ func updateTransaction(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func deleteTransaction(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) deleteTransaction(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	err := model.DeleteTransaction(dbConn, id)
+	err := model.DeleteTransaction(c.db, id)
 	if err != nil {
 		return APIError{
 			Status:  http.StatusInternalServerError,

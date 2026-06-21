@@ -13,8 +13,8 @@ type AnnualPage struct {
 	NetCounts           []NetCounts
 }
 
-func annual(w http.ResponseWriter, r *http.Request) error {
-	incomeCountsByYear, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
+func (c *Controller) annual(w http.ResponseWriter, r *http.Request) error {
+	incomeCountsByYear, err := model.CountsByDate(c.db, model.QueryTransactionsFilters{
 		Type: "income",
 	}, "%Y")
 	if err != nil {
@@ -24,7 +24,7 @@ func annual(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	expenseCountsByYear, err := model.CountsByDate(dbConn, model.QueryTransactionsFilters{
+	expenseCountsByYear, err := model.CountsByDate(c.db, model.QueryTransactionsFilters{
 		Type: "expenses",
 	}, "%Y")
 	if err != nil {

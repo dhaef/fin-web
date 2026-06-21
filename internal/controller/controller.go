@@ -2,7 +2,6 @@ package controller
 
 import (
 	"database/sql"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -10,83 +9,68 @@ import (
 	"time"
 
 	"fin-web/internal/assets"
-	"fin-web/internal/model"
 	"fin-web/internal/templates"
 )
 
-var (
-	dbConn      *sql.DB
-	tiingoToken string
-)
-
 type Controller struct {
-	Server http.Server
+	db          *sql.DB
+	tiingoToken string
+	Server      http.Server
 }
 
 func NewController(conn *sql.DB, tt string) Controller {
-	dbConn = conn
-	tiingoToken = tt
-	return Controller{
-		Server: http.Server{
-			Addr:    ":3000",
-			Handler: buildRoutes(),
-		},
+	c := Controller{
+		db:          conn,
+		tiingoToken: tt,
 	}
+	c.Server = http.Server{
+		Addr:    ":3000",
+		Handler: c.buildRoutes(),
+	}
+	return c
 }
 
-func buildRoutes() http.Handler {
+func (c *Controller) buildRoutes() http.Handler {
 	r := http.NewServeMux()
 
 	r.Handle("GET /static/", http.FileServer(http.FS(assets.StaticAssets)))
 
-	r.HandleFunc("GET /favicon.ico", MakeHandler(favicon))
-	r.HandleFunc("GET /annual", MakeHandler(annual))
+	r.HandleFunc("GET /favicon.ico", MakeHandler(c.favicon))
+	r.HandleFunc("GET /annual", MakeHandler(c.annual))
 
-	r.HandleFunc("GET /net-worth/new", MakeHandler(newNetWorthItem))
-	r.HandleFunc("POST /net-worth/new", MakeHandler(createNetWorthItem))
-	r.HandleFunc("GET /net-worth/{id}", MakeHandler(netWorthItem))
-	r.HandleFunc("POST /net-worth/{id}/delete", MakeHandler(deleteNetWorthItem))
-	r.HandleFunc("POST /net-worth/{id}", MakeHandler(updateNetWorthItem))
-	r.HandleFunc("GET /net-worth", MakeHandler(netWorth))
+	r.HandleFunc("GET /net-worth/new", MakeHandler(c.newNetWorthItem))
+	r.HandleFunc("POST /net-worth/new", MakeHandler(c.createNetWorthItem))
+	r.HandleFunc("GET /net-worth/{id}", MakeHandler(c.netWorthItem))
+	r.HandleFunc("POST /net-worth/{id}/delete", MakeHandler(c.deleteNetWorthItem))
+	r.HandleFunc("POST /net-worth/{id}", MakeHandler(c.updateNetWorthItem))
+	r.HandleFunc("GET /net-worth", MakeHandler(c.netWorth))
 
-	r.HandleFunc("GET /transactions/uncategorized", MakeHandler(uncategorizedTransactions))
-	r.HandleFunc("GET /transactions/{id}", MakeHandler(transaction))
-	r.HandleFunc("POST /transactions/{id}/delete", MakeHandler(deleteTransaction))
-	r.HandleFunc("POST /transactions/{id}", MakeHandler(updateTransaction))
+	r.HandleFunc("GET /transactions/uncategorized", MakeHandler(c.uncategorizedTransactions))
+	r.HandleFunc("GET /transactions/{id}", MakeHandler(c.transaction))
+	r.HandleFunc("POST /transactions/{id}/delete", MakeHandler(c.deleteTransaction))
+	r.HandleFunc("POST /transactions/{id}", MakeHandler(c.updateTransaction))
 
-	r.HandleFunc("GET /categories/new", MakeHandler(newCategory))
-	r.HandleFunc("POST /categories/new", MakeHandler(createCategory))
-	r.HandleFunc("GET /categories/{id}", MakeHandler(category))
-	r.HandleFunc("POST /categories/{id}/delete", MakeHandler(deleteCategory))
-	r.HandleFunc("POST /categories/{id}", MakeHandler(updateCategory))
-	r.HandleFunc("GET /categories", MakeHandler(categories))
+	r.HandleFunc("GET /categories/new", MakeHandler(c.newCategory))
+	r.HandleFunc("POST /categories/new", MakeHandler(c.createCategory))
+	r.HandleFunc("GET /categories/{id}", MakeHandler(c.category))
+	r.HandleFunc("POST /categories/{id}/delete", MakeHandler(c.deleteCategory))
+	r.HandleFunc("POST /categories/{id}", MakeHandler(c.updateCategory))
+	r.HandleFunc("GET /categories", MakeHandler(c.categories))
 
-	r.HandleFunc("GET /trades/new", MakeHandler(newTrade))
-	r.HandleFunc("POST /trades/new", MakeHandler(createTrade))
-	r.HandleFunc("POST /trades/{id}/delete", MakeHandler(deleteTrade))
-	r.HandleFunc("GET /trades/{id}", MakeHandler(trade))
-	r.HandleFunc("POST /trades/{id}", MakeHandler(updateTrade))
-	r.HandleFunc("GET /trades", MakeHandler(trades))
+	r.HandleFunc("GET /trades/new", MakeHandler(c.newTrade))
+	r.HandleFunc("POST /trades/new", MakeHandler(c.createTrade))
+	r.HandleFunc("POST /trades/{id}/delete", MakeHandler(c.deleteTrade))
+	r.HandleFunc("GET /trades/{id}", MakeHandler(c.trade))
+	r.HandleFunc("POST /trades/{id}", MakeHandler(c.updateTrade))
+	r.HandleFunc("GET /trades", MakeHandler(c.trades))
 
 	// this will match everything else so handle this in home handler
-	r.HandleFunc("GET /", MakeHandler(transactions))
+	r.HandleFunc("GET /", MakeHandler(c.transactions))
 
 	return r
 }
 
-func getCache(w http.ResponseWriter, r *http.Request) error {
-	item, err := model.GetKVItem(dbConn, "test")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	fmt.Println(item)
-	w.WriteHeader(http.StatusOK)
-
-	return nil
-}
-
-func favicon(w http.ResponseWriter, r *http.Request) error {
+func (c *Controller) favicon(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
