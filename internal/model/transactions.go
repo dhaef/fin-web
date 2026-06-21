@@ -204,7 +204,7 @@ func CategoryCounts(conn *sql.DB, filters QueryTransactionsFilters) ([]GroupByCo
 }
 
 func SumTransactions(conn *sql.DB, filters QueryTransactionsFilters) (float64, error) {
-	queryStr := "select SUM(amount) from transactions as t left join categories as c on category_id = c.id"
+	queryStr := "select COALESCE(SUM(amount), 0) from transactions as t left join categories as c on category_id = c.id"
 	args := []any{}
 
 	queryStr, args = buildWhere(queryStr, args, filters)

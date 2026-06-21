@@ -84,7 +84,7 @@
   </div>
 
   {{ if ne .Data.Type "create" }}
-    <form method="POST" action="/trades/{{ .Data.Trade.ID }}/delete">
+    <form method="POST" action="/trades/{{ .Data.Trade.ID }}/delete" onsubmit="return confirm('Are you sure you want to delete this trade?')">
       <input type="submit" value="Delete" />
     </form>
   {{ end }}
