@@ -52,25 +52,143 @@ ul {
   justify-content: space-around;
 }
 
-.form-item {
-  margin-bottom: 0.5rem;
+/* FORMS */
+.form-card {
+  max-width: 460px;
+  margin: 1.5rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.form-item > input,
-.form-item > select {
+.form-item {
+  margin-bottom: 1rem;
+}
+
+.form-item > label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.35rem;
+}
+
+.form-card .form-item > input,
+.form-card .form-item > select {
   width: 100%;
-  padding: 0.5rem;
-  border-radius: 5px;
-  border: 1px solid rgb(118, 118, 118);
-  margin-top: 0.25rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 0.95rem;
+  margin-top: 0;
+}
+
+.form-card .form-item > input:focus,
+.form-card .form-item > select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.form-card input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Checkbox rows: a normal-sized box sitting inline with its label */
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-item > label {
+  margin-bottom: 0;
+}
+
+.checkbox-item input[type='checkbox'] {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
 }
 
 .form-error {
-  color: red;
+  color: #dc2626;
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
 }
 
 .form-success {
-  color: green;
+  color: #065f46;
+  background: #d1fae5;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 1rem;
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-block;
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.btn-secondary:hover {
+  background: #f1f5f9;
+}
+
+.btn-danger {
+  background: #fff;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.btn-danger:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+/* Row of actions at the bottom of a form (Save / Cancel) */
+.form-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+/* Destructive actions are visually separated from the main form card */
+.form-danger {
+  max-width: 460px;
+  margin: 0.75rem auto 1.5rem;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .card {
@@ -254,10 +372,15 @@ button {
 }
 
 .rm-value-btn {
-  margin-top: 0.25rem;
-  border: 1px solid rgb(118, 118, 118);
+  border: 1px solid #cbd5e1;
   border-left: 0;
   border-radius: 0 6px 6px 0;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.rm-value-btn:hover {
+  background: #f1f5f9;
 }
 
 .category-container {

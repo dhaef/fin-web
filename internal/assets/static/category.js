@@ -63,6 +63,7 @@ addValueBtn.addEventListener('click', (e) => {
   e.preventDefault();
 
   const parentEl = document.createElement('div');
+  parentEl.className = 'form-item flex';
   const el = document.createElement('input');
   el.className = 'value';
   const removeBtn = document.createElement('button');
