@@ -10,7 +10,7 @@ import (
 )
 
 func TestParseFile(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	testutil.SeedCategory(t, db, "Coffee", 5, "starbucks")
 
 	p := NewBofaProvider(db)
@@ -43,7 +43,7 @@ func TestParseFile(t *testing.T) {
 }
 
 func TestParseFileMissingFile(t *testing.T) {
-	p := NewBofaProvider(testutil.NewCategoryDB(t))
+	p := NewBofaProvider(testutil.NewDB(t))
 	_, err := p.ParseFile("testdata/does-not-exist.csv")
 	require.Error(t, err)
 }

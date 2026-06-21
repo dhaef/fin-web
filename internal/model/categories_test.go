@@ -12,7 +12,7 @@ import (
 )
 
 func TestCreateAndGetCategory(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 
 	id, err := CreateCategory(db, "Groceries", 10, "fixed", false)
 	require.NoError(t, err)
@@ -33,7 +33,7 @@ func TestCreateAndGetCategory(t *testing.T) {
 }
 
 func TestCreateCategoryDuplicatePriorityRejected(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 
 	_, err := CreateCategory(db, "A", 1, "fun", false)
 	require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestCreateCategoryDuplicatePriorityRejected(t *testing.T) {
 }
 
 func TestGetCategoriesOrderedByPriority(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 
 	mustCreateCategory(t, db, "Third", 30, "fun")
 	mustCreateCategory(t, db, "First", 10, "fun")
@@ -58,7 +58,7 @@ func TestGetCategoriesOrderedByPriority(t *testing.T) {
 }
 
 func TestSearchCategories(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 
 	groceries := mustCreateCategory(t, db, "Groceries", 10, "fixed")
 	coffee := mustCreateCategory(t, db, "Coffee", 5, "fun")
@@ -94,7 +94,7 @@ func TestSearchCategories(t *testing.T) {
 }
 
 func TestUpdateCategory(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	id := mustCreateCategory(t, db, "Old", 10, "fun")
 
 	newLabel := "New"
@@ -111,7 +111,7 @@ func TestUpdateCategory(t *testing.T) {
 }
 
 func TestUpdateCategoryNoFieldsIsNoop(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	id := mustCreateCategory(t, db, "Stable", 10, "fun")
 
 	require.NoError(t, UpdateCategory(db, strconv.Itoa(id), UpdateCategoryParams{}))
@@ -123,7 +123,7 @@ func TestUpdateCategoryNoFieldsIsNoop(t *testing.T) {
 }
 
 func TestDeleteCategory(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	id := mustCreateCategory(t, db, "Doomed", 10, "fun")
 
 	require.NoError(t, DeleteCategory(db, strconv.Itoa(id)))
@@ -134,7 +134,7 @@ func TestDeleteCategory(t *testing.T) {
 }
 
 func TestCategoryValueLifecycle(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	catID := mustCreateCategory(t, db, "Shopping", 10, "fun")
 	valID := mustCreateCategoryValue(t, db, catID, "amazon")
 

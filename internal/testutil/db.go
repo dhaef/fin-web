@@ -3,59 +3,26 @@ package testutil
 
 import (
 	"database/sql"
+	_ "embed"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
 
-// categorySchema mirrors the production categories/category_values tables and
-// the priority-uniqueness triggers. It is kept here so tests stay hermetic and
-// don't depend on a checked-in database file.
-const categorySchema = `
-CREATE TABLE categories(
-	id integer primary key autoincrement,
-	priority INTEGER not null,
-	label text,
-	is_ignored BOOLEAN DEFAULT 0,
-	type TEXT CHECK(type IS NULL OR type IN ('income', 'fixed', 'fun', 'neutral'))
-);
+//go:embed schema.sql
+var schema string
 
-CREATE TABLE category_values(
-	id integer primary key autoincrement,
-	category_id integer not null,
-	value text not null
-);
-
-CREATE TRIGGER validate_insert_categories
-BEFORE INSERT ON categories
-FOR EACH ROW
-WHEN EXISTS (SELECT 1 FROM categories WHERE priority = NEW.priority)
-BEGIN
-	SELECT RAISE(ABORT, 'Error: This value already exists in the table.');
-END;
-
-CREATE TRIGGER validate_update_category_priority
-BEFORE UPDATE OF priority ON categories
-FOR EACH ROW
-WHEN EXISTS (SELECT 1 FROM categories
-			 WHERE priority = NEW.priority
-			 AND id != OLD.id)
-BEGIN
-	SELECT RAISE(ABORT, 'Error: This value already exists in another row.');
-END;
-`
-
-// NewCategoryDB returns an isolated in-memory SQLite database with the
-// categories schema applied. The connection is closed when the test finishes.
-func NewCategoryDB(t *testing.T) *sql.DB {
+// NewDB returns an isolated in-memory SQLite database with the full
+// application schema applied. The connection is closed when the test finishes.
+func NewDB(t *testing.T) *sql.DB {
 	t.Helper()
 
 	conn, err := sql.Open("sqlite3", ":memory:")
 	require.NoError(t, err)
 	t.Cleanup(func() { conn.Close() })
 
-	_, err = conn.Exec(categorySchema)
+	_, err = conn.Exec(schema)
 	require.NoError(t, err)
 
 	return conn

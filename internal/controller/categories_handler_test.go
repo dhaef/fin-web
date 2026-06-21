@@ -34,7 +34,7 @@ func decodeErrs(t *testing.T, rec *httptest.ResponseRecorder) map[string]string 
 }
 
 func TestCategoriesHandlerRenders(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	testutil.SeedCategory(t, db, "Coffee", 5, "starbucks")
 	testutil.SeedCategory(t, db, "Groceries", 10, "whole foods")
 	c := &Controller{db: db}
@@ -50,7 +50,7 @@ func TestCategoriesHandlerRenders(t *testing.T) {
 }
 
 func TestCategoryHandlerRenders(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	id := testutil.SeedCategory(t, db, "Coffee", 5, "starbucks")
 	c := &Controller{db: db}
 
@@ -64,7 +64,7 @@ func TestCategoryHandlerRenders(t *testing.T) {
 }
 
 func TestNewCategoryHandlerRenders(t *testing.T) {
-	c := &Controller{db: testutil.NewCategoryDB(t)}
+	c := &Controller{db: testutil.NewDB(t)}
 
 	rec := httptest.NewRecorder()
 	require.NoError(t, c.newCategory(rec, httptest.NewRequest(http.MethodGet, "/categories/new", nil)))
@@ -73,7 +73,7 @@ func TestNewCategoryHandlerRenders(t *testing.T) {
 }
 
 func TestCreateCategorySuccess(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	c := &Controller{db: db}
 
 	rec := httptest.NewRecorder()
@@ -100,7 +100,7 @@ func TestCreateCategorySuccess(t *testing.T) {
 }
 
 func TestCreateCategoryValidationErrors(t *testing.T) {
-	c := &Controller{db: testutil.NewCategoryDB(t)}
+	c := &Controller{db: testutil.NewDB(t)}
 
 	rec := httptest.NewRecorder()
 	err := c.createCategory(rec, newFormRequest("/categories/new", url.Values{
@@ -120,7 +120,7 @@ func TestCreateCategoryValidationErrors(t *testing.T) {
 }
 
 func TestCreateCategoryEmptyValueRejected(t *testing.T) {
-	c := &Controller{db: testutil.NewCategoryDB(t)}
+	c := &Controller{db: testutil.NewDB(t)}
 
 	rec := httptest.NewRecorder()
 	err := c.createCategory(rec, newFormRequest("/categories/new", url.Values{
@@ -137,7 +137,7 @@ func TestCreateCategoryEmptyValueRejected(t *testing.T) {
 }
 
 func TestCreateCategoryMalformedValuesJSON(t *testing.T) {
-	c := &Controller{db: testutil.NewCategoryDB(t)}
+	c := &Controller{db: testutil.NewDB(t)}
 
 	rec := httptest.NewRecorder()
 	err := c.createCategory(rec, newFormRequest("/categories/new", url.Values{
@@ -155,7 +155,7 @@ func TestCreateCategoryMalformedValuesJSON(t *testing.T) {
 }
 
 func TestCreateCategoryDuplicatePriority(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	testutil.SeedCategory(t, db, "Existing", 5, "foo")
 	c := &Controller{db: db}
 
@@ -175,7 +175,7 @@ func TestCreateCategoryDuplicatePriority(t *testing.T) {
 }
 
 func TestDeleteCategory(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	id := testutil.SeedCategory(t, db, "Doomed", 5, "foo")
 	c := &Controller{db: db}
 

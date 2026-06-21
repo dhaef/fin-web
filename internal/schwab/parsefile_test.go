@@ -10,7 +10,7 @@ import (
 )
 
 func TestParseFile(t *testing.T) {
-	db := testutil.NewCategoryDB(t)
+	db := testutil.NewDB(t)
 	testutil.SeedCategory(t, db, "Coffee", 5, "starbucks")
 
 	p := NewSchwabProvider(db)
@@ -36,13 +36,13 @@ func TestParseFile(t *testing.T) {
 }
 
 func TestParseFileMissingFile(t *testing.T) {
-	p := NewSchwabProvider(testutil.NewCategoryDB(t))
+	p := NewSchwabProvider(testutil.NewDB(t))
 	_, err := p.ParseFile("testdata/does-not-exist.json")
 	require.Error(t, err)
 }
 
 func TestParseFileInvalidJSON(t *testing.T) {
-	p := NewSchwabProvider(testutil.NewCategoryDB(t))
+	p := NewSchwabProvider(testutil.NewDB(t))
 	_, err := p.ParseFile("testdata/invalid.txt")
 	require.Error(t, err)
 }
