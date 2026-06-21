@@ -75,7 +75,10 @@ func buildWhere(queryStr string, args []any, filters QueryTransactionsFilters) (
 		filterStrings = append(filterStrings, "c.type = 'fun'")
 	}
 
-	filterStrings = append(filterStrings, "is_ignored = 0")
+	// Uncategorized transactions have no joined category, so is_ignored is
+	// NULL; COALESCE treats them as not-ignored so they aren't silently
+	// dropped (only categories explicitly marked is_ignored = 1 are hidden).
+	filterStrings = append(filterStrings, "COALESCE(is_ignored, 0) = 0")
 
 	if filters.EmptyCustomCategory != nil {
 		if !*filters.EmptyCustomCategory {
