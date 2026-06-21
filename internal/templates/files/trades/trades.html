@@ -5,6 +5,11 @@
   </script>
 {{ end }}
 {{ define "body" }}
+  <div class="page-header">
+    <h2>Trades</h2>
+    <a href="/trades/new" class="btn btn-primary">New Trade</a>
+  </div>
+
   <div>
     <script id="trades-counts" type="application/json">
       [{{ range $i, $e := .Data.Prices }}{{ if $i }},{{ end }}{"id":"{{ $e.Ticker }}","name":"{{ $e.Ticker }}","value":{{ $e.Value }}}{{ end }}]
@@ -16,8 +21,6 @@
       style="margin: auto"
     ></div>
   </div>
-
-  <a href="/trades/new">New Trade</a>
 
   <div id="transactions-table-container" class="my-1">
     <table id="transactions-table">
