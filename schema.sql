@@ -21,3 +21,5 @@ insert into transactions(name, amount, date, account, source, id, category_id) v
 insert into categories(label, priority) values('test', 1);
 
 SELECT ticker, SUM(CASE WHEN type = 'sell' THEN -shares ELSE shares END) as shares FROM trades GROUP BY ticker;
+
+-- test

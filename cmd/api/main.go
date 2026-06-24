@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -25,6 +26,7 @@ func main() {
 		port = "3000"
 	}
 
+	fmt.Println("hello")
 	DB, err := db.NewDbConnection(dbPath)
 	if err != nil {
 		log.Fatal(err.Error())
