@@ -29,6 +29,7 @@ func (p *Provider) GetPrefix() string {
 }
 
 func (p *Provider) ParseFile(filePath string) ([]model.Transaction, error) {
+	fmt.Println("hello")
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -9,6 +10,7 @@ import (
 )
 
 func main() {
+	fmt.Println("hello")
 	dbPath := os.Getenv("DB_PATH")
 	tiingoToken := os.Getenv("TIINGO_TOKEN")
 	port := os.Getenv("PORT")
