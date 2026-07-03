@@ -1,0 +1,60 @@
+{{ define "title" }}🩺💰{{ end }}
+{{ define "scripts" }}
+  <script type="module">
+    import 'health';
+  </script>
+{{ end }}
+{{ define "body" }}
+  <div class="page-header">
+    <h2>Spending Health</h2>
+  </div>
+
+  <h3>50 / 30 / 20 — Last {{ .Data.WindowMonths }} Months</h3>
+  {{ if .Data.HasIncome }}
+    <p class="breakdown-summary">
+      Needs <strong>{{ .Data.NeedsPct }}</strong> · Wants
+      <strong>{{ .Data.WantsPct }}</strong> · Savings
+      <strong>{{ .Data.SavingsPct }}</strong>
+    </p>
+  {{ else }}
+    <p class="breakdown-summary">
+      Not enough income in this window to compute a breakdown.
+    </p>
+  {{ end }}
+
+
+  <div id="breakdown-donut" class="my-1"></div>
+  <script id="breakdown-counts" type="application/json">
+    [{{ range $i, $e := .Data.BreakdownDonut }}{{ if $i }},{{ end }}{"name":"{{ $e.Name }}","value":{{ $e.Value }},"id":{{ $e.ID }}}{{ end }}]
+  </script>
+
+  <h3>Monthly Savings Rate</h3>
+  <div id="transactions-table-container" class="my-1">
+    <table id="transactions-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Income</th>
+          <th>Expenses</th>
+          <th>Savings</th>
+          <th>Rate</th>
+          <th>3mo</th>
+          <th>12mo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range .Data.SavingsRows }}
+          <tr>
+            <td>{{ .Month }}</td>
+            <td class="currency">{{ .Income }}</td>
+            <td class="currency">{{ .Expense }}</td>
+            <td class="currency">{{ .Savings }}</td>
+            <td>{{ .Rate }}</td>
+            <td>{{ .Rolling3 }}</td>
+            <td>{{ .Rolling12 }}</td>
+          </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+{{ end }}

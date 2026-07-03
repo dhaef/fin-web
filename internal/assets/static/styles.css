@@ -288,10 +288,12 @@ td a:hover {
   text-decoration: underline;
 }
 
-/* Right-align the Amount column for financial clarity */
+/* Center the Amount column, header and values alike. The header selector is
+   qualified with the container so it outranks the sticky thead-th rule above,
+   which would otherwise leave the header left-aligned. */
 td:nth-child(2),
-th:nth-child(2) {
-  text-align: right;
+#transactions-table-container thead th:nth-child(2) {
+  /* text-align: center; */
   font-variant-numeric: tabular-nums; /* Keeps numbers from jumping */
 }
 
@@ -299,6 +301,13 @@ th:nth-child(2) {
 td:nth-child(4),
 td:nth-child(5) {
   font-size: 0.85rem;
+}
+
+/* Health 50/30/20 breakdown: center the donut (an inline SVG) and its
+   percentage caption under the centered heading. */
+#breakdown-donut,
+.breakdown-summary {
+  text-align: center;
 }
 
 /* FILTERS */

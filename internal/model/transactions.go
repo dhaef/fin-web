@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -257,6 +258,109 @@ func CountsByDate(conn *sql.DB, filters QueryTransactionsFilters, dateStr string
 	}
 
 	return counts, nil
+}
+
+// Breakdown holds the pieces of a 50/30/20-style split for a set of
+// transactions. All values are positive dollars: Income is real income (the
+// stored income amounts are negative, so this negates them), Needs is fixed
+// spending (fixed categories plus positive neutral amounts), and Wants is fun
+// spending. Needs+Wants equals total expenses, so Savings = Income-Needs-Wants
+// matches the net figure used elsewhere.
+type Breakdown struct {
+	Income float64
+	Needs  float64
+	Wants  float64
+}
+
+// Savings is what's left of income after needs and wants. Negative means the
+// period spent more than it earned.
+func (b Breakdown) Savings() float64 {
+	return b.Income - b.Needs - b.Wants
+}
+
+// SpendingBreakdown totals income, needs (fixed), and wants (fun) for the given
+// filters, reusing the same type semantics as the transaction queries.
+func SpendingBreakdown(conn *sql.DB, filters QueryTransactionsFilters) (Breakdown, error) {
+	incomeFilters := filters
+	incomeFilters.Type = "income"
+	income, err := SumTransactions(conn, incomeFilters)
+	if err != nil {
+		return Breakdown{}, err
+	}
+
+	fixedFilters := filters
+	fixedFilters.Type = "fixed"
+	needs, err := SumTransactions(conn, fixedFilters)
+	if err != nil {
+		return Breakdown{}, err
+	}
+
+	funFilters := filters
+	funFilters.Type = "fun"
+	wants, err := SumTransactions(conn, funFilters)
+	if err != nil {
+		return Breakdown{}, err
+	}
+
+	return Breakdown{Income: -income, Needs: needs, Wants: wants}, nil
+}
+
+// MonthlyFlow is the income and expense total for a single "YYYY-MM" month.
+// Both values are positive dollars.
+type MonthlyFlow struct {
+	Month   string
+	Income  float64
+	Expense float64
+}
+
+// MonthlyFlows returns per-month income and expense totals matching the given
+// filters, sorted chronologically. Months are "YYYY-MM", which sort
+// lexicographically in date order.
+func MonthlyFlows(conn *sql.DB, filters QueryTransactionsFilters) ([]MonthlyFlow, error) {
+	incomeFilters := filters
+	incomeFilters.Type = "income"
+	incomeCounts, err := CountsByDate(conn, incomeFilters, "%Y-%m")
+	if err != nil {
+		return nil, err
+	}
+
+	expenseFilters := filters
+	expenseFilters.Type = "expenses"
+	expenseCounts, err := CountsByDate(conn, expenseFilters, "%Y-%m")
+	if err != nil {
+		return nil, err
+	}
+
+	byMonth := map[string]*MonthlyFlow{}
+	get := func(month string) *MonthlyFlow {
+		flow, ok := byMonth[month]
+		if !ok {
+			flow = &MonthlyFlow{Month: month}
+			byMonth[month] = flow
+		}
+		return flow
+	}
+
+	// Income amounts are stored negative; negate so Income reads as positive.
+	for _, c := range incomeCounts {
+		get(c.Key).Income = -c.Value
+	}
+	for _, c := range expenseCounts {
+		get(c.Key).Expense = c.Value
+	}
+
+	months := make([]string, 0, len(byMonth))
+	for month := range byMonth {
+		months = append(months, month)
+	}
+	sort.Strings(months)
+
+	flows := make([]MonthlyFlow, 0, len(months))
+	for _, month := range months {
+		flows = append(flows, *byMonth[month])
+	}
+
+	return flows, nil
 }
 
 func GetTransaction(conn *sql.DB, ID string) (Transaction, error) {
