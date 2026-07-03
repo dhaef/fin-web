@@ -23,7 +23,7 @@ func NewSchwabProvider(db *sql.DB) *Provider {
 }
 
 func (p *Provider) GetPrefix() string {
-	return "Checking"
+	return "schwab"
 }
 
 type statementSchema struct {
