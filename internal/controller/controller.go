@@ -38,6 +38,7 @@ func (c *Controller) buildRoutes() http.Handler {
 	r.HandleFunc("GET /favicon.ico", MakeHandler(c.favicon))
 	r.HandleFunc("GET /annual", MakeHandler(c.annual))
 	r.HandleFunc("GET /health", MakeHandler(c.health))
+	r.HandleFunc("GET /subscriptions", MakeHandler(c.subscriptions))
 
 	r.HandleFunc("GET /net-worth/new", MakeHandler(c.newNetWorthItem))
 	r.HandleFunc("POST /net-worth/new", MakeHandler(c.createNetWorthItem))

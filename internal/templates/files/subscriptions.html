@@ -1,0 +1,122 @@
+{{ define "title" }}🔁💳{{ end }}
+{{ define "scripts" }}{{ end }}
+{{ define "body" }}
+  <div class="page-header">
+    <h2>Subscriptions</h2>
+  </div>
+
+  <!-- <p class="breakdown-summary"> -->
+  <!--   <span class="currency">{{ printf "%.2f" .Data.MonthlySubTotal }}</span>/mo -->
+  <!--   (<span class="currency">{{ printf "%.2f" .Data.AnnualSubTotal }}</span>/yr) -->
+  <!--   across {{ .Data.SubCount }} active -->
+  <!--   subscription{{ if ne .Data.SubCount 1 }}s{{ end }} -->
+  <!--   · -->
+  <!--   <span class="currency">{{ printf "%.2f" .Data.MonthlyBillTotal }}</span>/mo -->
+  <!--   in {{ .Data.BillCount }} recurring -->
+  <!--   bill{{ if ne .Data.BillCount 1 }}s{{ end }} -->
+  <!-- </p> -->
+
+  <h3>Active Subscriptions</h3>
+  {{ if .Data.Report.Subscriptions }}
+    {{ template "recurring-table" .Data.Report.Subscriptions }}
+  {{ else }}
+    <p class="breakdown-summary">None detected.</p>
+  {{ end }}
+
+
+  <h3>Recurring Bills</h3>
+  {{ if .Data.Report.Bills }}
+    {{ template "recurring-table" .Data.Report.Bills }}
+  {{ else }}
+    <p class="breakdown-summary">None detected.</p>
+  {{ end }}
+
+  {{ if .Data.Report.Possible }}
+    <h3>Possible (new or annual — low confidence)</h3>
+    <p class="breakdown-summary">
+      Only two charges seen, so cadence isn't confirmed yet.
+    </p>
+    <div id="transactions-table-container" class="my-1">
+      <table id="transactions-table">
+        <thead>
+          <tr>
+            <th>Merchant</th>
+            <th>Cadence</th>
+            <th>Typical</th>
+            <th>Last</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range .Data.Report.Possible }}
+            <tr>
+              <td>{{ .Merchant }}</td>
+              <td>{{ .Cadence }}</td>
+              <td class="currency">{{ printf "%.2f" .TypicalAmt }}</td>
+              <td>{{ .Last }}</td>
+            </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+  {{ end }}
+
+  {{ if .Data.Report.Canceled }}
+    <h3>Likely Canceled</h3>
+    <p class="breakdown-summary">Regular in the past, but no recent charge.</p>
+    <div id="transactions-table-container" class="my-1">
+      <table id="transactions-table">
+        <thead>
+          <tr>
+            <th>Merchant</th>
+            <th>Cadence</th>
+            <th>Typical</th>
+            <th>Last charge</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range .Data.Report.Canceled }}
+            <tr>
+              <td>{{ .Merchant }}</td>
+              <td>{{ .Cadence }}</td>
+              <td class="currency">{{ printf "%.2f" .TypicalAmt }}</td>
+              <td>{{ .Last }}</td>
+            </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+  {{ end }}
+{{ end }}
+
+{{ define "recurring-table" }}
+  <div id="transactions-table-container" class="my-1">
+    <table id="transactions-table">
+      <thead>
+        <tr>
+          <th>Merchant</th>
+          <th>Cadence</th>
+          <th>Typical</th>
+          <th>Monthly</th>
+          <th>Annual</th>
+          <th>Last</th>
+          <th>Next</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range . }}
+          <tr>
+            <td>{{ .Merchant }}</td>
+            <td>
+              {{ .Cadence }}{{ if not .AmountFixed }}&nbsp;· variable{{ end }}
+            </td>
+            <td class="currency">{{ printf "%.2f" .TypicalAmt }}</td>
+            <td class="currency">{{ printf "%.2f" .Monthly }}</td>
+            <td class="currency">{{ printf "%.2f" .Annual }}</td>
+            <td>{{ .Last }}</td>
+            <td>{{ .Next }}</td>
+          </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+{{ end }}

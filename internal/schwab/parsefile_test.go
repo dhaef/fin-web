@@ -48,5 +48,5 @@ func TestParseFileInvalidJSON(t *testing.T) {
 }
 
 func TestGetPrefix(t *testing.T) {
-	assert.Equal(t, "Checking", NewSchwabProvider(nil).GetPrefix())
+	assert.Equal(t, "schwab", NewSchwabProvider(nil).GetPrefix())
 }

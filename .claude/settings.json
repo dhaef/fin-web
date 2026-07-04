@@ -1,10 +1,10 @@
 {
   "permissions": {
     "deny": [
-      "Read(./db/**)",
-      "Read(./db)",
-      "Edit(./db/**)",
-      "Write(./db/**)"
+      "Read(//Users/derekheafner/dev/go/fin-web/db/**)",
+      "Read(//Users/derekheafner/dev/go/fin-web/db)",
+      "Edit(//Users/derekheafner/dev/go/fin-web/db/**)",
+      "Write(//Users/derekheafner/dev/go/fin-web/db/**)"
     ]
   }
 }
