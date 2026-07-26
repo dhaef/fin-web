@@ -23,17 +23,19 @@
       </script>
     </head>
     <body>
-      <h1 style="text-align: center">💰📈</h1>
-      <div style="text-align: center">
-        <a href="/">Home</a>
-        <a href="/annual">Annual</a>
-        <a href="/health">Health</a>
-        <a href="/subscriptions">Subscriptions</a>
-        <a href="/net-worth">Net Worth</a>
-        <a href="/trades">Trades</a>
-        <a href="/transactions/uncategorized">Uncategorized</a>
-        <a href="/categories">Categories</a>
-      </div>
+      <header class="site-header">
+        <h1 class="site-title">💰📈</h1>
+        <nav class="site-nav">
+          <a href="/">Home</a>
+          <a href="/annual">Annual</a>
+          <a href="/health">Health</a>
+          <a href="/subscriptions">Subscriptions</a>
+          <a href="/net-worth">Net Worth</a>
+          <a href="/trades">Trades</a>
+          <a href="/transactions/uncategorized">Uncategorized</a>
+          <a href="/categories">Categories</a>
+        </nav>
+      </header>
 
       <div class="wrapper">{{ template "body" . }}</div>
 
