@@ -19,6 +19,29 @@ body {
 .wrapper {
   max-width: 1200px;
   margin: 1rem auto;
+  padding: 0 1rem;
+}
+
+/* HEADER / NAV */
+.site-header {
+  padding: 0 1rem;
+}
+
+.site-title {
+  text-align: center;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1rem;
+}
+
+/* Nav links get a tap-target-sized hit area rather than bare inline text */
+.site-nav a {
+  padding: 0.4rem 0.25rem;
+  color: var(--anchor-color);
 }
 
 .hide {
@@ -49,7 +72,14 @@ ul {
 
 .category-donuts {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
+  gap: 1rem;
+}
+
+.category-donuts > div {
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 /* FORMS */
@@ -213,6 +243,7 @@ ul {
 }
 
 .summary {
+  flex-wrap: wrap;
   justify-content: center;
   gap: 1rem;
 }
@@ -234,8 +265,16 @@ h3 {
 #transactions-table-container {
   max-height: 550px;
   overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
+}
+
+/* Keep columns readable when the container starts scrolling sideways on narrow
+   screens instead of crushing Category/Account down to a character each. */
+#transactions-table {
+  min-width: 640px;
 }
 
 table {
@@ -315,7 +354,8 @@ td:nth-child(5) {
 /* Container for the entire filter row */
 .filter-bar {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 16px;
   background: white;
   padding: 12px 20px;
@@ -329,6 +369,23 @@ td:nth-child(5) {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* Paired controls inside a group (start/end date, sort by/direction) */
+.input-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.separator {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.multi-select {
+  max-width: 100%;
 }
 
 .filter-group label {
@@ -449,4 +506,140 @@ button {
 .decline-tag {
   background-color: #ff9191;
   border: 1px solid red;
+}
+
+/* MOBILE */
+@media (max-width: 640px) {
+  .wrapper {
+    margin: 0.5rem auto;
+  }
+
+  .site-title {
+    margin-bottom: 0.25rem;
+  }
+
+  .site-nav {
+    gap: 0 0.9rem;
+    font-size: 0.95rem;
+  }
+
+  /* Filters become a 3-row grid: range, sort, then categories sharing a row
+     with the Filter button. Paired controls stay side by side so the bar
+     doesn't grow into a full screen of chrome above the data. */
+  .filter-bar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 10px 8px;
+    padding: 12px;
+  }
+
+  .filter-group {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .filter-group-categories {
+    grid-column: 1;
+  }
+
+  .btn-filter {
+    grid-column: 2;
+    padding: 8px 20px;
+  }
+
+  /* Both dates share one row; min-width:0 lets them shrink past the intrinsic
+     width of a native date field instead of pushing "to" onto its own line. */
+  .input-row {
+    flex-wrap: nowrap;
+  }
+
+  .input-row > input,
+  .input-row > select {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+  }
+
+  .separator {
+    flex: 0 0 auto;
+  }
+
+  .multi-select {
+    width: 100%;
+  }
+
+  /* 16px keeps iOS Safari from zooming in when a field takes focus */
+  input,
+  select,
+  button,
+  .btn {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  .checkbox-item input[type='checkbox'] {
+    min-height: 0;
+  }
+
+  /* One summary card per row rather than three crushed together */
+  .summary > .card {
+    flex: 1 1 100%;
+  }
+
+  #transactions-table-container {
+    max-height: 420px;
+  }
+
+  #transactions-table-container thead th,
+  td {
+    padding: 10px 12px;
+  }
+
+  table {
+    font-size: 0.9rem;
+  }
+
+  .widget {
+    margin: 1.5rem 0;
+  }
+
+  #chart-select {
+    width: 100%;
+  }
+
+  .page-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .form-card,
+  .form-danger {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .category-container {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+  }
+}
+
+/* Very narrow phones (iPhone SE and similar): a native date field can't shrink
+   below its own text, so buy back the ~30px the pair needs by trimming their
+   padding rather than letting the year clip. */
+@media (max-width: 360px) {
+  .filter-bar {
+    gap: 10px 6px;
+    padding: 12px 10px;
+  }
+
+  .input-row > input[type='date'] {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .separator {
+    font-size: 0.75rem;
+  }
 }

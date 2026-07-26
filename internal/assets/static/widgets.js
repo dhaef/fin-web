@@ -96,14 +96,40 @@ export function donut(data, colorRange, disableNavigate) {
   return { node: svg.node() };
 }
 
-function barChart(data, id, colors) {
+function barChart(data, id, colors, width = 1200) {
+  // Under ~640px the chart is drawn at the container's real width so its text
+  // renders at true pixel sizes, instead of drawing at 1200 and letting the
+  // browser shrink the labels into an unreadable smear.
+  const compact = width < 640;
+
+  // Month keys ("07-2025") are too wide for a narrow band, so shorten them to
+  // "7/25". Anything else — the annual charts are keyed by plain year — is left
+  // alone rather than assumed to have a month part.
+  const formatLabel = (name) => {
+    const parts = String(name).split('-');
+
+    if (!compact || parts.length !== 2) {
+      return name;
+    }
+
+    return `${Number(parts[0])}/${parts[1].slice(2)}`;
+  };
+
   // Dimensions & Scales
-  const width = 1200;
-  const height = 500;
-  const marginTop = 50;
-  const marginRight = 20;
-  const marginBottom = 40;
-  const marginLeft = 60;
+  const height = compact ? 300 : 500;
+  const marginTop = compact ? 24 : 50;
+  const marginRight = compact ? 10 : 20;
+  const marginLeft = compact ? 46 : 60;
+
+  // Only angle the labels when they'd actually collide: a dozen months need it,
+  // a handful of years doesn't, and rotating those just to be consistent costs
+  // 20px of chart height and reads worse.
+  const bandWidth =
+    (width - marginLeft - marginRight) / Math.max(data.length, 1);
+  const widestLabel =
+    d3.max(data, (d) => String(formatLabel(d.name)).length) || 0;
+  const rotateLabels = compact && widestLabel * 6 + 6 > bandWidth;
+  const marginBottom = compact ? (rotateLabels ? 54 : 34) : 40;
 
   const x = d3
     .scaleBand()
@@ -129,7 +155,12 @@ function barChart(data, id, colors) {
   svg
     .append('g')
     .attr('transform', `translate(${marginLeft},0)`)
-    .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('$.2s')))
+    .call(
+      d3
+        .axisLeft(y)
+        .ticks(compact ? 4 : 5)
+        .tickFormat(d3.format('$.2s'))
+    )
     .call((g) => g.select('.domain').remove())
     .call((g) =>
       g
@@ -217,10 +248,22 @@ function barChart(data, id, colors) {
     });
 
   // 4. X-Axis (Top Layer)
-  svg
+  const xAxis = svg
     .append('g')
     .attr('transform', `translate(0,${height - marginBottom})`)
-    .call(d3.axisBottom(x).tickSizeOuter(0));
+    .call(d3.axisBottom(x).tickSizeOuter(0).tickFormat(formatLabel));
+
+  if (compact) {
+    const ticks = xAxis.selectAll('text').style('font-size', '10px');
+
+    if (rotateLabels) {
+      ticks
+        .attr('transform', 'rotate(-45)')
+        .attr('text-anchor', 'end')
+        .attr('dx', '-0.6em')
+        .attr('dy', '0.15em');
+    }
+  }
 
   return { node: svg.node() };
 }
@@ -414,6 +457,20 @@ function lineChart(data) {
   return { node: svg.node() };
 }
 
+// Measure the page wrapper rather than the chart's own container: the charts
+// behind the Net Income / Expenses / Income selector are built while still
+// hidden, so their own clientWidth is 0 at render time.
+function availableWidth(el) {
+  const host = el.closest('.wrapper') || document.body;
+  const styles = getComputedStyle(host);
+  const inner =
+    host.clientWidth -
+    parseFloat(styles.paddingLeft) -
+    parseFloat(styles.paddingRight);
+
+  return Math.max(280, Math.min(1200, Math.round(inner)));
+}
+
 export function buildBarChart(barId, countsId, colors) {
   if (document.getElementById(`${barId}-chart`)) {
     return;
@@ -437,7 +494,7 @@ export function buildBarChart(barId, countsId, colors) {
         sign: d.value > 0 ? 'neg' : undefined,
       }));
 
-    const { node } = barChart(counts, barId, colors);
+    const { node } = barChart(counts, barId, colors, availableWidth(bar));
     bar.appendChild(node);
   }
 }
